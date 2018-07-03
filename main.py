@@ -4,15 +4,20 @@ from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 from direct.actor.Actor import Actor
 from direct.interval.IntervalGlobal import Sequence
-from panda3d.core import Point3
-
+from panda3d.core import Point3, KeyboardButton
 
 class MyApp(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
+        self.xSpeed = 0
+        self.ySpeed = 0
+
 
         # Disable the camera trackball controls.
         self.disableMouse()
+
+        # self.useDrive()
+        # self.useTrackball()
 
         # Load the environment model.
         self.scene = self.loader.loadModel("models/environment")
@@ -22,48 +27,46 @@ class MyApp(ShowBase):
         self.scene.setScale(0.25, 0.25, 0.25)
         self.scene.setPos(-8, 42, 0)
 
-        # Add the spinCameraTask procedure to the task manager.
-        self.taskMgr.add(self.spinCameraTask, "SpinCameraTask")
+        # ...or register event handlers
+        self.accept("w", self.start_moving_forward)
+        self.accept("w-up", self.stop_moving_forward)
+        self.accept("s", self.start_moving_backward)
+        self.accept("s-up", self.stop_moving_backward)
+        self.accept("a", self.start_moving_left)
+        self.accept("a-up", self.stop_moving_left)
+        self.accept("d", self.start_moving_right)
+        self.accept("d-up", self.stop_moving_right)
 
-        # Load and transform the panda actor.
-        self.pandaActor = Actor("models/panda-model",
-                                {"walk": "models/panda-walk4"})
-        self.pandaActor.setScale(0.005, 0.005, 0.005)
-        self.pandaActor.reparentTo(self.render)
-        # Loop its animation.
-        self.pandaActor.loop("walk")
+        self.taskMgr.add(self.moveCameraTask, "SpinCameraTask")
 
-        # Create the four lerp intervals needed for the panda to
-        # walk back and forth.
-        pandaPosInterval1 = self.pandaActor.posInterval(13,
-                                                        Point3(0, -10, 0),
-                                                        startPos=Point3(0, 10, 0))
-        pandaPosInterval2 = self.pandaActor.posInterval(13,
-                                                        Point3(0, 10, 0),
-                                                        startPos=Point3(0, -10, 0))
-        pandaHprInterval1 = self.pandaActor.hprInterval(3,
-                                                        Point3(180, 0, 0),
-                                                        startHpr=Point3(0, 0, 0))
-        pandaHprInterval2 = self.pandaActor.hprInterval(3,
-                                                        Point3(0, 0, 0),
-                                                        startHpr=Point3(180, 0, 0))
+    def start_moving_forward(self):
+        self.ySpeed = 1
 
-        # Create and play the sequence that coordinates the intervals.
-        self.pandaPace = Sequence(pandaPosInterval1,
-                                  pandaHprInterval1,
-                                  pandaPosInterval2,
-                                  pandaHprInterval2,
-                                  name="pandaPace")
-        self.pandaPace.loop()
+    def stop_moving_forward(self):
+        self.ySpeed = 0
 
-    # Define a procedure to move the camera.
-    def spinCameraTask(self, task):
-        angleDegrees = task.time * 6.0
-        angleRadians = angleDegrees * (pi / 180.0)
-        self.camera.setPos(20 * sin(angleRadians), -20.0 * cos(angleRadians), 3)
-        self.camera.setHpr(angleDegrees, 0, 0)
+    def start_moving_backward(self):
+        self.ySpeed = -1
+
+    def stop_moving_backward(self):
+        self.ySpeed = 0
+
+    def start_moving_left(self):
+        self.xSpeed = -1
+
+    def stop_moving_left(self):
+        self.xSpeed = 0
+
+    def start_moving_right(self):
+        self.xSpeed = 1
+
+    def stop_moving_right(self):
+        self.xSpeed = 0
+
+    def moveCameraTask(self, task):
+        self.camera.setPos(self.camera.getX()  + self.xSpeed, self.camera.getY(), self.camera.getZ())
+        self.camera.setPos(self.camera.getX(), self.camera.getY() + self.ySpeed, self.camera.getZ())
         return Task.cont
-
 
 app = MyApp()
 app.run()
