@@ -56,7 +56,7 @@ world.setGravity(Vec3(0, 0, -9.81))
 world.setDebugNode(debugNP.node())
 
 #HeightField
-height = 10.0
+height = 8.0
 img = PNMImage(Filename('models/elevation.png'))
 hshape = BulletHeightfieldShape(img, height, ZUp)
 hnode = BulletRigidBodyNode('HGround')
@@ -80,6 +80,8 @@ speed = Vec3(0, 0, 0)
 shape = BulletBoxShape(Vec3(0.25, .25, 0.6))
 
 playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
+playerNode.setMaxJumpHeight(2.0)
+playerNode.setJumpSpeed(4.0)
 playerNP = render.attachNewNode(playerNode)
 playerNP.setPos(-2, 0, 4)
 playerNP.setH(45)
@@ -94,17 +96,9 @@ inputState.watchWithModifiers('forward', 'w')
 inputState.watchWithModifiers('left', 'a')
 inputState.watchWithModifiers('reverse', 's')
 inputState.watchWithModifiers('right', 'd')
+inputState.watchWithModifiers('jump', 'space')
 inputState.watchWithModifiers('turnLeft', 'q')
 inputState.watchWithModifiers('turnRight', 'e')
-
-# Box
-# shape = BulletBoxShape(Vec3(0.25, 0.25, 0.25))
-# node = BulletRigidBodyNode('Box')
-# node.setMass(1.0)
-# node.addShape(shape)
-# np = render.attachNewNode(node)
-# np.setPos(0, 0, 10)
-# world.attachRigidBody(node)
 
 #player movement
 def processInput():
@@ -112,10 +106,11 @@ def processInput():
     speed.setX(0)
     speed.setY(0)
 
-    if inputState.isSet('forward'): speed.setY(2.0)
-    if inputState.isSet('reverse'): speed.setY(-2.0)
-    if inputState.isSet('left'):    speed.setX(-2.0)
-    if inputState.isSet('right'):   speed.setX(2.0)
+    if inputState.isSet('forward'): speed.setY(1.0)
+    if inputState.isSet('reverse'): speed.setY(-1.0)
+    if inputState.isSet('left'):    speed.setX(-1.0)
+    if inputState.isSet('right'):   speed.setX(1.0)
+    if inputState.isSet('jump'):   playerNode.doJump()
     if inputState.isSet('turnLeft'):  omega = 120.0
     if inputState.isSet('turnRight'): omega = -120.0
 
