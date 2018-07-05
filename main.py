@@ -1,72 +1,144 @@
-from math import pi, sin, cos
-
-from direct.showbase.ShowBase import ShowBase
-from direct.task import Task
+import direct.directbase.DirectStart
+from direct.showbase.DirectObject import DirectObject
+from direct.showbase.InputStateGlobal import inputState
+from panda3d.core import Vec3, BitMask32, GeoMipTerrain, AmbientLight, Vec4, DirectionalLight
+from panda3d.bullet import BulletWorld
+from panda3d.bullet import BulletRigidBodyNode
+from panda3d.bullet import BulletBoxShape
+from panda3d.bullet import BulletDebugNode
+from direct.showbase.DirectObject import DirectObject
+from panda3d.core import Filename
+from panda3d.core import PNMImage
+from panda3d.bullet import BulletHeightfieldShape
+from panda3d.bullet import ZUp
+from panda3d.bullet import BulletCharacterControllerNode
 from direct.actor.Actor import Actor
-from direct.interval.IntervalGlobal import Sequence
-from panda3d.core import Point3, KeyboardButton
 
-class MyApp(ShowBase):
-    def __init__(self):
-        ShowBase.__init__(self)
-        self.xSpeed = 0
-        self.ySpeed = 0
+#Debug
+def toggleDebug():
+    if debugNP.isHidden():
+        debugNP.show()
+    else:
+        debugNP.hide()
+
+o = DirectObject()
+o.accept('f1', toggleDebug)
+
+debugNode = BulletDebugNode('Debug')
+debugNode.showWireframe(True)
+debugNode.showConstraints(True)
+debugNode.showBoundingBoxes(False)
+debugNode.showNormals(False)
+debugNP = render.attachNewNode(debugNode)
+debugNP.show()
+
+# Light
+alight = AmbientLight('ambientLight')
+alight.setColor(Vec4(0.2, 0.2, 0.2, 1))
+alightNP = render.attachNewNode(alight)
+
+dlight = DirectionalLight('directionalLight')
+dlight.setDirection(Vec3(1, 1, -1))
+dlight.setColor(Vec4(0.7, 0.7, 0.7, 1))
+dlightNP = render.attachNewNode(dlight)
+
+render.clearLight()
+render.setLight(alightNP)
+render.setLight(dlightNP)
+
+#Camera
+base.cam.setPos(0, -20, 4)
+base.cam.lookAt(0, 0, 0)
+
+# World
+world = BulletWorld()
+world.setGravity(Vec3(0, 0, -9.81))
+world.setDebugNode(debugNP.node())
+
+#HeightField
+height = 10.0
+img = PNMImage(Filename('models/elevation.png'))
+hshape = BulletHeightfieldShape(img, height, ZUp)
+hnode = BulletRigidBodyNode('HGround')
+hnode.addShape(hshape)
+world.attachRigidBody(hnode)
+
+#Terrian
+
+terrain = GeoMipTerrain('terrain')
+terrain.setHeightfield(img)
+
+offset = img.getXSize() / 2.0 - 0.5
+rootNP = terrain.getRoot()
+rootNP.reparentTo(render)
+rootNP.setSz(height)
+rootNP.setPos(-offset, -offset, -height / 2.0)
+terrain.generate()
+
+#Player
+speed = Vec3(0, 0, 0)
+shape = BulletBoxShape(Vec3(0.25, .25, 0.6))
+
+playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
+playerNP = render.attachNewNode(playerNode)
+playerNP.setPos(-2, 0, 4)
+playerNP.setH(45)
+playerNP.setCollideMask(BitMask32.allOn())
+world.attachCharacter(playerNP.node())
+playerModel = Actor('models/soldier.egg',{"walk" : "models/soldier-ArmatureAction"})
+playerModel.setScale(.25, .25, .25)
+playerModel.flattenLight()
+playerModel.reparentTo(playerNP)
+
+inputState.watchWithModifiers('forward', 'w')
+inputState.watchWithModifiers('left', 'a')
+inputState.watchWithModifiers('reverse', 's')
+inputState.watchWithModifiers('right', 'd')
+inputState.watchWithModifiers('turnLeft', 'q')
+inputState.watchWithModifiers('turnRight', 'e')
+
+# Box
+# shape = BulletBoxShape(Vec3(0.25, 0.25, 0.25))
+# node = BulletRigidBodyNode('Box')
+# node.setMass(1.0)
+# node.addShape(shape)
+# np = render.attachNewNode(node)
+# np.setPos(0, 0, 10)
+# world.attachRigidBody(node)
+
+#player movement
+def processInput():
+    omega = 0.0
+    speed.setX(0)
+    speed.setY(0)
+
+    if inputState.isSet('forward'): speed.setY(2.0)
+    if inputState.isSet('reverse'): speed.setY(-2.0)
+    if inputState.isSet('left'):    speed.setX(-2.0)
+    if inputState.isSet('right'):   speed.setX(2.0)
+    if inputState.isSet('turnLeft'):  omega = 120.0
+    if inputState.isSet('turnRight'): omega = -120.0
+
+    playerNP.node().setAngularMovement(omega)
+    playerNP.node().setLinearMovement(speed, True)
+
+#player animation
+def animate():
+    if(speed.getX() == 0 and speed.getY() == 0):
+        playerModel.pose("walk", 15)
+    else:
+        if(playerModel.get_current_anim() == None):
+            playerModel.loop("walk")
 
 
-        # Disable the camera trackball controls.
-        self.disableMouse()
+# Update
+def update(task):
+    dt = globalClock.getDt()
+    processInput()
+    animate()
+    world.doPhysics(dt)
+    return task.cont
 
-        # self.useDrive()
-        # self.useTrackball()
 
-        # Load the environment model.
-        self.scene = self.loader.loadModel("models/environment")
-        # Reparent the model to render.
-        self.scene.reparentTo(self.render)
-        # Apply scale and position transforms on the model.
-        self.scene.setScale(0.25, 0.25, 0.25)
-        self.scene.setPos(-8, 42, 0)
-
-        # ...or register event handlers
-        self.accept("w", self.start_moving_forward)
-        self.accept("w-up", self.stop_moving_forward)
-        self.accept("s", self.start_moving_backward)
-        self.accept("s-up", self.stop_moving_backward)
-        self.accept("a", self.start_moving_left)
-        self.accept("a-up", self.stop_moving_left)
-        self.accept("d", self.start_moving_right)
-        self.accept("d-up", self.stop_moving_right)
-
-        self.taskMgr.add(self.moveCameraTask, "SpinCameraTask")
-
-    def start_moving_forward(self):
-        self.ySpeed = 1
-
-    def stop_moving_forward(self):
-        self.ySpeed = 0
-
-    def start_moving_backward(self):
-        self.ySpeed = -1
-
-    def stop_moving_backward(self):
-        self.ySpeed = 0
-
-    def start_moving_left(self):
-        self.xSpeed = -1
-
-    def stop_moving_left(self):
-        self.xSpeed = 0
-
-    def start_moving_right(self):
-        self.xSpeed = 1
-
-    def stop_moving_right(self):
-        self.xSpeed = 0
-
-    def moveCameraTask(self, task):
-        self.camera.setPos(self.camera.getX()  + self.xSpeed, self.camera.getY(), self.camera.getZ())
-        self.camera.setPos(self.camera.getX(), self.camera.getY() + self.ySpeed, self.camera.getZ())
-        return Task.cont
-
-app = MyApp()
-app.run()
+taskMgr.add(update, 'update')
+base.run()
