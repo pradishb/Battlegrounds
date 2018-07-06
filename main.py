@@ -10,6 +10,7 @@ from panda3d.bullet import ZUp
 from panda3d.bullet import BulletCharacterControllerNode
 from direct.actor.Actor import Actor, WindowProperties
 import math
+import sys
 
 #Debug
 def toggleDebug():
@@ -20,6 +21,7 @@ def toggleDebug():
 
 o = DirectObject()
 o.accept('f1', toggleDebug)
+o.accept('escape', sys.exit, [0])
 
 debugNode = BulletDebugNode('Debug')
 debugNode.showWireframe(True)
