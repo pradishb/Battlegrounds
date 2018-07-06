@@ -2,7 +2,7 @@ import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
 from direct.showbase.InputStateGlobal import inputState
 from panda3d.core import Vec3, BitMask32, GeoMipTerrain, AmbientLight, Vec4, DirectionalLight
-from panda3d.bullet import BulletWorld
+from panda3d.bullet import BulletWorld, BulletCapsuleShape
 from panda3d.bullet import BulletRigidBodyNode
 from panda3d.bullet import BulletBoxShape
 from panda3d.bullet import BulletDebugNode
@@ -13,7 +13,6 @@ from panda3d.bullet import BulletHeightfieldShape
 from panda3d.bullet import ZUp
 from panda3d.bullet import BulletCharacterControllerNode
 from direct.actor.Actor import Actor
-from camera import *
 
 #Debug
 def toggleDebug():
@@ -74,7 +73,8 @@ terrain.generate()
 
 #Player
 speed = Vec3(0, 0, 0)
-shape = BulletBoxShape(Vec3(0.25, .25, 0.6))
+
+shape = BulletCapsuleShape(.25, .75, ZUp)
 
 playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
 playerNode.setMaxJumpHeight(2.0)
@@ -111,10 +111,10 @@ def processInput():
     speed.setX(0)
     speed.setY(0)
 
-    if inputState.isSet('forward'): speed.setY(2.0)
-    if inputState.isSet('reverse'): speed.setY(-2.0)
-    if inputState.isSet('left'):    speed.setX(-2.0)
-    if inputState.isSet('right'):   speed.setX(2.0)
+    if inputState.isSet('forward'): speed.setY(2.5)
+    if inputState.isSet('reverse'): speed.setY(-2.5)
+    if inputState.isSet('left'):    speed.setX(-2.5)
+    if inputState.isSet('right'):   speed.setX(2.5)
     if inputState.isSet('jump'):   playerNode.doJump()
     if inputState.isSet('turnLeft'):  omega = 120.0
     if inputState.isSet('turnRight'): omega = -120.0
