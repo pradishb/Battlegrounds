@@ -1,18 +1,14 @@
 import direct.directbase.DirectStart
-from direct.showbase.DirectObject import DirectObject
 from direct.showbase.InputStateGlobal import inputState
-from panda3d.core import Vec3, BitMask32, GeoMipTerrain, AmbientLight, Vec4, DirectionalLight
+from direct.showbase.DirectObject import DirectObject
+from panda3d.core import Vec3, BitMask32, GeoMipTerrain, AmbientLight, Vec4, DirectionalLight, Filename, PNMImage
 from panda3d.bullet import BulletWorld, BulletCapsuleShape
 from panda3d.bullet import BulletRigidBodyNode
-from panda3d.bullet import BulletBoxShape
 from panda3d.bullet import BulletDebugNode
-from direct.showbase.DirectObject import DirectObject
-from panda3d.core import Filename
-from panda3d.core import PNMImage
 from panda3d.bullet import BulletHeightfieldShape
 from panda3d.bullet import ZUp
 from panda3d.bullet import BulletCharacterControllerNode
-from direct.actor.Actor import Actor
+from direct.actor.Actor import Actor, WindowProperties
 import math
 
 #Debug
@@ -61,7 +57,6 @@ hnode.addShape(hshape)
 world.attachRigidBody(hnode)
 
 #Terrian
-
 terrain = GeoMipTerrain('terrain')
 terrain.setHeightfield(img)
 
@@ -76,7 +71,6 @@ terrain.generate()
 speed = Vec3(0, 0, 0)
 
 shape = BulletCapsuleShape(.25, .75, ZUp)
-
 playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
 playerNode.setMaxJumpHeight(2.0)
 playerNode.setJumpSpeed(4.0)
@@ -90,7 +84,6 @@ playerModel.setScale(.25, .25, .25)
 playerModel.flattenLight()
 playerModel.reparentTo(playerNP)
 
-
 inputState.watchWithModifiers('forward', 'w')
 inputState.watchWithModifiers('left', 'a')
 inputState.watchWithModifiers('reverse', 's')
@@ -100,11 +93,13 @@ inputState.watchWithModifiers('turnLeft', 'q')
 inputState.watchWithModifiers('turnRight', 'e')
 
 #Camera
-# cameraNP = NodePath(playerNP)
-# cameraNP.setX(0)
-# cameraNP.setY(0)
-# cameraNP.setZ(10)
-# base.cam.reparentTo(cameraNP)
+base.disableMouse()
+props = WindowProperties()
+props.setCursorHidden(True)
+base.win.requestProperties(props)
+base.cam.lookAt(playerNP.getPos())
+heading = base.cam.getH()
+pitch = - base.cam.getP()
 
 #player movement
 def processInput():
@@ -132,13 +127,31 @@ def animate():
             playerModel.loop("walk")
 
 
-# Update
-def update(task):
-    dt = globalClock.getDt()
+def moveCamera():
+    global heading
+    global pitch
+
+    md = base.win.getPointer(0)
+
+    x = md.getX()
+    y = md.getY()
+
+    if base.win.movePointer(0, 300, 300):
+        heading = heading - (x - 300) * 0.2
+        pitch = pitch - (y - 300) * 0.2
+
+    base.cam.setHpr(heading, pitch, 0)
+
+    playerNP.setH(heading)
     base.cam.setX(playerNP.getX() + 5 * math.sin(math.pi / 180.0 * playerNP.getH()))
     base.cam.setY(playerNP.getY() - 5 * math.cos(math.pi / 180.0 * playerNP.getH()))
     base.cam.setZ(playerNP.getZ() + 3)
-    base.cam.lookAt(playerNP)
+
+
+# Update
+def update(task):
+    dt = globalClock.getDt()
+    moveCamera()
     processInput()
     animate()
     world.doPhysics(dt)
