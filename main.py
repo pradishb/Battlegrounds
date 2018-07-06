@@ -19,6 +19,7 @@ def toggleDebug():
     else:
         debugNP.hide()
 
+base.setFrameRateMeter(True)
 o = DirectObject()
 o.accept('f1', toggleDebug)
 o.accept('escape', sys.exit, [0])
