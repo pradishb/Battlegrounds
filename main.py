@@ -13,6 +13,7 @@ from panda3d.bullet import BulletHeightfieldShape
 from panda3d.bullet import ZUp
 from panda3d.bullet import BulletCharacterControllerNode
 from direct.actor.Actor import Actor
+import math
 
 #Debug
 def toggleDebug():
@@ -134,9 +135,9 @@ def animate():
 # Update
 def update(task):
     dt = globalClock.getDt()
-    base.cam.setX(playerNP.getX()+5)
-    base.cam.setY(playerNP.getY())
-    base.cam.setZ(playerNP.getZ()+3)
+    base.cam.setX(playerNP.getX() + 5 * math.sin(math.pi / 180.0 * playerNP.getH()))
+    base.cam.setY(playerNP.getY() - 5 * math.cos(math.pi / 180.0 * playerNP.getH()))
+    base.cam.setZ(playerNP.getZ() + 3)
     base.cam.lookAt(playerNP)
     processInput()
     animate()
