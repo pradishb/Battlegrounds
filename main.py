@@ -13,6 +13,7 @@ from panda3d.bullet import BulletHeightfieldShape
 from panda3d.bullet import ZUp
 from panda3d.bullet import BulletCharacterControllerNode
 from direct.actor.Actor import Actor
+from camera import *
 
 #Debug
 def toggleDebug():
@@ -45,10 +46,6 @@ dlightNP = render.attachNewNode(dlight)
 render.clearLight()
 render.setLight(alightNP)
 render.setLight(dlightNP)
-
-#Camera
-base.cam.setPos(0, -20, 4)
-base.cam.lookAt(0, 0, 0)
 
 # World
 world = BulletWorld()
@@ -92,6 +89,7 @@ playerModel.setScale(.25, .25, .25)
 playerModel.flattenLight()
 playerModel.reparentTo(playerNP)
 
+
 inputState.watchWithModifiers('forward', 'w')
 inputState.watchWithModifiers('left', 'a')
 inputState.watchWithModifiers('reverse', 's')
@@ -100,16 +98,23 @@ inputState.watchWithModifiers('jump', 'space')
 inputState.watchWithModifiers('turnLeft', 'q')
 inputState.watchWithModifiers('turnRight', 'e')
 
+#Camera
+# cameraNP = NodePath(playerNP)
+# cameraNP.setX(0)
+# cameraNP.setY(0)
+# cameraNP.setZ(10)
+# base.cam.reparentTo(cameraNP)
+
 #player movement
 def processInput():
     omega = 0.0
     speed.setX(0)
     speed.setY(0)
 
-    if inputState.isSet('forward'): speed.setY(1.0)
-    if inputState.isSet('reverse'): speed.setY(-1.0)
-    if inputState.isSet('left'):    speed.setX(-1.0)
-    if inputState.isSet('right'):   speed.setX(1.0)
+    if inputState.isSet('forward'): speed.setY(2.0)
+    if inputState.isSet('reverse'): speed.setY(-2.0)
+    if inputState.isSet('left'):    speed.setX(-2.0)
+    if inputState.isSet('right'):   speed.setX(2.0)
     if inputState.isSet('jump'):   playerNode.doJump()
     if inputState.isSet('turnLeft'):  omega = 120.0
     if inputState.isSet('turnRight'): omega = -120.0
@@ -129,6 +134,10 @@ def animate():
 # Update
 def update(task):
     dt = globalClock.getDt()
+    base.cam.setX(playerNP.getX()+5)
+    base.cam.setY(playerNP.getY())
+    base.cam.setZ(playerNP.getZ()+3)
+    base.cam.lookAt(playerNP)
     processInput()
     animate()
     world.doPhysics(dt)
