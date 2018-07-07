@@ -90,7 +90,7 @@ terrain.generate()
 #Player
 speed = Vec3(0, 0, 0)
 
-shape = BulletCapsuleShape(.25, .75, ZUp)
+shape = BulletCapsuleShape(.2, .6, ZUp)
 playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
 playerNode.setMaxJumpHeight(2.0)
 playerNode.setJumpSpeed(4.0)
@@ -98,9 +98,15 @@ playerNP = render.attachNewNode(playerNode)
 playerNP.setPos(-2, 0, 4)
 playerNP.setCollideMask(BitMask32.allOn())
 world.attachCharacter(playerNP.node())
-playerModel = Actor('models/soldier.egg',{"walk" : "models/soldier-ArmatureAction"})
-playerModel.setScale(.25, .25, .25)
+playerModel = Actor('models/soldier.egg', {"idle" : "models/soldier_ani_idle.egg",
+                                           "walk": "models/soldier_ani_walk.egg"})
+myTexture = loader.loadTexture("models/soldier_texture.png")
+playerModel.setTexture(myTexture,1)
+playerModel.setH(90)
+playerModel.setScale(.06)
+playerModel.setZ(-.45)
 playerModel.flattenLight()
+playerModel.setLightOff()
 playerModel.reparentTo(playerNP)
 
 inputState.watchWithModifiers('forward', 'w')
@@ -146,9 +152,10 @@ def processInput():
 #player animation
 def animate():
     if(speed.getX() == 0 and speed.getY() == 0):
-        playerModel.pose("walk", 15)
+        if (playerModel.get_current_anim() != "idle"):
+            playerModel.loop("idle")
     else:
-        if(playerModel.get_current_anim() == None):
+        if (playerModel.get_current_anim() != "walk"):
             playerModel.loop("walk")
 
 
