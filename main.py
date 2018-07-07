@@ -9,6 +9,7 @@ from panda3d.bullet import BulletHeightfieldShape
 from panda3d.bullet import ZUp
 from panda3d.bullet import BulletCharacterControllerNode
 from direct.actor.Actor import Actor, WindowProperties
+from direct.gui.OnscreenImage import OnscreenImage, LineSegs, deg2Rad, NodePath
 import math
 import sys
 
@@ -79,7 +80,6 @@ playerNode.setMaxJumpHeight(2.0)
 playerNode.setJumpSpeed(4.0)
 playerNP = render.attachNewNode(playerNode)
 playerNP.setPos(-2, 0, 4)
-playerNP.setH(45)
 playerNP.setCollideMask(BitMask32.allOn())
 world.attachCharacter(playerNP.node())
 playerModel = Actor('models/soldier.egg',{"walk" : "models/soldier-ArmatureAction"})
@@ -100,9 +100,8 @@ base.disableMouse()
 props = WindowProperties()
 props.setCursorHidden(True)
 base.win.requestProperties(props)
-base.cam.lookAt(playerNP.getPos())
-heading = base.cam.getH()
-pitch = - base.cam.getP()
+heading = 0
+pitch = 0
 
 #player movement
 def processInput():
@@ -142,13 +141,15 @@ def moveCamera():
     if base.win.movePointer(0, 300, 300):
         heading = heading - (x - 300) * 0.2
         pitch = pitch - (y - 300) * 0.2
+        if (pitch < -30.0): pitch = -30.0
+        elif (pitch > 45.0): pitch = 45.0
 
     base.cam.setHpr(heading, pitch, 0)
 
     playerNP.setH(heading)
-    base.cam.setX(playerNP.getX() + 5 * math.sin(math.pi / 180.0 * playerNP.getH()))
-    base.cam.setY(playerNP.getY() - 5 * math.cos(math.pi / 180.0 * playerNP.getH()))
-    base.cam.setZ(playerNP.getZ() + 3)
+    base.cam.setX(playerNP.getX() + 3 * math.sin(math.pi / 180.0 * playerNP.getH()))
+    base.cam.setY(playerNP.getY() - 3 * math.cos(math.pi / 180.0 * playerNP.getH()))
+    base.cam.setZ(playerNP.getZ() - 0.05 * pitch + .7)
 
 
 # Update
