@@ -9,9 +9,25 @@ from panda3d.bullet import BulletHeightfieldShape
 from panda3d.bullet import ZUp
 from panda3d.bullet import BulletCharacterControllerNode
 from direct.actor.Actor import Actor, WindowProperties
-from direct.gui.OnscreenImage import OnscreenImage, LineSegs, deg2Rad, NodePath
+from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
 import math
 import sys
+
+def makeArc(angleDegrees = 360, numSteps = 16):
+    ls = LineSegs()
+
+    angleRadians = deg2Rad(angleDegrees)
+
+    for i in range(numSteps + 1):
+        a = angleRadians * i / numSteps
+        y = math.sin(a)
+        x = math.cos(a)
+
+        ls.drawTo(x, 0, y)
+
+
+    node = ls.create()
+    return NodePath(node)
 
 #Debug
 def toggleDebug():
@@ -101,7 +117,14 @@ props = WindowProperties()
 props.setCursorHidden(True)
 base.win.requestProperties(props)
 heading = 0
-pitch = 0
+pitch = 40
+
+#Pointer
+imageObject = makeArc()
+imageObject.setSx(.02)
+imageObject.setSy(.02)
+imageObject.setSz(.02)
+imageObject.reparent_to(aspect2d)
 
 #player movement
 def processInput():
