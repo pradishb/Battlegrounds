@@ -115,8 +115,7 @@ inputState.watchWithModifiers('left', 'a')
 inputState.watchWithModifiers('reverse', 's')
 inputState.watchWithModifiers('right', 'd')
 inputState.watchWithModifiers('jump', 'space')
-inputState.watchWithModifiers('turnLeft', 'q')
-inputState.watchWithModifiers('turnRight', 'e')
+
 
 #Camera
 base.disableMouse()
@@ -144,10 +143,7 @@ def processInput():
     if inputState.isSet('left'):    speed.setX(-walk_speed)
     if inputState.isSet('right'):   speed.setX(walk_speed)
     if inputState.isSet('jump'):   playerNode.doJump()
-    if inputState.isSet('turnLeft'):  omega = 120.0
-    if inputState.isSet('turnRight'): omega = -120.0
 
-    playerNP.node().setAngularMovement(omega)
     playerNP.node().setLinearMovement(speed, True)
 
 #player animation
