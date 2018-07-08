@@ -89,6 +89,7 @@ terrain.generate()
 
 #Player
 speed = Vec3(0, 0, 0)
+walk_speed = 1.5
 
 shape = BulletCapsuleShape(.2, .6, ZUp)
 playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
@@ -138,10 +139,10 @@ def processInput():
     speed.setX(0)
     speed.setY(0)
 
-    if inputState.isSet('forward'): speed.setY(2.5)
-    if inputState.isSet('reverse'): speed.setY(-2.5)
-    if inputState.isSet('left'):    speed.setX(-2.5)
-    if inputState.isSet('right'):   speed.setX(2.5)
+    if inputState.isSet('forward'): speed.setY(walk_speed)
+    if inputState.isSet('reverse'): speed.setY(-walk_speed)
+    if inputState.isSet('left'):    speed.setX(-walk_speed)
+    if inputState.isSet('right'):   speed.setX(walk_speed)
     if inputState.isSet('jump'):   playerNode.doJump()
     if inputState.isSet('turnLeft'):  omega = 120.0
     if inputState.isSet('turnRight'): omega = -120.0
