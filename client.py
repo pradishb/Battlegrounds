@@ -4,6 +4,7 @@ import direct.directbase.DirectStart
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 
+
 from direct.gui.DirectGui import *
 import sys
 
@@ -24,6 +25,8 @@ PASSWORD = "mypass"
 ## Quote Yellow: This are server opcodes. It tells the server
 ## or client what pkt it is receiving. Ie if the pkt starts
 ## with 3, the server knows he has to deal with a chat msg
+
+
 
 MSG_NONE = 0
 CMSG_AUTH = 1
@@ -122,7 +125,8 @@ class Client(DirectObject):
         ## This handles the sending of the auth request.
         ##
 
-        ## 1st. We need to create a buffer
+        ## 1st. We need to create a buffer 
+
         pkg = PyDatagram()
 
         ## 2nd. We put a UInt16 type Number in it. Here its CMSG_AUTH
@@ -197,6 +201,10 @@ class Client(DirectObject):
             ## you can write also:
             ## pkg.addString('Hey, ',USERNAME,' is calling!')
             pkg.addString("%s is calling in and is glad to be here" % USERNAME)
+            
+            # data varible phaser pass garnae input bata diect 
+            val = phaser(0,1,0,0,1)
+            pkg.addUint64(val)
 
             ## Now lets send the whole thing...
             self.send(pkg)
@@ -283,4 +291,14 @@ Handlers = {
 ##
 ## We need that loop. Otherwise it would run once and then quit.
 ##
+
+def phaser (w,a,s,d,jmp):
+    ary =str(1)+str(int(w))+str(int(a))+str(int(s))+str(int(d))+str(int(jmp))
+    print(ary)
+    val = int(ary)
+    print(val)
+    return(val)
+
+
+
 run()

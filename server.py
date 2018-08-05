@@ -248,6 +248,14 @@ class Server(DirectObject):
         ## next line out...
         print("ChatMsg: %s" % data.getString())
 
+        
+        #sequence bata still extra fisrt true key ignore garyera garnu parxa kam .. 
+        seq = key_input(str(data.getUint64()))
+        for i in seq:
+            print(seq[i])    
+
+        
+
     def msgDisconnectReq(self, msgID, data, client):
         pkg = PyDatagram()
         pkg.addUint16(SMSG_DISCONNECT_ACK)
@@ -272,4 +280,13 @@ Handlers = {
 }
 
 ## The loop again... otherwise the program would run once and thats it ;)
+def key_input(seq):
+    #optimize garna yo 2 ota lai globally define garde hunxa 
+    count = 0;
+    x = {}    
+    for i in seq:
+            x[count] = bool (int(i))
+            count = count + 1 
+    return(x)
+
 run()

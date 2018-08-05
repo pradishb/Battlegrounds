@@ -13,6 +13,11 @@ from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
 import math
 import sys
 
+
+#For sending data in client.py 
+import client.py
+from client.py import temp_data 
+
 def makeArc(angleDegrees = 360, numSteps = 16):
     ls = LineSegs()
 
