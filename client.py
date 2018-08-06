@@ -176,7 +176,6 @@ class Client(DirectObject):
     # player movement
 
     def processInput(self):
-        omega = 0.0
         self.speed.setX(0)
         self.speed.setY(0)
 
