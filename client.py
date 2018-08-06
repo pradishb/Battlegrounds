@@ -4,10 +4,23 @@ import direct.directbase.DirectStart
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 
-
-from direct.gui.DirectGui import *
+import direct.directbase.DirectStart
+from direct.showbase.InputStateGlobal import inputState
+from direct.showbase.DirectObject import DirectObject
+from panda3d.core import Vec3, BitMask32, GeoMipTerrain, AmbientLight, Vec4, DirectionalLight, Filename, PNMImage
+from panda3d.bullet import BulletWorld, BulletCapsuleShape
+from panda3d.bullet import BulletRigidBodyNode
+from panda3d.bullet import BulletDebugNode
+from panda3d.bullet import BulletHeightfieldShape
+from panda3d.bullet import ZUp
+from panda3d.bullet import BulletCharacterControllerNode
+from direct.actor.Actor import Actor, WindowProperties
+from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
+import math
 import sys
 
+
+from direct.gui.DirectGui import *
 ######################################3
 ##
 ## Config
@@ -44,6 +57,98 @@ class Client(DirectObject):
         # Create network layer objects
         ## This is madatory code. Don't ask for now, just use it ;)
         ## If something is unclear, just ask.
+        base.setFrameRateMeter(True)
+        self.accept('f1', self.toggleDebug)
+        self.accept('escape', sys.exit, [0])
+
+        self.debugNode = BulletDebugNode('Debug')
+        self.debugNode.showWireframe(True)
+        self.debugNode.showConstraints(True)
+        self.debugNode.showBoundingBoxes(False)
+        self.debugNode.showNormals(False)
+        self.debugNP = render.attachNewNode(self.debugNode)
+        self.debugNP.show()
+
+        # Light
+        self.alight = AmbientLight('ambientLight')
+        self.alight.setColor(Vec4(0.2, 0.2, 0.2, 1))
+        self.alightNP = render.attachNewNode(self.alight)
+
+        self.dlight = DirectionalLight('directionalLight')
+        self.dlight.setDirection(Vec3(1, 1, -1))
+        self.dlight.setColor(Vec4(0.7, 0.7, 0.7, 1))
+        self.dlightNP = render.attachNewNode(self.dlight)
+
+        render.clearLight()
+        render.setLight(self.alightNP)
+        render.setLight(self.dlightNP)
+
+        # World
+        self.world = BulletWorld()
+        self.world.setGravity(Vec3(0, 0, -9.81))
+        self.world.setDebugNode(self.debugNP.node())
+
+        # HeightField
+        self.height = 8.0
+        self.img = PNMImage(Filename('models/elevation.png'))
+        self.hshape = BulletHeightfieldShape(self.img, self.height, ZUp)
+        self.hnode = BulletRigidBodyNode('HGround')
+        self.hnode.addShape(self.hshape)
+        self.world.attachRigidBody(self.hnode)
+
+        # Terrian
+        terrain = GeoMipTerrain('terrain')
+        terrain.setHeightfield(self.img)
+
+        offset = self.img.getXSize() / 2.0 - 0.5
+        rootNP = terrain.getRoot()
+        rootNP.reparentTo(render)
+        rootNP.setSz(self.height)
+        rootNP.setPos(-offset, -offset, -self.height / 2.0)
+        terrain.generate()
+
+        self.speed = Vec3(0, 0, 0)
+        self.walk_speed = 1.5
+
+        shape = BulletCapsuleShape(.2, .6, ZUp)
+        playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
+        playerNode.setMaxJumpHeight(2.0)
+        playerNode.setJumpSpeed(4.0)
+        self.playerNP = render.attachNewNode(playerNode)
+        self.playerNP.setPos(-2, 0, 4)
+        self.playerNP.setCollideMask(BitMask32.allOn())
+        self.world.attachCharacter(self.playerNP.node())
+        self.playerModel = Actor('models/soldier.egg', {"idle": "models/soldier_ani_idle.egg",
+                                                   "walk": "models/soldier_ani_walk.egg"})
+        myTexture = loader.loadTexture("models/soldier_texture.png")
+        self.playerModel.setTexture(myTexture, 1)
+        self.playerModel.setH(90)
+        self.playerModel.setScale(.06)
+        self.playerModel.setZ(-.45)
+        self.playerModel.flattenLight()
+        self.playerModel.setLightOff()
+        self.playerModel.reparentTo(self.playerNP)
+
+        # Camera
+        base.disableMouse()
+        props = WindowProperties()
+        props.setCursorHidden(True)
+        base.win.requestProperties(props)
+        self.heading = 0
+        self.pitch = 40
+
+        # Pointer
+        # imageObject = self.makeArc()
+        # imageObject.setSx(.02)
+        # imageObject.setSy(.02)
+        # imageObject.setSz(.02)
+        # imageObject.reparent_to(aspect2d)
+
+        inputState.watchWithModifiers('forward', 'w')
+        inputState.watchWithModifiers('left', 'a')
+        inputState.watchWithModifiers('reverse', 's')
+        inputState.watchWithModifiers('right', 'd')
+        inputState.watchWithModifiers('jump', 'space')
 
         self.cManager = QueuedConnectionManager()
         self.cListener = QueuedConnectionListener(self.cManager, 0)
@@ -55,6 +160,7 @@ class Client(DirectObject):
 
         # Start tasks
         taskMgr.add(self.readTask, "serverReaderPollTask", -39)
+        taskMgr.add(self.update, 'update')
 
         # Send login msg to the server
         ## required to get the whole thing running.
@@ -67,6 +173,82 @@ class Client(DirectObject):
     ## Here are the basic networking code pieces.
     ## If you have questions, ask...
     ##
+    # player movement
+
+    def processInput(self):
+        omega = 0.0
+        self.speed.setX(0)
+        self.speed.setY(0)
+
+        if inputState.isSet('forward'): self.speed.setY(self.walk_speed)
+        if inputState.isSet('reverse'): self.speed.setY(-self.walk_speed)
+        if inputState.isSet('left'):    self.speed.setX(-self.walk_speed)
+        if inputState.isSet('right'):   self.speed.setX(self.walk_speed)
+        if inputState.isSet('jump'):   playerNode.doJump()
+
+        self.playerNP.node().setLinearMovement(self.speed, True)
+
+    # player animation
+    def animate(self):
+        if (self.speed.getX() == 0 and self.speed.getY() == 0):
+            if (self.playerModel.get_current_anim() != "idle"):
+                self.playerModel.loop("idle")
+        else:
+            if (self.playerModel.get_current_anim() != "walk"):
+                self.playerModel.loop("walk")
+
+    def moveCamera(self):
+
+        md = base.win.getPointer(0)
+
+        x = md.getX()
+        y = md.getY()
+
+        if base.win.movePointer(0, 300, 300):
+            self.heading = self.heading - (x - 300) * 0.2
+            self.pitch = self.pitch - (y - 300) * 0.2
+            if (self.pitch < -30.0):
+                self.pitch = -30.0
+            elif (self.pitch > 45.0):
+                self.pitch = 45.0
+
+        base.cam.setHpr(self.heading, self.pitch, 0)
+
+        self.playerNP.setH(self.heading)
+        base.cam.setX(self.playerNP.getX() + 3 * math.sin(math.pi / 180.0 * self.playerNP.getH()))
+        base.cam.setY(self.playerNP.getY() - 3 * math.cos(math.pi / 180.0 * self.playerNP.getH()))
+        base.cam.setZ(self.playerNP.getZ() - 0.05 * self.pitch + .7)
+
+    # Update
+    def update(self, task):
+        dt = globalClock.getDt()
+        self.moveCamera()
+        self.processInput()
+        self.animate()
+        self.world.doPhysics(dt)
+        return task.cont
+
+    def makeArc(angleDegrees=360, numSteps=16):
+        ls = LineSegs()
+
+        angleRadians = deg2Rad(angleDegrees)
+
+        for i in range(numSteps + 1):
+            a = angleRadians * i / numSteps
+            y = math.sin(a)
+            x = math.cos(a)
+
+            ls.drawTo(x, 0, y)
+
+        node = ls.create()
+        return NodePath(node)
+
+    # Debug
+    def toggleDebug(self):
+        if self.debugNP.isHidden():
+            self.debugNP.show()
+        else:
+            self.debugNP.hide()
 
     def readTask(self, task):
         while 1:
