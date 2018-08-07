@@ -65,6 +65,7 @@ class Server(DirectObject):
         ## If you press Escape @ the server window, the server will quit.
         self.accept("escape", self.quit)
         self.lastConnection = None
+        self.serverClock = 0
 
         # Create network layer objects
 
@@ -90,7 +91,9 @@ class Server(DirectObject):
         taskMgr.add(self.listenTask, "serverListenTask", -40)
 
         # Start Read task
+
         taskMgr.add(self.readTask, "serverReadTask", -39)
+        taskMgr.add(self.broadcastTask, "broadcastTask")
 
     def listenTask(self, task):
         """
@@ -263,7 +266,7 @@ class Server(DirectObject):
         s = data.getBool()
         d = data.getBool()
         space = data.getBool()
-        print("Keyboard input from client : ",w,a,s,d,space)
+        # print("Keyboard input from client : ",w,a,s,d,space)
         pkg = PyDatagram()
         pkg.addUint16(SERVER_INPUT)
         pkg.addBool(w)
@@ -272,6 +275,14 @@ class Server(DirectObject):
         pkg.addBool(d)
         pkg.addBool(space)
         self.cWriter.send(pkg,client)
+
+    def broadcastTask(self, task):
+        print("Broadcasting. Server Clock = " + str(self.serverClock))
+        # for c in CLIENTS:
+        #     print(c)
+        # pkg = PyDatagram()
+        self.serverClock += 1
+        return task.cont
 
 
 # create a server object on port 9099
