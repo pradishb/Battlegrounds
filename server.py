@@ -308,6 +308,7 @@ class Server(DirectObject):
         print()
         return task.cont
 
+    #sabai krua boardcasting garnae ko lagi ho 
     def broadcastMsg(self, msg):
         pkg = PyDatagram()
         pkg.addUint16(SMSG_CHAT)
@@ -317,14 +318,19 @@ class Server(DirectObject):
             # print(c)
             self.cWriter.send(pkg,c)
 
+    #to send game's initial stats
     def gameStart(self):
         x  = 0
+        playerId = 0
         ranValPkg = PyDatagram()
-        ranValPkg = pkg.addUint16(SMSG_CHAT)
-        for client in CLIENTS: 
+        ranValPkg.addUint16(SMSG_CHAT)
+        ranValPkg.addUint32(self.playerCount) 
+        for client in CLIENTS:
             ranValPkg.addString(client)
+            ranValPkg.addUint16(player_id)
             ranValPkg.addfloat(random.randint(1,5))
             ranValPkg.addfloat(random.randint(1,5))
+            playerId += playerId
         for client in CLIENTS:
             self.cWriter.send(self,ranValPkg,client)
 
