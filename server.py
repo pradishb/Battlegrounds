@@ -64,12 +64,12 @@ class Server(DirectObject):
         ## If you press Escape @ the server window, the server will quit.
         self.accept("escape", self.quit)
         self.lastConnection = None
-<<<<<<< HEAD
         self.clientInputDict = {}
-=======
         self.serverClock = 0
 
->>>>>>> 3934f73b45365091957643bce305e45b8a0a591b
+        self.playerCount = 0
+        self.listenStat = 1
+        self.listPkg = PyDatagram()
         # Create network layer objects
 
         # Deals with the basic network stuff
@@ -96,7 +96,7 @@ class Server(DirectObject):
         # Start Read task
 
         taskMgr.add(self.readTask, "serverReadTask", -39)
-        taskMgr.add(self.broadcastTask, "broadcastTask")
+        #taskMgr.add(self.broadcastTask, "broadcastTask")
 
     def listenTask(self, task):
         """
@@ -105,20 +105,30 @@ class Server(DirectObject):
         # Run this task after the dataLoop
 
         # If there's a new connection Handle it
-        if self.cListener.newConnectionAvailable():
-            rendezvous = PointerToConnection()
-            netAddress = NetAddress()
-            newConnection = PointerToConnection()
+        if (self.listenStat < 1800):
+            timeToStart = 0
+            x = int(self.listenStat/60)
+            if(x == (self.listenStat/60)):
+                self.timeToStart = 30 -x 
+                print(self.timeToStart)
+                self.broadcastMsg(str(self.timeToStart))
 
-            if self.cListener.getNewConnection(rendezvous, netAddress, newConnection):
-                newConnection = newConnection.p()
-                # tell the Reader that there's a new connection to read from
-                self.cReader.addConnection(newConnection)
-                CLIENTS[newConnection] = netAddress.getIpString()
-                self.lastConnection = newConnection
-                print("Got a connection!")
-            else:
-                print("getNewConnection returned false")
+            self.listenStat += 1 
+            if self.cListener.newConnectionAvailable():
+                rendezvous = PointerToConnection()
+                netAddress = NetAddress()
+                newConnection = PointerToConnection()
+
+                if self.cListener.getNewConnection(rendezvous, netAddress, newConnection):
+                    newConnection = newConnection.p()
+                    # tell the Reader that there's a new connection to read from
+                    self.cReader.addConnection(newConnection)
+                    CLIENTS[newConnection] = netAddress.getIpString()
+                    self.lastConnection = newConnection
+                    print("Got a connection!")
+                    self.playerCount += 1 
+                else:
+                    print("getNewConnection returned false")
         return task.cont
 
     def readTask(self, task):
@@ -203,7 +213,7 @@ class Server(DirectObject):
         elif USERS[username] == password:
             # authenticated, come on in
             flag = 1
-            CLIENTS[username] = 1
+            # CLIENTS[username] = 1
             print("User: %s, logged in with pass: %s" % (username, password))
         else:
             # Wrong password, try again or bugger off
@@ -250,6 +260,7 @@ class Server(DirectObject):
         ## first getString()!!!
         ## If you want to test the above example, comment the
         ## next line out...
+
         print("ChatMsg: %s" % data.getString())
 
     def msgDisconnectReq(self, msgID, data, client):
@@ -270,13 +281,8 @@ class Server(DirectObject):
         s = data.getBool()
         d = data.getBool()
         space = data.getBool()
-<<<<<<< HEAD
-        #print("Keyboard input from client : ",w,a,s,d,space)
         self.val = [w,a,s,d,space]
         self.clientInputDict[client] = self.val
-=======
-        # print("Keyboard input from client : ",w,a,s,d,space)
->>>>>>> 3934f73b45365091957643bce305e45b8a0a591b
         pkg = PyDatagram()
         pkg.addUint16(SERVER_INPUT)
         pkg.addBool(w)
@@ -294,6 +300,22 @@ class Server(DirectObject):
         self.serverClock += 1
         return task.cont
 
+    def broadcastMsg(self, msg):
+        pkg = PyDatagram()
+        pkg.addUint16(SMSG_CHAT)
+        pkg.addString(msg)
+        # print(CLIENTS)
+        for c in CLIENTS:
+            # print(c)
+            self.cWriter.send(pkg,c)
+
+
+    def sendInitialData(self):
+        self.listPkg.addUint32(self.timeToStart)
+        self.listPkg.addUint32(self.playerCount)
+        for client in CLIENTS:
+            self.cWriter.send(self.listPkg,client)
+       
 
 # create a server object on port 9099
 serverHandler = Server()
