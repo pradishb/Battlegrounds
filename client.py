@@ -51,6 +51,26 @@ SMSG_DISCONNECT_ACK = 6
 CLIENT_INPUT = 7
 SERVER_INPUT = 8
 
+class Player():
+    def __init__(self, x, y, z):
+        shape = BulletCapsuleShape(.2, .6, ZUp)
+        self.playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
+        self.playerNode.setMaxJumpHeight(2.0)
+        self.playerNode.setJumpSpeed(4.0)
+        self.playerNP = render.attachNewNode(self.playerNode)
+        self.playerNP.setPos(x, y, z)
+        self.playerNP.setCollideMask(BitMask32.allOn())
+        self.playerModel = Actor('models/soldier.egg', {"idle": "models/soldier_ani_idle.egg",
+                                                        "walk": "models/soldier_ani_walk.egg"})
+        myTexture = loader.loadTexture("models/soldier_texture.png")
+        self.playerModel.setTexture(myTexture, 1)
+        self.playerModel.setH(90)
+        self.playerModel.setScale(.06)
+        self.playerModel.setZ(-.45)
+        self.playerModel.flattenLight()
+        self.playerModel.setLightOff()
+        self.playerModel.reparentTo(self.playerNP)
+
 
 class Client(DirectObject):
     def __init__(self):
@@ -112,24 +132,12 @@ class Client(DirectObject):
         self.speed = Vec3(0, 0, 0)
         self.walk_speed = 1.5
 
-        shape = BulletCapsuleShape(.2, .6, ZUp)
-        playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
-        playerNode.setMaxJumpHeight(2.0)
-        playerNode.setJumpSpeed(4.0)
-        self.playerNP = render.attachNewNode(playerNode)
-        self.playerNP.setPos(-2, 0, 4)
-        self.playerNP.setCollideMask(BitMask32.allOn())
-        self.world.attachCharacter(self.playerNP.node())
-        self.playerModel = Actor('models/soldier.egg', {"idle": "models/soldier_ani_idle.egg",
-                                                   "walk": "models/soldier_ani_walk.egg"})
-        myTexture = loader.loadTexture("models/soldier_texture.png")
-        self.playerModel.setTexture(myTexture, 1)
-        self.playerModel.setH(90)
-        self.playerModel.setScale(.06)
-        self.playerModel.setZ(-.45)
-        self.playerModel.flattenLight()
-        self.playerModel.setLightOff()
-        self.playerModel.reparentTo(self.playerNP)
+        self.players = []
+        self.players.append(Player(-2, 0, 4))
+        self.players.append(Player(2, 0, 4))
+
+        for player in self.players:
+            self.world.attachCharacter(player.playerNP.node())
 
         # Camera
         base.disableMouse()
@@ -199,12 +207,13 @@ class Client(DirectObject):
 
     # player animation
     def animate(self):
-        if (self.speed.getX() == 0 and self.speed.getY() == 0):
-            if (self.playerModel.get_current_anim() != "idle"):
-                self.playerModel.loop("idle")
-        else:
-            if (self.playerModel.get_current_anim() != "walk"):
-                self.playerModel.loop("walk")
+        for player in self.players:
+            if (self.speed.getX() == 0 and self.speed.getY() == 0):
+                if (player.playerModel.get_current_anim() != "idle"):
+                    player.playerModel.loop("idle")
+            else:
+                if (player.playerModel.get_current_anim() != "walk"):
+                    player.playerModel.loop("walk")
 
     def moveCamera(self):
 
@@ -223,10 +232,10 @@ class Client(DirectObject):
 
         base.cam.setHpr(self.heading, self.pitch, 0)
 
-        self.playerNP.setH(self.heading)
-        base.cam.setX(self.playerNP.getX() + 3 * math.sin(math.pi / 180.0 * self.playerNP.getH()))
-        base.cam.setY(self.playerNP.getY() - 3 * math.cos(math.pi / 180.0 * self.playerNP.getH()))
-        base.cam.setZ(self.playerNP.getZ() - 0.05 * self.pitch + .7)
+        self.players[0].playerNP.setH(self.heading)
+        base.cam.setX(self.players[0].playerNP.getX() + 3 * math.sin(math.pi / 180.0 * self.players[0].playerNP.getH()))
+        base.cam.setY(self.players[0].playerNP.getY() - 3 * math.cos(math.pi / 180.0 * self.players[0].playerNP.getH()))
+        base.cam.setZ(self.players[0].playerNP.getZ() - 0.05 * self.pitch + .7)
 
     # Update
     def update(self, task):
@@ -291,7 +300,7 @@ class Client(DirectObject):
             print()
             # playerNode.doJump()
             # inputList[4] = True
-        self.playerNP.node().setLinearMovement(self.speed, True)
+        self.players[0].playerNP.node().setLinearMovement(self.speed, True)
         self.serverWait = False
 
     def readTask(self, task):
