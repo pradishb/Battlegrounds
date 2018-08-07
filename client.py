@@ -166,6 +166,7 @@ class Client(DirectObject):
         # Send login msg to the server
         ## required to get the whole thing running.
         self.sendMsgAuth()
+        self.serverWait = False
         taskMgr.add(self.update, 'update')
 
     ########################################
@@ -231,9 +232,11 @@ class Client(DirectObject):
     def update(self, task):
         dt = globalClock.getDt()
         self.moveCamera()
-        self.processInput()
-        self.animate()
-        self.world.doPhysics(dt)
+        if(not self.serverWait):
+            self.processInput()
+            self.animate()
+            self.world.doPhysics(dt)
+            self.serverWait = True
         return task.cont
 
     def makeArc(angleDegrees=360, numSteps=16):
@@ -289,6 +292,7 @@ class Client(DirectObject):
             # playerNode.doJump()
             # inputList[4] = True
         self.playerNP.node().setLinearMovement(self.speed, True)
+        self.serverWait = False
 
     def readTask(self, task):
         while 1:
