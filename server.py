@@ -136,16 +136,6 @@ class Server(DirectObject):
                 else:
                     print("getNewConnection returned false")
             #creating random value for clients
-            if(self.listenStat==1799):
-                x  = 0
-                ranValPkg = PyDatagram()
-                ranValPkg = pkg.addUint16(SMSG_CHAT)
-                for client in CLIENTS: 
-                    ranValPkg.addString(client)
-                    ranValPkg.addfloat(random.randint(1,5))
-                    ranValPkg.addfloat(random.randint(1,5))
-                for client in CLIENTS:
-                    self.cWriter.send(self,ranValPkg,client)
         return task.cont
 
     def readTask(self, task):
@@ -315,6 +305,7 @@ class Server(DirectObject):
         #     print(c)
         # pkg = PyDatagram()
         self.serverClock += 1
+        print()
         return task.cont
 
     def broadcastMsg(self, msg):
@@ -326,7 +317,16 @@ class Server(DirectObject):
             # print(c)
             self.cWriter.send(pkg,c)
 
-    
+    def gameStart(self):
+        x  = 0
+        ranValPkg = PyDatagram()
+        ranValPkg = pkg.addUint16(SMSG_CHAT)
+        for client in CLIENTS: 
+            ranValPkg.addString(client)
+            ranValPkg.addfloat(random.randint(1,5))
+            ranValPkg.addfloat(random.randint(1,5))
+        for client in CLIENTS:
+            self.cWriter.send(self,ranValPkg,client)
 
 # create a server object on port 9099
 serverHandler = Server()
