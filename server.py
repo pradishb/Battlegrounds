@@ -320,7 +320,6 @@ class Server(DirectObject):
 
     #to send game's initial stats
     def gameStart(self):
-        x  = 0
         playerId = 0
         ranValPkg = PyDatagram()
         ranValPkg.addUint16(SMSG_CHAT)
