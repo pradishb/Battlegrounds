@@ -50,6 +50,7 @@ CMSG_DISCONNECT_REQ = 5
 SMSG_DISCONNECT_ACK = 6
 CLIENT_INPUT = 7
 SERVER_INPUT = 8
+GAME_INITIALIZE = 9
 
 class Player():
     def __init__(self, x, y, z):
@@ -297,11 +298,22 @@ class Client(DirectObject):
         if data.getBool():
             self.speed.setX(self.walk_speed)
         if data.getBool():
+
             print()
             # playerNode.doJump()
             # inputList[4] = True
         self.players[0].playerNP.node().setLinearMovement(self.speed, True)
         self.serverWait = False
+
+    def gameInitialize(self, msgID, data):
+        playerCount = data.getUint32()
+        for i in range(0, playerCount):
+            playerId = data.getUint32()
+            x = data.getFloat32()
+            y = data.getFloat32()
+            print(playerId, x, y)
+        clientId = data.getUint32()
+        print(clientId)
 
     def readTask(self, task):
         while 1:
@@ -481,6 +493,7 @@ Handlers = {
     SMSG_CHAT: aClient.msgChat,
     SMSG_DISCONNECT_ACK: aClient.msgDisconnectAck,
     SERVER_INPUT: aClient.serverInputHanlder,
+    GAME_INITIALIZE: aClient.gameInitialize,
 }
 
 #######################################################################

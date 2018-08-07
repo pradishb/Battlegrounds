@@ -33,6 +33,7 @@ CMSG_DISCONNECT_REQ = 5
 SMSG_DISCONNECT_ACK = 6
 CLIENT_INPUT = 7
 SERVER_INPUT = 8
+GAME_INITIALIZE = 9
 
 
 ##################################################################
@@ -57,6 +58,7 @@ USERS = {
 ##
 
 CLIENTS = {}
+CLIENTS_ID = {}
 
 
 class Server(DirectObject):
@@ -67,6 +69,7 @@ class Server(DirectObject):
         self.lastConnection = None
         self.clientInputDict = {}
         self.serverClock = 0
+        self.lobbyWaitTime = 10
 
         self.randomValue = {}
 
@@ -108,14 +111,14 @@ class Server(DirectObject):
         # Run this task after the dataLoop
 
         # If there's a new connection Handle it
-        if (self.listenStat < 1800):
+        if (self.listenStat < 60 * self.lobbyWaitTime):
             x = 0
             y = 0
             timeToStart = 0
             ranVal = {}
-            x = int(self.listenStat/60)
-            if(x == (self.listenStat/60)):
-                self.timeToStart = 30 -x 
+            x = int(self.listenStat / 60)
+            if(x == (self.listenStat / 60)):
+                self.timeToStart = self.lobbyWaitTime - x
                 print(self.timeToStart)
                 self.broadcastMsg(str(self.timeToStart))
 
@@ -130,12 +133,14 @@ class Server(DirectObject):
                     # tell the Reader that there's a new connection to read from
                     self.cReader.addConnection(newConnection)
                     CLIENTS[newConnection] = netAddress.getIpString()
+                    CLIENTS_ID[newConnection] = self.playerCount
                     self.lastConnection = newConnection
                     print("Got a connection!")
                     self.playerCount += 1 
                 else:
                     print("getNewConnection returned false")
-            #creating random value for clients
+            elif (self.listenStat ==  60 * self.lobbyWaitTime):
+                self.gameStart()
         return task.cont
 
     def readTask(self, task):
@@ -320,18 +325,19 @@ class Server(DirectObject):
 
     #to send game's initial stats
     def gameStart(self):
-        playerId = 0
         ranValPkg = PyDatagram()
-        ranValPkg.addUint16(SMSG_CHAT)
+        ranValPkg.addUint16(GAME_INITIALIZE)
         ranValPkg.addUint32(self.playerCount) 
         for client in CLIENTS:
-            ranValPkg.addString(client)
-            ranValPkg.addUint16(player_id)
-            ranValPkg.addfloat(random.randint(1,5))
-            ranValPkg.addfloat(random.randint(1,5))
-            playerId += playerId
+            ranValPkg.addUint32(CLIENTS_ID[client])
+            ranValPkg.addFloat32(random.randint(1,5))
+            ranValPkg.addFloat32(random.randint(1,5))
         for client in CLIENTS:
-            self.cWriter.send(self,ranValPkg,client)
+            temp = ranValPkg.__copy__()
+            temp.addUint32(CLIENTS_ID[client])
+            print(CLIENTS_ID[client])
+            self.cWriter.send(temp, client)
+        print("Starting game...")
 
 # create a server object on port 9099
 serverHandler = Server()
