@@ -31,6 +31,7 @@ SMSG_CHAT = 4
 CMSG_DISCONNECT_REQ = 5
 SMSG_DISCONNECT_ACK = 6
 CLIENT_INPUT = 7
+SERVER_INPUT = 8
 
 
 ##################################################################
