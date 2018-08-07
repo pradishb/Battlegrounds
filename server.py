@@ -7,6 +7,7 @@ from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from direct.gui.DirectGui import *
 import sys
 
+import random 
 ######################################3
 ##
 ## Config
@@ -67,6 +68,8 @@ class Server(DirectObject):
         self.clientInputDict = {}
         self.serverClock = 0
 
+        self.randomValue = {}
+
         self.playerCount = 0
         self.listenStat = 1
         self.listPkg = PyDatagram()
@@ -106,7 +109,10 @@ class Server(DirectObject):
 
         # If there's a new connection Handle it
         if (self.listenStat < 1800):
+            x = 0
+            y = 0
             timeToStart = 0
+            ranVal = {}
             x = int(self.listenStat/60)
             if(x == (self.listenStat/60)):
                 self.timeToStart = 30 -x 
@@ -129,6 +135,17 @@ class Server(DirectObject):
                     self.playerCount += 1 
                 else:
                     print("getNewConnection returned false")
+            #creating random value for clients
+            if(self.listenStat==1799):
+                x  = 0
+                ranValPkg = PyDatagram()
+                ranValPkg = pkg.addUint16(SMSG_CHAT)
+                for client in CLIENTS: 
+                    ranValPkg.addString(client)
+                    ranValPkg.addfloat(random.randint(1,5))
+                    ranValPkg.addfloat(random.randint(1,5))
+                for client in CLIENTS:
+                    self.cWriter.send(self,ranValPkg,client)
         return task.cont
 
     def readTask(self, task):
@@ -309,13 +326,7 @@ class Server(DirectObject):
             # print(c)
             self.cWriter.send(pkg,c)
 
-
-    def sendInitialData(self):
-        self.listPkg.addUint32(self.timeToStart)
-        self.listPkg.addUint32(self.playerCount)
-        for client in CLIENTS:
-            self.cWriter.send(self.listPkg,client)
-       
+    
 
 # create a server object on port 9099
 serverHandler = Server()
