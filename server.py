@@ -61,11 +61,10 @@ CLIENTS = {}
 class Server(DirectObject):
 
     def __init__(self):
-
         ## If you press Escape @ the server window, the server will quit.
         self.accept("escape", self.quit)
         self.lastConnection = None
-
+        self.clientInputDict = {}
         # Create network layer objects
 
         # Deals with the basic network stuff
@@ -258,12 +257,16 @@ class Server(DirectObject):
         sys.exit()
 
     def clientInputHandler(self, msgID, data, client):
+        
         w = data.getBool()
         a = data.getBool()
         s = data.getBool()
         d = data.getBool()
         space = data.getBool()
-        print("Keyboard input from client : ",w,a,s,d,space)
+        #print("Keyboard input from client : ",w,a,s,d,space)
+        self.val = [w,a,s,d,space]
+        self.clientInputDict[client] = self.val
+        print(self.clientInputDict[client],client)
         pkg = PyDatagram()
         pkg.addUint16(SERVER_INPUT)
         pkg.addBool(w)
