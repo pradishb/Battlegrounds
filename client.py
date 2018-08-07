@@ -184,23 +184,17 @@ class Client(DirectObject):
         inputList = [False] * 5
 
         if inputState.isSet('forward'):
-            self.speed.setY(self.walk_speed)
             inputList[0] = True
         if inputState.isSet('left'):
-            self.speed.setX(-self.walk_speed)
             inputList[1] = True
         if inputState.isSet('reverse'):
-            self.speed.setY(-self.walk_speed)
             inputList[2] = True
         if inputState.isSet('right'):
-            self.speed.setX(self.walk_speed)
             inputList[3] = True
         if inputState.isSet('jump'):
             # playerNode.doJump()
             inputList[4] = True
-            self.sendUserInput(inputList)
-
-        self.playerNP.node().setLinearMovement(self.speed, True)
+        self.sendUserInput(inputList)
 
     # player animation
     def animate(self):
@@ -280,6 +274,21 @@ class Client(DirectObject):
 
         # Now lets send the whole thing...
         self.send(pkg)
+
+    def serverInputHanlder(self, msgID, data):
+        if data.getBool():
+            self.speed.setY(self.walk_speed)
+        if data.getBool():
+            self.speed.setX(-self.walk_speed)
+        if data.getBool():
+            self.speed.setY(-self.walk_speed)
+        if data.getBool():
+            self.speed.setX(self.walk_speed)
+        if data.getBool():
+            print()
+            # playerNode.doJump()
+            # inputList[4] = True
+        self.playerNP.node().setLinearMovement(self.speed, True)
 
     def readTask(self, task):
         while 1:
@@ -458,6 +467,7 @@ Handlers = {
     SMSG_AUTH_RESPONSE: aClient.msgAuthResponse,
     SMSG_CHAT: aClient.msgChat,
     SMSG_DISCONNECT_ACK: aClient.msgDisconnectAck,
+    SERVER_INPUT: aClient.serverInputHanlder,
 }
 
 #######################################################################

@@ -258,7 +258,20 @@ class Server(DirectObject):
         sys.exit()
 
     def clientInputHandler(self, msgID, data, client):
-        print("Keyboard input from client : ",data.getBool(),data.getBool(),data.getBool(),data.getBool(),data.getBool())
+        w = data.getBool()
+        a = data.getBool()
+        s = data.getBool()
+        d = data.getBool()
+        space = data.getBool()
+        print("Keyboard input from client : ",w,a,s,d,space)
+        pkg = PyDatagram()
+        pkg.addUint16(SERVER_INPUT)
+        pkg.addBool(w)
+        pkg.addBool(a)
+        pkg.addBool(s)
+        pkg.addBool(d)
+        pkg.addBool(space)
+        self.cWriter.send(pkg,client)
 
 
 # create a server object on port 9099
