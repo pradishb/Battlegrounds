@@ -263,9 +263,9 @@ class Server(DirectObject):
 
     def clientInputHandler(self, msgID, data, client):
         # sequence bata still extra fisrt true key ignore garyera garnu parxa kam ..
+
         seq = key_input(str(data.getUint64()))
-        for i in seq:
-            print(seq[i])
+        print("Keyboard input from client : " + str(seq))
 
 
 

@@ -495,10 +495,8 @@ Handlers = {
 ##
 
 def phaser (w,a,s,d,jmp):
-    ary =str(1)+str(int(w))+str(int(a))+str(int(s))+str(int(d))+str(int(jmp))
-    print(ary)
+    ary =str(1)+str(int(w))+str(int(a))+str(int(s))+str(int(d))+str(int(jmp))k
     val = int(ary)
-    # print(val)
     return(val)
 
 
