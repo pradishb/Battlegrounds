@@ -236,12 +236,7 @@ class Server(DirectObject):
         ##
         ## This is again only an example showing you what you CAN
         ## do with the received code... Example: Sending it back.
-        ## pkg = PyDatagram()
-        ## pkg.addUint16(SMSG_CHAT)
-        ## chatMsg=data.getString()
-        ## pkg.addString(chatMsg)
-        ## self.cWriter.send(pkg,client)
-        ## print 'ChatMsg: ',chatMsg
+        # print 'ChatMsg: ',chatMsg
 
         ## If you have trouble with the print command:
         ## print 'ChatMsg: ',data.GetString() does the same.
@@ -264,9 +259,14 @@ class Server(DirectObject):
 
     def clientInputHandler(self, msgID, data, client):
         # sequence bata still extra fisrt true key ignore garyera garnu parxa kam ..
-
-        seq = key_input(str(data.getUint64()))
+        val = data.getUint64()
+        seq = key_input(str(val))
         print("Keyboard input from client : " + str(seq))
+        pkg = PyDatagram()
+        pkg.addUint16(SMSG_CHAT)
+        pkg.addString(str(val))
+        self.cWriter.send(pkg,client)
+
 
 
 
