@@ -181,26 +181,24 @@ class Client(DirectObject):
         self.speed.setX(0)
         self.speed.setY(0)
 
-        inputList = [0, 0, 0, 0, 0]
+        inputList = [False] * 5
 
         if inputState.isSet('forward'):
             self.speed.setY(self.walk_speed)
-            inputList[0] = 1
+            inputList[0] = True
         if inputState.isSet('left'):
             self.speed.setX(-self.walk_speed)
-            inputList[1] = 1
+            inputList[1] = True
         if inputState.isSet('reverse'):
             self.speed.setY(-self.walk_speed)
-            inputList[2] = 1
+            inputList[2] = True
         if inputState.isSet('right'):
             self.speed.setX(self.walk_speed)
-            inputList[3] = 1
+            inputList[3] = True
         if inputState.isSet('jump'):
             # playerNode.doJump()
-            inputList[4] = 1
+            inputList[4] = True
             self.sendUserInput(inputList)
-
-        # print(inputList[2])
 
         self.playerNP.node().setLinearMovement(self.speed, True)
 
@@ -273,8 +271,12 @@ class Client(DirectObject):
 
         # pkg.addString("hehehe")
         # print(inputArr[0])
-        val = phaser(inputArr[0], inputArr[1], inputArr[2], inputArr[3], inputArr[4])
-        pkg.addUint64(val)
+        # val = phaser(inputArr[0], inputArr[1], inputArr[2], inputArr[3], inputArr[4])
+        pkg.addBool(inputArr[0])
+        pkg.addBool(inputArr[1])
+        pkg.addBool(inputArr[2])
+        pkg.addBool(inputArr[3])
+        pkg.addBool(inputArr[4])
 
         # Now lets send the whole thing...
         self.send(pkg)
@@ -392,25 +394,6 @@ class Client(DirectObject):
         if flag == 1:
             print("Authentication Successfull")
 
-            ######################################################
-            ##
-            ## Now that we are known and trusted by the server, lets
-            ## send some text!
-            ##
-
-            ## creating the buffer again
-            pkg = PyDatagram()
-
-            ## Putting the Op-Code into the buffer saying that this is
-            ## going to be a chat message. (if you read the buffer you
-            ## would see then a 3 there. Why? Because CMSG_CHAT=3
-            pkg.addUint16(CMSG_CHAT)
-
-            pkg.addString("%s has connected to the server" % USERNAME)
-
-            ## Now lets send the whole thing...
-            self.send(pkg)
-
     def msgChat(self, msgID, data):
 
         ##########################################################
@@ -494,12 +477,5 @@ Handlers = {
 ##
 ## We need that loop. Otherwise it would run once and then quit.
 ##
-
-def phaser (w,a,s,d,jmp):
-    ary =str(1)+str(int(w))+str(int(a))+str(int(s))+str(int(d))+str(int(jmp))
-    val = int(ary)
-    return(val)
-
-
 
 base.run()

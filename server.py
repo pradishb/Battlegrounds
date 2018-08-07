@@ -258,16 +258,7 @@ class Server(DirectObject):
         sys.exit()
 
     def clientInputHandler(self, msgID, data, client):
-        # sequence bata still extra fisrt true key ignore garyera garnu parxa kam ..
-        val = data.getUint64()
-        seq = key_input(str(val))
-        print("Keyboard input from client : " + str(seq))
-        pkg = PyDatagram()
-        pkg.addUint16(SMSG_CHAT)
-        pkg.addString(str(val))
-        self.cWriter.send(pkg,client)
-
-
+        print("Keyboard input from client : ",data.getBool(),data.getBool(),data.getBool(),data.getBool(),data.getBool())
 
 
 # create a server object on port 9099
@@ -281,15 +272,5 @@ Handlers = {
     CMSG_DISCONNECT_REQ: serverHandler.msgDisconnectReq,
     CLIENT_INPUT: serverHandler.clientInputHandler,
 }
-
-## The loop again... otherwise the program would run once and thats it ;)
-def key_input(seq):
-    #optimize garna yo 2 ota lai globally define garde hunxa 
-    count = 0;
-    x = {}    
-    for i in seq:
-            x[count] = bool (int(i))
-            count = count + 1 
-    return(x)
 
 base.run()
