@@ -30,6 +30,8 @@ CMSG_CHAT = 3
 SMSG_CHAT = 4
 CMSG_DISCONNECT_REQ = 5
 SMSG_DISCONNECT_ACK = 6
+CLIENT_INPUT = 7
+
 
 ##################################################################
 ##
@@ -248,14 +250,6 @@ class Server(DirectObject):
         ## next line out...
         print("ChatMsg: %s" % data.getString())
 
-        
-        #sequence bata still extra fisrt true key ignore garyera garnu parxa kam .. 
-        seq = key_input(str(data.getUint64()))
-        for i in seq:
-            print(seq[i])    
-
-        
-
     def msgDisconnectReq(self, msgID, data, client):
         pkg = PyDatagram()
         pkg.addUint16(SMSG_DISCONNECT_ACK)
@@ -267,6 +261,13 @@ class Server(DirectObject):
         self.cManager.closeConnection(self.tcpSocket)
         sys.exit()
 
+    def clientInputHandler(self, msgID, data, client):
+        # sequence bata still extra fisrt true key ignore garyera garnu parxa kam ..
+        seq = key_input(str(data.getUint64()))
+        for i in seq:
+            print(seq[i])
+
+
 
 # create a server object on port 9099
 serverHandler = Server()
@@ -277,6 +278,7 @@ Handlers = {
     CMSG_AUTH: serverHandler.msgAuth,
     CMSG_CHAT: serverHandler.msgChat,
     CMSG_DISCONNECT_REQ: serverHandler.msgDisconnectReq,
+    CLIENT_INPUT: serverHandler.clientInputHandler,
 }
 
 ## The loop again... otherwise the program would run once and thats it ;)
@@ -289,4 +291,4 @@ def key_input(seq):
             count = count + 1 
     return(x)
 
-run()
+base.run()

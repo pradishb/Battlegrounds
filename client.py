@@ -48,6 +48,7 @@ CMSG_CHAT = 3
 SMSG_CHAT = 4
 CMSG_DISCONNECT_REQ = 5
 SMSG_DISCONNECT_ACK = 6
+CLIENT_INPUT = 7
 
 
 class Client(DirectObject):
@@ -160,11 +161,11 @@ class Client(DirectObject):
 
         # Start tasks
         taskMgr.add(self.readTask, "serverReaderPollTask", -39)
-        taskMgr.add(self.update, 'update')
 
         # Send login msg to the server
         ## required to get the whole thing running.
         self.sendMsgAuth()
+        taskMgr.add(self.update, 'update')
 
     ########################################
     ##
@@ -179,11 +180,26 @@ class Client(DirectObject):
         self.speed.setX(0)
         self.speed.setY(0)
 
-        if inputState.isSet('forward'): self.speed.setY(self.walk_speed)
-        if inputState.isSet('reverse'): self.speed.setY(-self.walk_speed)
-        if inputState.isSet('left'):    self.speed.setX(-self.walk_speed)
-        if inputState.isSet('right'):   self.speed.setX(self.walk_speed)
-        if inputState.isSet('jump'):   playerNode.doJump()
+        inputList = [0, 0, 0, 0, 0]
+
+        if inputState.isSet('forward'):
+            self.speed.setY(self.walk_speed)
+            inputList[0] = 1
+        if inputState.isSet('left'):
+            self.speed.setX(-self.walk_speed)
+            inputList[1] = 1
+        if inputState.isSet('reverse'):
+            self.speed.setY(-self.walk_speed)
+            inputList[2] = 1
+        if inputState.isSet('right'):
+            self.speed.setX(self.walk_speed)
+            inputList[3] = 1
+        if inputState.isSet('jump'):
+            # playerNode.doJump()
+            inputList[4] = 1
+            self.sendUserInput(inputList)
+
+        # print(inputList[2])
 
         self.playerNP.node().setLinearMovement(self.speed, True)
 
@@ -249,6 +265,19 @@ class Client(DirectObject):
         else:
             self.debugNP.hide()
 
+    def sendUserInput(self, inputArr = [], *args):
+        pkg = PyDatagram()
+
+        pkg.addUint16(CLIENT_INPUT)
+
+        # pkg.addString("hehehe")
+        # print(inputArr[0])
+        val = phaser(inputArr[0], inputArr[1], inputArr[2], inputArr[3], inputArr[4])
+        pkg.addUint64(val)
+
+        # Now lets send the whole thing...
+        self.send(pkg)
+
     def readTask(self, task):
         while 1:
             (datagram, data, msgID) = self.nonBlockingRead(self.cReader)
@@ -282,7 +311,7 @@ class Client(DirectObject):
     def handleDatagram(self, data, msgID):
         """
         Check if there's a handler assigned for this msgID.
-        Since we dont have case statements in python,
+        Since we don't have case statements in python,
         we're using a dictionary to avoid endless elif statements.
         """
 
@@ -376,16 +405,7 @@ class Client(DirectObject):
             ## would see then a 3 there. Why? Because CMSG_CHAT=3
             pkg.addUint16(CMSG_CHAT)
 
-            ## Next we are going to add our desired Chat message
-            ## to the buffer. Don't get confused about the %s
-            ## its a useable way to use variables in C++
-            ## you can write also:
-            ## pkg.addString('Hey, ',USERNAME,' is calling!')
-            pkg.addString("%s is calling in and is glad to be here" % USERNAME)
-            
-            # data varible phaser pass garnae input bata diect 
-            val = phaser(0,1,0,0,1)
-            pkg.addUint64(val)
+            pkg.addString("%s has connected to the server" % USERNAME)
 
             ## Now lets send the whole thing...
             self.send(pkg)
@@ -433,6 +453,7 @@ class Client(DirectObject):
         sys.exit()
 
 
+
 ######################################################################
 ##
 ## OK! After all of this preparation lets create a Instance of the
@@ -477,9 +498,9 @@ def phaser (w,a,s,d,jmp):
     ary =str(1)+str(int(w))+str(int(a))+str(int(s))+str(int(d))+str(int(jmp))
     print(ary)
     val = int(ary)
-    print(val)
+    # print(val)
     return(val)
 
 
 
-run()
+base.run()
