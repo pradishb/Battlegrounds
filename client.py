@@ -77,6 +77,7 @@ class Client(DirectObject):
     def __init__(self):
         self.accept("escape", self.sendMsgDisconnectReq)
 
+        self.gameStart = False
         # Create network layer objects
         ## This is madatory code. Don't ask for now, just use it ;)
         ## If something is unclear, just ask.
@@ -134,11 +135,6 @@ class Client(DirectObject):
         self.walk_speed = 1.5
 
         self.players = []
-        self.players.append(Player(-2, 0, 4))
-        self.players.append(Player(2, 0, 4))
-
-        for player in self.players:
-            self.world.attachCharacter(player.playerNP.node())
 
         # Camera
         base.disableMouse()
@@ -176,7 +172,6 @@ class Client(DirectObject):
         ## required to get the whole thing running.
         self.sendMsgAuth()
         self.serverWait = False
-        taskMgr.add(self.update, 'update')
 
     ########################################
     ##
@@ -233,10 +228,10 @@ class Client(DirectObject):
 
         base.cam.setHpr(self.heading, self.pitch, 0)
 
-        self.players[0].playerNP.setH(self.heading)
-        base.cam.setX(self.players[0].playerNP.getX() + 3 * math.sin(math.pi / 180.0 * self.players[0].playerNP.getH()))
-        base.cam.setY(self.players[0].playerNP.getY() - 3 * math.cos(math.pi / 180.0 * self.players[0].playerNP.getH()))
-        base.cam.setZ(self.players[0].playerNP.getZ() - 0.05 * self.pitch + .7)
+        self.players[self.id].playerNP.setH(self.heading)
+        base.cam.setX(self.players[self.id].playerNP.getX() + 3 * math.sin(math.pi / 180.0 * self.players[self.id].playerNP.getH()))
+        base.cam.setY(self.players[self.id].playerNP.getY() - 3 * math.cos(math.pi / 180.0 * self.players[self.id].playerNP.getH()))
+        base.cam.setZ(self.players[self.id].playerNP.getZ() - 0.05 * self.pitch + .7)
 
     # Update
     def update(self, task):
@@ -289,20 +284,20 @@ class Client(DirectObject):
         self.send(pkg)
 
     def serverInputHanlder(self, msgID, data):
-        if data.getBool():
-            self.speed.setY(self.walk_speed)
-        if data.getBool():
-            self.speed.setX(-self.walk_speed)
-        if data.getBool():
-            self.speed.setY(-self.walk_speed)
-        if data.getBool():
-            self.speed.setX(self.walk_speed)
-        if data.getBool():
-
-            print()
-            # playerNode.doJump()
-            # inputList[4] = True
-        self.players[0].playerNP.node().setLinearMovement(self.speed, True)
+        if(data.getRemainingSize() != 0):
+            playerId = data.getUint32()
+            if data.getBool():
+                self.speed.setY(self.walk_speed)
+            if data.getBool():
+                self.speed.setX(-self.walk_speed)
+            if data.getBool():
+                self.speed.setY(-self.walk_speed)
+            if data.getBool():
+                self.speed.setX(self.walk_speed)
+            if data.getBool():
+                print()
+                # playerNode.doJump()
+            self.players[playerId].playerNP.node().setLinearMovement(self.speed, True)
         self.serverWait = False
 
     def gameInitialize(self, msgID, data):
@@ -311,9 +306,10 @@ class Client(DirectObject):
             playerId = data.getUint32()
             x = data.getFloat32()
             y = data.getFloat32()
-            print(playerId, x, y)
-        clientId = data.getUint32()
-        print(clientId)
+            self.players.append(Player(x, y, 4))
+            self.world.attachCharacter(self.players[i].playerNP.node())
+        self.id = data.getUint32()
+        taskMgr.add(self.update, 'update')
 
     def readTask(self, task):
         while 1:

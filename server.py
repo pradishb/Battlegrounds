@@ -67,15 +67,16 @@ class Server(DirectObject):
         ## If you press Escape @ the server window, the server will quit.
         self.accept("escape", self.quit)
         self.lastConnection = None
-        self.clientInputDict = {}
         self.serverClock = 0
-        self.lobbyWaitTime = 10
+        self.lobbyWaitTime = 15
 
         self.randomValue = {}
 
         self.playerCount = 0
         self.listenStat = 1
         self.listPkg = PyDatagram()
+        self.clientInputList = PyDatagram()
+        self.clientInputList.addUint16(SERVER_INPUT)
         # Create network layer objects
 
         # Deals with the basic network stuff
@@ -102,7 +103,6 @@ class Server(DirectObject):
         # Start Read task
 
         taskMgr.add(self.readTask, "serverReadTask", -39)
-        #taskMgr.add(self.broadcastTask, "broadcastTask")
 
     def listenTask(self, task):
         """
@@ -141,6 +141,7 @@ class Server(DirectObject):
                     print("getNewConnection returned false")
             elif (self.listenStat ==  60 * self.lobbyWaitTime):
                 self.gameStart()
+                taskMgr.add(self.broadcastTask, "broadcastTask")
         return task.cont
 
     def readTask(self, task):
@@ -287,30 +288,28 @@ class Server(DirectObject):
         sys.exit()
 
     def clientInputHandler(self, msgID, data, client):
-        
         w = data.getBool()
         a = data.getBool()
         s = data.getBool()
         d = data.getBool()
         space = data.getBool()
         self.val = [w,a,s,d,space]
-        self.clientInputDict[client] = self.val
-        pkg = PyDatagram()
-        pkg.addUint16(SERVER_INPUT)
-        pkg.addBool(w)
-        pkg.addBool(a)
-        pkg.addBool(s)
-        pkg.addBool(d)
-        pkg.addBool(space)
-        self.cWriter.send(pkg,client)
+        self.clientInputList.addUint32(CLIENTS_ID[client])
+        self.clientInputList.addBool(w)
+        self.clientInputList.addBool(a)
+        self.clientInputList.addBool(s)
+        self.clientInputList.addBool(d)
+        self.clientInputList.addBool(space)
 
     def broadcastTask(self, task):
         print("Broadcasting. Server Clock = " + str(self.serverClock))
-        # for c in CLIENTS:
-        #     print(c)
-        # pkg = PyDatagram()
+
+        for c in CLIENTS:
+            self.cWriter.send(self.clientInputList, c)
+
+        self.clientInputList = PyDatagram()
+        self.clientInputList.addUint16(SERVER_INPUT)
         self.serverClock += 1
-        print()
         return task.cont
 
     #sabai krua boardcasting garnae ko lagi ho 
