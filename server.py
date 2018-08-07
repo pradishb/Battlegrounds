@@ -266,7 +266,6 @@ class Server(DirectObject):
         #print("Keyboard input from client : ",w,a,s,d,space)
         self.val = [w,a,s,d,space]
         self.clientInputDict[client] = self.val
-        print(self.clientInputDict[client],client)
         pkg = PyDatagram()
         pkg.addUint16(SERVER_INPUT)
         pkg.addBool(w)
