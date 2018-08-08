@@ -3,7 +3,6 @@ from pandac.PandaModules import *
 import direct.directbase.DirectStart
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
-
 from direct.gui.DirectGui import *
 import sys
 

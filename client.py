@@ -1,45 +1,19 @@
-from direct.showbase.DirectObject import DirectObject
 from pandac.PandaModules import *
-import direct.directbase.DirectStart
+from direct.showbase.DirectObject import DirectObject
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
-
-import direct.directbase.DirectStart
 from direct.showbase.InputStateGlobal import inputState
-from direct.showbase.DirectObject import DirectObject
-from panda3d.core import Vec3, BitMask32, GeoMipTerrain, AmbientLight, Vec4, DirectionalLight, Filename, PNMImage
-from panda3d.bullet import BulletWorld, BulletCapsuleShape
-from panda3d.bullet import BulletRigidBodyNode
 from panda3d.bullet import BulletDebugNode
-from panda3d.bullet import BulletHeightfieldShape
-from panda3d.bullet import ZUp
-from panda3d.bullet import BulletCharacterControllerNode
-from direct.actor.Actor import Actor, WindowProperties
 from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
+
+from game import Player, GameEngine
 import math
 import sys
-
-
-from direct.gui.DirectGui import *
-######################################3
-##
-## Config
-##
 
 IP = '127.0.0.1'
 PORT = 9099
 USERNAME = "yellow"
 PASSWORD = "mypass"
-
-######################################3
-##
-## Defines
-##
-## Quote Yellow: This are server opcodes. It tells the server
-## or client what pkt it is receiving. Ie if the pkt starts
-## with 3, the server knows he has to deal with a chat msg
-
-
 
 MSG_NONE = 0
 CMSG_AUTH = 1
@@ -52,44 +26,19 @@ CLIENT_INPUT = 7
 SERVER_INPUT = 8
 GAME_INITIALIZE = 9
 
-class Player():
-    def __init__(self, x, y, z):
-        shape = BulletCapsuleShape(.2, .6, ZUp)
-        self.playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
-        self.playerNode.setMaxJumpHeight(2.0)
-        self.playerNode.setJumpSpeed(4.0)
-        self.playerNP = render.attachNewNode(self.playerNode)
-        self.playerNP.setPos(x, y, z)
-        self.playerNP.setCollideMask(BitMask32.allOn())
-        self.playerModel = Actor('models/soldier.egg', {"idle": "models/soldier_ani_idle.egg",
-                                                        "walk": "models/soldier_ani_walk.egg"})
-        myTexture = loader.loadTexture("models/soldier_texture.png")
-        self.playerModel.setTexture(myTexture, 1)
-        self.playerModel.setH(90)
-        self.playerModel.setScale(.06)
-        self.playerModel.setZ(-.45)
-        self.playerModel.flattenLight()
-        self.playerModel.setLightOff()
-        self.playerModel.reparentTo(self.playerNP)
-
-class GameEngine():
-    def initCam(self):
-        base.cam.setHpr(-40, -40, 0)
-        base.cam.setPos(-25, -30, 30)
-
-
 class Client(DirectObject):
     def __init__(self):
-        ge = GameEngine()
-        ge.initCam()
+        self.gameEngine = GameEngine()
+        self.gameEngine.initCam()
         self.accept("escape", self.sendMsgDisconnectReq)
 
         self.gameStart = False
         self.myClock = 0
+        self.heading = 0
+        self.pitch = 40
         # Create network layer objects
         ## This is madatory code. Don't ask for now, just use it ;)
         ## If something is unclear, just ask.
-        base.setFrameRateMeter(True)
         self.accept('f1', self.toggleDebug)
         self.accept('escape', sys.exit, [0])
 
@@ -100,64 +49,7 @@ class Client(DirectObject):
         self.debugNode.showNormals(False)
         self.debugNP = render.attachNewNode(self.debugNode)
         self.debugNP.show()
-
-        # Light
-        self.alight = AmbientLight('ambientLight')
-        self.alight.setColor(Vec4(0.2, 0.2, 0.2, 1))
-        self.alightNP = render.attachNewNode(self.alight)
-
-        self.dlight = DirectionalLight('directionalLight')
-        self.dlight.setDirection(Vec3(1, 1, -1))
-        self.dlight.setColor(Vec4(0.7, 0.7, 0.7, 1))
-        self.dlightNP = render.attachNewNode(self.dlight)
-
-        render.clearLight()
-        render.setLight(self.alightNP)
-        render.setLight(self.dlightNP)
-
-        # World
-        self.world = BulletWorld()
-        self.world.setGravity(Vec3(0, 0, -9.81))
-        self.world.setDebugNode(self.debugNP.node())
-
-        # HeightField
-        self.height = 8.0
-        self.img = PNMImage(Filename('models/elevation.png'))
-        self.hshape = BulletHeightfieldShape(self.img, self.height, ZUp)
-        self.hnode = BulletRigidBodyNode('HGround')
-        self.hnode.addShape(self.hshape)
-        self.world.attachRigidBody(self.hnode)
-
-        # Terrian
-        terrain = GeoMipTerrain('terrain')
-        terrain.setHeightfield(self.img)
-
-        offset = self.img.getXSize() / 2.0 - 0.5
-        rootNP = terrain.getRoot()
-        rootNP.reparentTo(render)
-        rootNP.setSz(self.height)
-        rootNP.setPos(-offset, -offset, -self.height / 2.0)
-        terrain.generate()
-
-        self.speed = Vec3(0, 0, 0)
-        self.walk_speed = 1.5
-
-        self.players = []
-
-        # Camera
-        base.disableMouse()
-        props = WindowProperties()
-        props.setCursorHidden(True)
-        base.win.requestProperties(props)
-        self.heading = 0
-        self.pitch = 40
-
-        # Pointer
-        # imageObject = self.makeArc()
-        # imageObject.setSx(.02)
-        # imageObject.setSy(.02)
-        # imageObject.setSz(.02)
-        # imageObject.reparent_to(aspect2d)
+        self.gameEngine.world.setDebugNode(self.debugNP.node())
 
         inputState.watchWithModifiers('forward', 'w')
         inputState.watchWithModifiers('left', 'a')
@@ -173,26 +65,16 @@ class Client(DirectObject):
         self.Connection = self.cManager.openTCPClientConnection(IP, PORT, 1)
         self.cReader.addConnection(self.Connection)
 
-        # Start tasks
         taskMgr.add(self.readTask, "serverReaderPollTask", -39)
 
-        # Send login msg to the server
-        ## required to get the whole thing running.
         self.sendMsgAuth()
         self.serverWait = False
 
-    ########################################
-    ##
-    ## Addition:
-    ## If in doubt, don't change the following. Its working.
-    ## Here are the basic networking code pieces.
-    ## If you have questions, ask...
-    ##
     # player movement
 
     def processInput(self):
-        self.speed.setX(0)
-        self.speed.setY(0)
+        self.gameEngine.speed.setX(0)
+        self.gameEngine.speed.setY(0)
 
         inputList = [False] * 5
 
@@ -211,8 +93,8 @@ class Client(DirectObject):
 
     # player animation
     def animate(self):
-        for player in self.players:
-            if (self.speed.getX() == 0 and self.speed.getY() == 0):
+        for player in self.gameEngine.players:
+            if (self.gameEngine.speed.getX() == 0 and self.gameEngine.speed.getY() == 0):
                 if (player.playerModel.get_current_anim() != "idle"):
                     player.playerModel.loop("idle")
             else:
@@ -236,10 +118,10 @@ class Client(DirectObject):
 
         base.cam.setHpr(self.heading, self.pitch, 0)
 
-        self.players[self.id].playerNP.setH(self.heading)
-        base.cam.setX(self.players[self.id].playerNP.getX() + 3 * math.sin(math.pi / 180.0 * self.players[self.id].playerNP.getH()))
-        base.cam.setY(self.players[self.id].playerNP.getY() - 3 * math.cos(math.pi / 180.0 * self.players[self.id].playerNP.getH()))
-        base.cam.setZ(self.players[self.id].playerNP.getZ() - 0.05 * self.pitch + .7)
+        self.gameEngine.players[self.id].playerNP.setH(self.heading)
+        base.cam.setX(self.gameEngine.players[self.id].playerNP.getX() + 3 * math.sin(math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
+        base.cam.setY(self.gameEngine.players[self.id].playerNP.getY() - 3 * math.cos(math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
+        base.cam.setZ(self.gameEngine.players[self.id].playerNP.getZ() - 0.05 * self.pitch + .7)
 
     # Update
     def update(self, task):
@@ -248,7 +130,7 @@ class Client(DirectObject):
         if(not self.serverWait):
             self.processInput()
             self.animate()
-            self.world.doPhysics(dt)
+            self.gameEngine.world.doPhysics(dt)
             self.serverWait = True
         return task.cont
 
@@ -295,17 +177,17 @@ class Client(DirectObject):
             if(data.getRemainingSize() != 0):
                 playerId = data.getUint32()
                 if data.getBool():
-                    self.speed.setY(self.walk_speed)
+                    self.gameEngine.speed.setY(self.gameEngine.walk_speed)
                 if data.getBool():
-                    self.speed.setX(-self.walk_speed)
+                    self.gameEngine.speed.setX(-self.gameEngine.walk_speed)
                 if data.getBool():
-                    self.speed.setY(-self.walk_speed)
+                    self.gameEngine.speed.setY(-self.gameEngine.walk_speed)
                 if data.getBool():
-                    self.speed.setX(self.walk_speed)
+                    self.gameEngine.speed.setX(self.gameEngine.walk_speed)
                 if data.getBool():
                     print()
                     # playerNode.doJump()
-                self.players[playerId].playerNP.node().setLinearMovement(self.speed, True)
+                self.gameEngine.players[playerId].playerNP.node().setLinearMovement(self.gameEngine.speed, True)
             self.myClock += 1
             self.serverWait = False
 
@@ -315,8 +197,8 @@ class Client(DirectObject):
             playerId = data.getUint32()
             x = data.getFloat32()
             y = data.getFloat32()
-            self.players.append(Player(x, y, 4))
-            self.world.attachCharacter(self.players[i].playerNP.node())
+            self.gameEngine.players.append(Player(x, y, 4))
+            self.gameEngine.world.attachCharacter(self.gameEngine.players[i].playerNP.node())
         self.id = data.getUint32()
         taskMgr.add(self.update, 'update')
 
