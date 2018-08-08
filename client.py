@@ -118,7 +118,7 @@ class Client(DirectObject):
 
         base.cam.setHpr(self.heading, self.pitch, 0)
 
-        # self.gameEngine.players[self.id].playerNP.setH(self.heading)
+        self.gameEngine.players[self.id].playerNP.setH(self.heading)
         base.cam.setX(self.gameEngine.players[self.id].playerNP.getX() + 3 * math.sin(math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
         base.cam.setY(self.gameEngine.players[self.id].playerNP.getY() - 3 * math.cos(math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
         base.cam.setZ(self.gameEngine.players[self.id].playerNP.getZ() - 0.05 * self.pitch + .7)
@@ -167,8 +167,8 @@ class Client(DirectObject):
         pkg.addBool(inputArr[3])
         pkg.addBool(inputArr[4])
         pkg.addBool(inputArr[4])
-        pkg.addInt16(int(self.gameEngine.players[self.id].playerNP.getH()))
-        pkg.addInt16(int(self.gameEngine.players[self.id].playerNP.getP()))
+        # print('from Client No. ', self.id, ' : ', self.gameEngine.players[self.id].playerNP.getH())
+        pkg.addFloat64(self.gameEngine.players[self.id].playerNP.getH())
         # Now lets send the whole thing...
         self.send(pkg)
 
@@ -176,7 +176,9 @@ class Client(DirectObject):
         serverClock = data.getUint64()
         print('server clock is :', serverClock, 'my clock is :', self.myClock)
         if self.myClock == serverClock:
-            if(data.getRemainingSize() != 0):
+            pn = 0
+
+            while(data.getRemainingSize() != 0):
                 playerId = data.getUint32()
                 if data.getBool():
                     self.gameEngine.speed.setY(self.gameEngine.walk_speed)
@@ -189,11 +191,13 @@ class Client(DirectObject):
                 if data.getBool():
                     print()
                     # playerNode.doJump()
-                h = data.getInt16()
-                p = data.getInt16()
-                self.gameEngine.players[self.id].playerNP.setH(h)
-                self.gameEngine.players[self.id].playerNP.setP(p)
+                h = data.getFloat64()
+                print(data.getRemainingSize(), 'size got')
+                pn += 1
+
+                self.gameEngine.players[playerId].playerNP.setH(h)
                 self.gameEngine.players[playerId].playerNP.node().setLinearMovement(self.gameEngine.speed, True)
+            print(pn, 'people got')
             self.myClock += 1
             self.serverWait = False
 

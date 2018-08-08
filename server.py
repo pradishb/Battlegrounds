@@ -303,17 +303,16 @@ class Server(DirectObject):
             s = data.getBool()
             d = data.getBool()
             space = data.getBool()
-            h = data.getInt16()
-            p = data.getInt16()
-            self.val = [w, a, s, d, space, h, p]
+            h = data.getFloat64()
+            print('heading of', CLIENTS_ID[client],' is', h)
+            self.val = [w, a, s, d, space, h]
             self.clientInputList.addUint32(CLIENTS_ID[client])
             self.clientInputList.addBool(w)
             self.clientInputList.addBool(a)
             self.clientInputList.addBool(s)
             self.clientInputList.addBool(d)
             self.clientInputList.addBool(space)
-            self.clientInputList.addInt16(h)
-            self.clientInputList.addInt16(p)
+            self.clientInputList.addFloat64(h)
 
     def broadcastTask(self, task):
         if CLIENT_INPUT_RECEIVED.__len__() == CLIENTS.__len__():
