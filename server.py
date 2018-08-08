@@ -77,7 +77,6 @@ class Server(DirectObject):
         self.listPkg = PyDatagram()
         self.clientInputList = PyDatagram()
         self.clientInputList.addUint16(SERVER_INPUT)
-        self.clientInputList.addUint64(self.serverClock)
         # Create network layer objects
 
         # Deals with the basic network stuff
@@ -311,7 +310,6 @@ class Server(DirectObject):
         self.serverClock += 1
         self.clientInputList = PyDatagram()
         self.clientInputList.addUint16(SERVER_INPUT)
-        self.clientInputList.addUint64(self.serverClock)
         return task.cont
 
     #sabai krua boardcasting garnae ko lagi ho 
