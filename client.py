@@ -10,7 +10,7 @@ from game import Player, GameEngine
 import math
 import sys
 
-IP = '127.0.0.1'
+IP = '192.168.1.90'
 PORT = 9099
 USERNAME = "yellow"
 PASSWORD = "mypass"
