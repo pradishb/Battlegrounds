@@ -85,6 +85,7 @@ class Client(DirectObject):
         self.accept("escape", self.sendMsgDisconnectReq)
 
         self.gameStart = False
+        self.myClock = 0
         # Create network layer objects
         ## This is madatory code. Don't ask for now, just use it ;)
         ## If something is unclear, just ask.
@@ -277,10 +278,7 @@ class Client(DirectObject):
         pkg = PyDatagram()
 
         pkg.addUint16(CLIENT_INPUT)
-
-        # pkg.addString("hehehe")
-        # print(inputArr[0])
-        # val = phaser(inputArr[0], inputArr[1], inputArr[2], inputArr[3], inputArr[4])
+        pkg.addUint64(self.myClock)
         pkg.addBool(inputArr[0])
         pkg.addBool(inputArr[1])
         pkg.addBool(inputArr[2])
@@ -291,21 +289,25 @@ class Client(DirectObject):
         self.send(pkg)
 
     def serverInputHanlder(self, msgID, data):
-        if(data.getRemainingSize() != 0):
-            playerId = data.getUint32()
-            if data.getBool():
-                self.speed.setY(self.walk_speed)
-            if data.getBool():
-                self.speed.setX(-self.walk_speed)
-            if data.getBool():
-                self.speed.setY(-self.walk_speed)
-            if data.getBool():
-                self.speed.setX(self.walk_speed)
-            if data.getBool():
-                print()
-                # playerNode.doJump()
-            self.players[playerId].playerNP.node().setLinearMovement(self.speed, True)
-        self.serverWait = False
+        serverClock = data.getUint64()
+        print('server clock is :', serverClock, 'my clock is :', self.myClock)
+        if self.myClock == serverClock:
+            if(data.getRemainingSize() != 0):
+                playerId = data.getUint32()
+                if data.getBool():
+                    self.speed.setY(self.walk_speed)
+                if data.getBool():
+                    self.speed.setX(-self.walk_speed)
+                if data.getBool():
+                    self.speed.setY(-self.walk_speed)
+                if data.getBool():
+                    self.speed.setX(self.walk_speed)
+                if data.getBool():
+                    print()
+                    # playerNode.doJump()
+                self.players[playerId].playerNP.node().setLinearMovement(self.speed, True)
+            self.myClock += 1
+            self.serverWait = False
 
     def gameInitialize(self, msgID, data):
         playerCount = data.getUint32()
