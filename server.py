@@ -303,13 +303,17 @@ class Server(DirectObject):
             s = data.getBool()
             d = data.getBool()
             space = data.getBool()
-            self.val = [w,a,s,d,space]
+            h = data.getInt16()
+            p = data.getInt16()
+            self.val = [w, a, s, d, space, h, p]
             self.clientInputList.addUint32(CLIENTS_ID[client])
             self.clientInputList.addBool(w)
             self.clientInputList.addBool(a)
             self.clientInputList.addBool(s)
             self.clientInputList.addBool(d)
             self.clientInputList.addBool(space)
+            self.clientInputList.addInt16(h)
+            self.clientInputList.addInt16(p)
 
     def broadcastTask(self, task):
         if CLIENT_INPUT_RECEIVED.__len__() == CLIENTS.__len__():
@@ -324,7 +328,7 @@ class Server(DirectObject):
             CLIENT_INPUT_RECEIVED.clear()
 
         else:
-            print("Waiting for all inputs. Server Clock = " + str(self.serverClock), "remaining users = " + str(CLIENTS.__len__()-CLIENT_INPUT_RECEIVED.__len__()))
+            print("Waiting for all inputs. Server Clock = " + str(self.serverClock), "remaining users = " + str(CLIENTS.__len__() - CLIENT_INPUT_RECEIVED.__len__()))
 
         return task.cont
 

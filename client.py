@@ -118,7 +118,7 @@ class Client(DirectObject):
 
         base.cam.setHpr(self.heading, self.pitch, 0)
 
-        self.gameEngine.players[self.id].playerNP.setH(self.heading)
+        # self.gameEngine.players[self.id].playerNP.setH(self.heading)
         base.cam.setX(self.gameEngine.players[self.id].playerNP.getX() + 3 * math.sin(math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
         base.cam.setY(self.gameEngine.players[self.id].playerNP.getY() - 3 * math.cos(math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
         base.cam.setZ(self.gameEngine.players[self.id].playerNP.getZ() - 0.05 * self.pitch + .7)
@@ -166,7 +166,9 @@ class Client(DirectObject):
         pkg.addBool(inputArr[2])
         pkg.addBool(inputArr[3])
         pkg.addBool(inputArr[4])
-
+        pkg.addBool(inputArr[4])
+        pkg.addInt16(int(self.gameEngine.players[self.id].playerNP.getH()))
+        pkg.addInt16(int(self.gameEngine.players[self.id].playerNP.getP()))
         # Now lets send the whole thing...
         self.send(pkg)
 
@@ -187,6 +189,10 @@ class Client(DirectObject):
                 if data.getBool():
                     print()
                     # playerNode.doJump()
+                h = data.getInt16()
+                p = data.getInt16()
+                self.gameEngine.players[self.id].playerNP.setH(h)
+                self.gameEngine.players[self.id].playerNP.setP(p)
                 self.gameEngine.players[playerId].playerNP.node().setLinearMovement(self.gameEngine.speed, True)
             self.myClock += 1
             self.serverWait = False
