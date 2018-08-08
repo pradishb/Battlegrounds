@@ -6,6 +6,8 @@ from direct.showbase.InputStateGlobal import inputState
 from panda3d.bullet import BulletDebugNode
 from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
 
+from direct.gui.OnscreenText import OnscreenText
+
 from game import Player, GameEngine
 import math
 import sys
@@ -158,6 +160,7 @@ class Client(DirectObject):
             self.debugNP.hide()
 
     def sendUserInput(self, inputArr = [], *args):
+
         pkg = PyDatagram()
 
         pkg.addUint16(CLIENT_INPUT)
@@ -194,6 +197,7 @@ class Client(DirectObject):
             self.serverWait = False
 
     def gameInitialize(self, msgID, data):
+        self.gameEngine.textObject.destroy()
         playerCount = data.getUint32()
         for i in range(0, playerCount):
             playerId = data.getUint32()
@@ -327,8 +331,12 @@ class Client(DirectObject):
         ## be used. Of course you can do anything with "data". The
         ## raw print to console should only show a example.
         ##
-
-        print(data.getString())
+        msg = data.getString()
+        if (msg[:1] == '/'):
+            msg = msg.strip('/')
+            self.consoleCmdExecutor(msg)
+        else:
+            print(msg)
 
     def msgDisconnectAck(self, msgID, data):
 
@@ -359,6 +367,40 @@ class Client(DirectObject):
         self.cManager.closeConnection(self.Connection)
         sys.exit()
 
+    def consoleCmdExecutor(self,msg):
+        temp = []
+        temp = msg.split(' ')
+        switcher = {
+            'timeToStart': self.countdown,
+            'begin' : self.begin            #game startwas already takken
+            }
+        fucn = switcher.get(temp[0],"error")
+        fucn(temp[1])
+
+
+    def countdown(self,value):
+        self.gameEngine.textObject.setText(str(int(value)-1))
+
+    def error(self,value):
+        print("Invalid command for " + value)
+
+    def begin(self,value):
+        self.gameEngine.textObject.setText("Begin")
+        #x = 
+        #try:
+        #    switch():
+        #     switch(TimeUntilStart):
+        #except nosuchcommandexpet:
+        #    print
+        #except Exception as e:
+        #    print(e)
+
+
+        #print(Invalid h)
+        ##consoleCmdExecutor()
+        #throw ene
+        #self.gameEngine.textObject.setText(msg)
+        
 
 
 ######################################################################

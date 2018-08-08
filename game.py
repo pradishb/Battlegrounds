@@ -5,6 +5,8 @@ from panda3d.bullet import BulletCapsuleShape, BulletCharacterControllerNode, ZU
     BulletRigidBodyNode
 from panda3d.core import BitMask32
 
+from direct.gui.OnscreenText import OnscreenText
+
 
 class Player():
     def __init__(self, x, y, z):
@@ -72,6 +74,7 @@ class GameEngine():
         self.players = []
 
         # Camera
+        self.textObject  = OnscreenText(text = "Connected", pos =(0,0), scale = 0.5)
         base.disableMouse()
         props = WindowProperties()
         props.setCursorHidden(True)

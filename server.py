@@ -330,10 +330,15 @@ class Server(DirectObject):
 
         return task.cont
 
-    #sabai krua boardcasting garnae ko lagi ho 
     def broadcastMsg(self, msg):
         pkg = PyDatagram()
         pkg.addUint16(SMSG_CHAT)
+        if(self.timeToStart == 1 ):
+            msg = '/' + 'begin' + " " + msg
+        else:
+            msg = '/'+ 'timeToStart' + " " + msg
+
+        #remainingTime_
         pkg.addString(msg)
         # print(CLIENTS)
         for c in CLIENTS:
