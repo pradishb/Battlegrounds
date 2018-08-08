@@ -410,5 +410,6 @@ Handlers = {
 ##
 ## We need that loop. Otherwise it would run once and then quit.
 ##
-
-base.run()
+if __name__ == '__main__':
+	IP = input("Enter server's IP: ")
+	base.run()
