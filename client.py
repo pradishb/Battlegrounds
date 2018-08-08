@@ -10,7 +10,7 @@ from game import Player, GameEngine
 import math
 import sys
 
-IP = '192.168.1.90'
+IP = '127.0.0.1'
 PORT = 9099
 USERNAME = "yellow"
 PASSWORD = "mypass"
@@ -406,5 +406,6 @@ Handlers = {
 ##
 ## We need that loop. Otherwise it would run once and then quit.
 ##
-
-base.run()
+if __name__ == '__main__':
+	IP = input("Enter server's IP: ")
+	base.run()
