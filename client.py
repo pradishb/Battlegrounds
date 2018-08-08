@@ -72,9 +72,16 @@ class Player():
         self.playerModel.setLightOff()
         self.playerModel.reparentTo(self.playerNP)
 
+class GameEngine():
+    def initCam(self):
+        base.cam.setHpr(-40, -40, 0)
+        base.cam.setPos(-25, -30, 30)
+
 
 class Client(DirectObject):
     def __init__(self):
+        ge = GameEngine()
+        ge.initCam()
         self.accept("escape", self.sendMsgDisconnectReq)
 
         self.gameStart = False
