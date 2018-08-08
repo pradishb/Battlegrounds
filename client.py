@@ -78,6 +78,7 @@ class Client(DirectObject):
         self.accept("escape", self.sendMsgDisconnectReq)
 
         self.gameStart = False
+        self.myClock = 0
         # Create network layer objects
         ## This is madatory code. Don't ask for now, just use it ;)
         ## If something is unclear, just ask.
@@ -271,9 +272,7 @@ class Client(DirectObject):
 
         pkg.addUint16(CLIENT_INPUT)
 
-        # pkg.addString("hehehe")
-        # print(inputArr[0])
-        # val = phaser(inputArr[0], inputArr[1], inputArr[2], inputArr[3], inputArr[4])
+        pkg.addUint64(self.myClock)
         pkg.addBool(inputArr[0])
         pkg.addBool(inputArr[1])
         pkg.addBool(inputArr[2])
@@ -282,6 +281,7 @@ class Client(DirectObject):
 
         # Now lets send the whole thing...
         self.send(pkg)
+        self.myClock += 1
 
     def serverInputHanlder(self, msgID, data):
         if(data.getRemainingSize() != 0):
