@@ -3,9 +3,6 @@ from direct.showbase.DirectObject import DirectObject
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from direct.showbase.InputStateGlobal import inputState
-from panda3d.bullet import BulletDebugNode
-
-from direct.gui.OnscreenText import OnscreenText
 
 from game import Player, ClientGameEngine
 import math
