@@ -1,14 +1,12 @@
 import direct.directbase.DirectStart
 import math
-
 import sys
-from direct.actor.Actor import Actor, AmbientLight, Vec4, DirectionalLight, Vec3, PNMImage, Filename, WindowProperties, \
-    GeoMipTerrain
-from panda3d.bullet import BulletCapsuleShape, BulletCharacterControllerNode, ZUp, BulletWorld, BulletHeightfieldShape, \
-    BulletRigidBodyNode, BulletDebugNode
+from direct.actor.Actor import Actor, AmbientLight, Vec4, DirectionalLight, Vec3, PNMImage, Filename, WindowProperties, GeoMipTerrain
+from panda3d.bullet import BulletCapsuleShape, BulletCharacterControllerNode, ZUp, BulletWorld, BulletHeightfieldShape, BulletRigidBodyNode, BulletDebugNode
 from panda3d.core import BitMask32
 
-from direct.gui.OnscreenText import OnscreenText, LineSegs, deg2Rad, NodePath
+from direct.gui.OnscreenText import OnscreenText
+from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
 
 
 class Player():
@@ -110,8 +108,14 @@ class ClientGameEngine(GameEngine):
         render.setLight(self.alightNP)
         render.setLight(self.dlightNP)
 
+        # Pointer
+        self.pointer = self.makeArc()
+        self.pointer.setSx(.02)
+        self.pointer.setSy(.02)
+        self.pointer.setSz(.02)
+
         #Onscreentext
-        self.textObject = OnscreenText(text="Connected", pos=(0, 0), scale=0.5)
+        self.textObject = OnscreenText(text="No Connection", pos=(0, 0), scale=0.5)
 
     # player animation
     def animate(self, player, xSpeed, ySpeed):
@@ -122,17 +126,16 @@ class ClientGameEngine(GameEngine):
             if (player.playerModel.get_current_anim() != "walk"):
                 player.playerModel.loop("walk")
 
-    def makeArc(angleDegrees=360, numSteps=16):
+    def makeArc(self, angleDegrees=360, numSteps=16):
         ls = LineSegs()
-
         angleRadians = deg2Rad(angleDegrees)
-
         for i in range(numSteps + 1):
             a = angleRadians * i / numSteps
             y = math.sin(a)
             x = math.cos(a)
-
             ls.drawTo(x, 0, y)
-
         node = ls.create()
         return NodePath(node)
+
+    def showPointer(self):
+        self.pointer.reparent_to(aspect2d)

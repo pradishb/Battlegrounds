@@ -147,6 +147,7 @@ class Client(DirectObject):
             y = data.getFloat32()
             self.gameEngine.players.append(Player(x, y, 4))
             self.gameEngine.world.attachCharacter(self.gameEngine.players[i].playerNP.node())
+        self.gameEngine.showPointer()
         self.id = data.getUint32()
         taskMgr.add(self.update, 'update')
         self.serverWait = False
