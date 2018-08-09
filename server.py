@@ -325,8 +325,6 @@ class Server(DirectObject):
                 player = self.gameEngine.players[CLIENTS_ID[client]].playerNP
                 player.setH(h)
                 player.node().setLinearMovement(self.gameEngine.speed, True)
-                self.gameEngine.speed.setX(0)
-                self.gameEngine.speed.setY(0)
 
                 self.val = [w, a, s, d, space, h]
                 self.clientInputList.addUint32(CLIENTS_ID[client])
@@ -334,7 +332,10 @@ class Server(DirectObject):
                 self.clientInputList.addFloat32(player.getY())
                 self.clientInputList.addFloat32(player.getZ())
                 self.clientInputList.addFloat32(player.getH())
-
+                self.clientInputList.addFloat32(self.gameEngine.speed.getX())
+                self.clientInputList.addFloat32(self.gameEngine.speed.getY())
+                self.gameEngine.speed.setX(0)
+                self.gameEngine.speed.setY(0)
 
     def broadcastTask(self, task):
         if CLIENT_INPUT_RECEIVED.__len__() == CLIENTS.__len__():
@@ -354,21 +355,6 @@ class Server(DirectObject):
             # print("Waiting for all inputs. Server Clock = " + str(self.serverClock), "remaining users = " + str(CLIENTS.__len__() - CLIENT_INPUT_RECEIVED.__len__()))
 
         return task.cont
-
-    def broadcastMsg(self, msg):
-        pkg = PyDatagram()
-        pkg.addUint16(SMSG_CHAT)
-        if(self.timeToStart == 1 ):
-            msg = '/' + 'begin' + " " + msg
-        else:
-            msg = '/'+ 'timeToStart' + " " + msg
-
-        #remainingTime_
-        pkg.addString(msg)
-        # print(CLIENTS)
-        for c in CLIENTS:
-            # print(c)
-            self.cWriter.send(pkg,c)
 
     #to send game's initial stats
     def gameStart(self):
@@ -397,6 +383,21 @@ class Server(DirectObject):
         dt = globalClock.getDt()
         self.gameEngine.world.doPhysics(dt)
         return task.cont
+
+    def broadcastMsg(self, msg):
+        pkg = PyDatagram()
+        pkg.addUint16(SMSG_CHAT)
+        if(self.timeToStart == 1 ):
+            msg = '/' + 'begin' + " " + msg
+        else:
+            msg = '/'+ 'timeToStart' + " " + msg
+
+        #remainingTime_
+        pkg.addString(msg)
+        # print(CLIENTS)
+        for c in CLIENTS:
+            # print(c)
+            self.cWriter.send(pkg,c)
 
 # create a server object on port 9099
 serverHandler = Server()

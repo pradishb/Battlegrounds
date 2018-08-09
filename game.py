@@ -115,14 +115,13 @@ class ClientGameEngine(GameEngine):
         self.textObject = OnscreenText(text="Connected", pos=(0, 0), scale=0.5)
 
     # player animation
-    def animate(self):
-        for player in self.players:
-            if (self.speed.getX() == 0 and self.speed.getY() == 0):
-                if (player.playerModel.get_current_anim() != "idle"):
-                    player.playerModel.loop("idle")
-            else:
-                if (player.playerModel.get_current_anim() != "walk"):
-                    player.playerModel.loop("walk")
+    def animate(self, player, xSpeed, ySpeed):
+        if (xSpeed == 0 and ySpeed == 0):
+            if (player.playerModel.get_current_anim() != "idle"):
+                player.playerModel.loop("idle")
+        else:
+            if (player.playerModel.get_current_anim() != "walk"):
+                player.playerModel.loop("walk")
 
     def makeArc(angleDegrees=360, numSteps=16):
         ls = LineSegs()

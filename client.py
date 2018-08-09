@@ -101,7 +101,6 @@ class Client(DirectObject):
         self.moveCamera()
         if(not self.serverWait):
             self.processInput()
-            self.gameEngine.animate()
             self.serverWait = True
         return task.cont
 
@@ -130,6 +129,11 @@ class Client(DirectObject):
                 h = data.getFloat32()
                 if(playerId != self.id):
                     player.setH(h)
+
+                xSpeed = data.getFloat32()
+                ySpeed = data.getFloat32()
+                self.gameEngine.animate(self.gameEngine.players[playerId], xSpeed, ySpeed)
+
 
             self.myClock += 1
             self.serverWait = False
