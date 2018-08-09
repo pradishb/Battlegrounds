@@ -325,6 +325,8 @@ class Server(DirectObject):
                 player = self.gameEngine.players[CLIENTS_ID[client]].playerNP
                 player.setH(h)
                 player.node().setLinearMovement(self.gameEngine.speed, True)
+                self.gameEngine.speed.setX(0)
+                self.gameEngine.speed.setY(0)
 
                 self.val = [w, a, s, d, space, h]
                 self.clientInputList.addUint32(CLIENTS_ID[client])
