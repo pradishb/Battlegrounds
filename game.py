@@ -3,9 +3,8 @@ import math
 import sys
 from direct.actor.Actor import Actor, AmbientLight, Vec4, DirectionalLight, Vec3, PNMImage, Filename, WindowProperties, GeoMipTerrain
 from panda3d.bullet import BulletCapsuleShape, BulletCharacterControllerNode, ZUp, BulletWorld, BulletHeightfieldShape, \
-    BulletRigidBodyNode, BulletDebugNode, BulletTriangleMesh, BulletTriangleMeshShape, BulletSphereShape, \
-    BulletConvexHullShape
-from panda3d.core import BitMask32
+    BulletRigidBodyNode, BulletDebugNode, BulletSphereShape
+from panda3d.core import BitMask32, ClockObject
 
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
@@ -31,19 +30,29 @@ class Player():
         self.playerModel.flattenLight()
         self.playerModel.setLightOff()
         self.playerModel.reparentTo(self.playerNP)
-        # print('joints are', self.playerModel.list_joints())
-        # self.playerModel.enableBlend()
+
         self.playerModel.makeSubpart("legs", ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg",])
         self.playerModel.makeSubpart("hips", ["mixamorig:Hips"], ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg", "mixamorig:Spine"])
         self.playerModel.makeSubpart("upperBody", ["mixamorig:Spine"])
-        # self.playerModel.loop("walk", partName="legs")
-        # self.playerModel.loop("idle", partName="hips")
-        # self.playerModel.pose("pistol", 0, partName="upperBody")
+        self.playerSpine = self.playerModel.controlJoint(None, 'modelRoot', 'mixamorig:Spine')
+
+        base.taskMgr.add(self.bendBody, "bendBody")
+
+    def clamp(i, mn=-100, mx=100):
+        return min(max(i, mn), mx)
+
+    def bendBody(self, task):
+        if base.mouseWatcherNode.hasMouse():
+            self.playerSpine.setP(base.cam.getP() * 1.5)
+        return task.cont
+
 
 
 class GameEngine():
     def __init__(self):
         base.setFrameRateMeter(True)
+        globalClock.setFrameRate(60)
+        globalClock.setMode(ClockObject.MLimited)
 
         base.accept('f1', self.toggleDebug)
         base.accept('escape', sys.exit, [0])
