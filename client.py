@@ -88,6 +88,14 @@ class Client(DirectObject):
             elif (self.pitch > 45.0):
                 self.pitch = 45.0
 
+        self.gameEngine.players[self.id].playerNP.setH(self.heading)
+        base.cam.setHpr(self.heading, self.pitch, 0)
+        base.cam.setX(self.gameEngine.players[self.id].playerNP.getX() + 3 * math.sin(
+            math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
+        base.cam.setY(self.gameEngine.players[self.id].playerNP.getY() - 3 * math.cos(
+            math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
+        base.cam.setZ(self.gameEngine.players[self.id].playerNP.getZ() - 0.05 * self.pitch + .7)
+
     # Update
     def update(self, task):
         self.moveCamera()
@@ -107,8 +115,6 @@ class Client(DirectObject):
         pkg.addBool(inputArr[3])
         pkg.addBool(inputArr[4])
         pkg.addFloat32(self.heading % 360)
-        pkg.addFloat32(self.gameEngine.players[0].playerNP.getX())
-        pkg.addFloat32(self.gameEngine.players[0].playerNP.getY())
         # Now lets send the whole thing...
         self.send(pkg)
 
@@ -121,14 +127,10 @@ class Client(DirectObject):
                 player.setX(data.getFloat32())
                 player.setY(data.getFloat32())
                 player.setZ(data.getFloat32())
-                player.setH(data.getFloat32())
+                h = data.getFloat32()
+                if(playerId != self.id):
+                    player.setH(h)
 
-            base.cam.setHpr(self.heading, self.pitch, 0)
-            base.cam.setX(self.gameEngine.players[self.id].playerNP.getX() + 3 * math.sin(
-                math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
-            base.cam.setY(self.gameEngine.players[self.id].playerNP.getY() - 3 * math.cos(
-                math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
-            base.cam.setZ(self.gameEngine.players[self.id].playerNP.getZ() - 0.05 * self.pitch + .7)
             self.myClock += 1
             self.serverWait = False
 

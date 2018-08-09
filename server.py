@@ -1,9 +1,7 @@
 from direct.showbase.DirectObject import DirectObject
 from pandac.PandaModules import *
-import direct.directbase.DirectStart
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
-from direct.gui.DirectGui import *
 import sys
 from game import GameEngine, Player
 
@@ -70,8 +68,6 @@ class Server(DirectObject):
         DirectObject.__init__(self)
         self.gameEngine = GameEngine()
 
-        self.X = 0
-        self.Y = 0
         ## If you press Escape @ the server window, the server will quit.
         self.accept("escape", self.quit)
         self.lastConnection = None
@@ -313,19 +309,6 @@ class Server(DirectObject):
                 d = data.getBool()
                 space = data.getBool()
                 h = data.getFloat32()
-                x = data.getFloat32()
-                y = data.getFloat32()
-
-                if self.X == 0 and self.Y == 0:
-                    self.X = x
-                    self.Y = y
-                else:
-                    print('X = ', self.X, 'x =', x, 'Y', self.Y, 'y = ', y)
-                    if self.X == x and self.Y == y:
-                        print('stated synced at', self.serverClock)
-                    else:
-                        print('STATE NOT SYNCED `AT ', self.serverClock)
-
 
                 if w:
                     self.gameEngine.speed.setY(self.gameEngine.walk_speed)
