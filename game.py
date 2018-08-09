@@ -115,7 +115,10 @@ class ClientGameEngine(GameEngine):
         self.pointer.setSz(.02)
 
         #Onscreentext
-        self.textObject = OnscreenText(text="No Connection", pos=(0, 0), scale=0.5)
+        font = loader.loadFont('./fonts/neuropol.ttf')
+        font.setPixelsPerUnit(60)
+        self.textObject = OnscreenText(text="No Connection", pos=(0, 0), font=font, scale=0.25, fg=(255, 255, 255, 255))
+        self.textObject.setColor(255, 255, 255, 255)
 
     # player animation
     def animate(self, player, xSpeed, ySpeed):

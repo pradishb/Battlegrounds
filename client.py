@@ -47,11 +47,11 @@ class Client(DirectObject):
         self.cWriter = ConnectionWriter(self.cManager, 0)
 
         self.Connection = self.cManager.openTCPClientConnection(IP, PORT, 1)
-        self.cReader.addConnection(self.Connection)
 
-        taskMgr.add(self.readTask, "serverReaderPollTask", -39)
-
-        self.sendMsgAuth()
+        if(self.Connection):
+            self.cReader.addConnection(self.Connection)
+            taskMgr.add(self.readTask, "serverReaderPollTask", -39)
+            self.sendMsgAuth()
         self.serverWait = True
 
     # player inputs
