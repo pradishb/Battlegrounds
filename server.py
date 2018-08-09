@@ -72,7 +72,7 @@ class Server(DirectObject):
         self.accept("escape", self.quit)
         self.lastConnection = None
         self.serverClock = 0
-        self.lobbyWaitTime = 10
+        self.lobbyWaitTime = 1
 
         self.randomValue = {}
 
@@ -364,7 +364,7 @@ class Server(DirectObject):
         for client in CLIENTS:
             x = random.randint(1,5)
             y = random.randint(1,5)
-            self.gameEngine.players.append(Player(x, y, 4))
+            self.gameEngine.players.append(Player(x, y, 10))
             self.gameEngine.world.attachCharacter(self.gameEngine.players[CLIENTS_ID[client]].playerNP.node())
             ranValPkg.addUint32(CLIENTS_ID[client])
             ranValPkg.addFloat32(x)
