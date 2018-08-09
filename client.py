@@ -4,11 +4,10 @@ from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from direct.showbase.InputStateGlobal import inputState
 from panda3d.bullet import BulletDebugNode
-from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
 
 from direct.gui.OnscreenText import OnscreenText
 
-from game import Player, GameEngine
+from game import Player, ClientGameEngine
 import math
 import sys
 
@@ -30,28 +29,14 @@ GAME_INITIALIZE = 9
 
 class Client(DirectObject):
     def __init__(self):
-        self.gameEngine = GameEngine()
-        self.gameEngine.initCam()
+        DirectObject.__init__(self)
+        self.gameEngine = ClientGameEngine()
         self.accept("escape", self.sendMsgDisconnectReq)
 
         self.gameStart = False
         self.myClock = 0
         self.heading = 0
         self.pitch = 40
-        # Create network layer objects
-        ## This is madatory code. Don't ask for now, just use it ;)
-        ## If something is unclear, just ask.
-        self.accept('f1', self.toggleDebug)
-        self.accept('escape', sys.exit, [0])
-
-        self.debugNode = BulletDebugNode('Debug')
-        self.debugNode.showWireframe(True)
-        self.debugNode.showConstraints(True)
-        self.debugNode.showBoundingBoxes(False)
-        self.debugNode.showNormals(False)
-        self.debugNP = render.attachNewNode(self.debugNode)
-        self.debugNP.show()
-        self.gameEngine.world.setDebugNode(self.debugNP.node())
 
         inputState.watchWithModifiers('forward', 'w')
         inputState.watchWithModifiers('left', 'a')
@@ -70,16 +55,13 @@ class Client(DirectObject):
         taskMgr.add(self.readTask, "serverReaderPollTask", -39)
 
         self.sendMsgAuth()
-        self.serverWait = False
+        self.serverWait = True
 
-    # player movement
-
+    # player inputs
     def processInput(self):
         self.gameEngine.speed.setX(0)
         self.gameEngine.speed.setY(0)
-
         inputList = [False] * 5
-
         if inputState.isSet('forward'):
             inputList[0] = True
         if inputState.isSet('left'):
@@ -93,20 +75,8 @@ class Client(DirectObject):
             inputList[4] = True
         self.sendUserInput(inputList)
 
-    # player animation
-    def animate(self):
-        for player in self.gameEngine.players:
-            if (self.gameEngine.speed.getX() == 0 and self.gameEngine.speed.getY() == 0):
-                if (player.playerModel.get_current_anim() != "idle"):
-                    player.playerModel.loop("idle")
-            else:
-                if (player.playerModel.get_current_anim() != "walk"):
-                    player.playerModel.loop("walk")
-
     def moveCamera(self):
-
         md = base.win.getPointer(0)
-
         x = md.getX()
         y = md.getY()
 
@@ -120,41 +90,15 @@ class Client(DirectObject):
 
     # Update
     def update(self, task):
-        dt = globalClock.getDt()
         self.moveCamera()
         if(not self.serverWait):
             self.processInput()
-            self.animate()
-            self.gameEngine.world.doPhysics(dt)
+            self.gameEngine.animate()
             self.serverWait = True
         return task.cont
 
-    def makeArc(angleDegrees=360, numSteps=16):
-        ls = LineSegs()
-
-        angleRadians = deg2Rad(angleDegrees)
-
-        for i in range(numSteps + 1):
-            a = angleRadians * i / numSteps
-            y = math.sin(a)
-            x = math.cos(a)
-
-            ls.drawTo(x, 0, y)
-
-        node = ls.create()
-        return NodePath(node)
-
-    # Debug
-    def toggleDebug(self):
-        if self.debugNP.isHidden():
-            self.debugNP.show()
-        else:
-            self.debugNP.hide()
-
     def sendUserInput(self, inputArr = [], *args):
-
         pkg = PyDatagram()
-
         pkg.addUint16(CLIENT_INPUT)
         pkg.addUint64(self.myClock)
         pkg.addBool(inputArr[0])
@@ -163,6 +107,8 @@ class Client(DirectObject):
         pkg.addBool(inputArr[3])
         pkg.addBool(inputArr[4])
         pkg.addFloat32(self.heading % 360)
+        pkg.addFloat32(self.gameEngine.players[0].playerNP.getX())
+        pkg.addFloat32(self.gameEngine.players[0].playerNP.getY())
         # Now lets send the whole thing...
         self.send(pkg)
 
@@ -171,20 +117,11 @@ class Client(DirectObject):
         if self.myClock == serverClock:
             while(data.getRemainingSize() != 0):
                 playerId = data.getUint32()
-                if data.getBool():
-                    self.gameEngine.speed.setY(self.gameEngine.walk_speed)
-                if data.getBool():
-                    self.gameEngine.speed.setX(-self.gameEngine.walk_speed)
-                if data.getBool():
-                    self.gameEngine.speed.setY(-self.gameEngine.walk_speed)
-                if data.getBool():
-                    self.gameEngine.speed.setX(self.gameEngine.walk_speed)
-                if data.getBool():
-                    print()
-                    # playerNode.doJump()
-                h = data.getFloat32()
-                self.gameEngine.players[playerId].playerNP.setH(h)
-                self.gameEngine.players[playerId].playerNP.node().setLinearMovement(self.gameEngine.speed, True)
+                player = self.gameEngine.players[playerId].playerNP
+                player.setX(data.getFloat32())
+                player.setY(data.getFloat32())
+                player.setZ(data.getFloat32())
+                player.setH(data.getFloat32())
 
             base.cam.setHpr(self.heading, self.pitch, 0)
             base.cam.setX(self.gameEngine.players[self.id].playerNP.getX() + 3 * math.sin(
@@ -206,6 +143,7 @@ class Client(DirectObject):
             self.gameEngine.world.attachCharacter(self.gameEngine.players[i].playerNP.node())
         self.id = data.getUint32()
         taskMgr.add(self.update, 'update')
+        self.serverWait = False
 
     def readTask(self, task):
         while 1:
@@ -258,58 +196,18 @@ class Client(DirectObject):
         return
 
     def sendMsgAuth(self):
-
-        #########################################################
-        ##
-        ## This handles the sending of the auth request.
-        ##
-
-        ## 1st. We need to create a buffer 
-
         pkg = PyDatagram()
-
-        ## 2nd. We put a UInt16 type Number in it. Here its CMSG_AUTH
-        ## what means that the corresponding Value is "1"
         pkg.addUint16(CMSG_AUTH)
-
-        ## 3rd. We add the username to the buffer after the UInt.
         pkg.addString(USERNAME)
-
-        ## 4th. We add the password for the username after the username
         pkg.addString(PASSWORD)
-
-        ## Now that we have a Buffer consisting of a Number and 2 Strings
-        ## we can send it.
         self.send(pkg)
 
     def sendMsgDisconnectReq(self):
-        #####################################################
-        ##
-        ## This is not used right now, but can be used to tell the
-        ## server that the client is disconnecting cleanly.
-        ##
         pkg = PyDatagram()
-
-        ## Will be a short paket... we are just sending
-        ## the Code for disconnecting. The server doesn't
-        ## need more information anyways...
         pkg.addUint16(CMSG_DISCONNECT_REQ)
         self.send(pkg)
 
     def msgAuthResponse(self, msgID, data):
-
-        ##################################################
-        ##
-        ## Here we are going to compare the auth response
-        ## we got from the server. Yellow kept it short, but
-        ## if the server sends a 0 here, it means, the User
-        ## doesn't exist. 1 means: user/pwd combination
-        ## successfull. If the server sends a 2: Wrong PWD.
-        ## Note that its a security risk to do so. That way
-        ## you can easily spy for existing users and then
-        ## check for their passwords, but its a good example
-        ## to show, how what is working.
-
         flag = data.getUint32()
         if flag == 0:
             print("Unknown user")
@@ -321,15 +219,6 @@ class Client(DirectObject):
             print("Authentication Successfull")
 
     def msgChat(self, msgID, data):
-
-        ##########################################################
-        ##
-        ## Here comes the interaction with the data sent from the server...
-        ## Due to the fact that the server does not send any data the
-        ## client could display, its only here to show you how it COULD
-        ## be used. Of course you can do anything with "data". The
-        ## raw print to console should only show a example.
-        ##
         msg = data.getString()
         if (msg[:1] == '/'):
             msg = msg.strip('/')
@@ -338,25 +227,7 @@ class Client(DirectObject):
             print(msg)
 
     def msgDisconnectAck(self, msgID, data):
-
-        ###########################################################
-        ##
-        ## If the server sends a "close" command to the client, this
-        ## would be handled here. Due to the fact that he doesn't do
-        ## that, its just another example that does show what would
-        ## be an example about how to do it. I would be careful with
-        ## the example given here... In that case everything a potential
-        ## unfriendly person needs to do is sending you a paket with a
-        ## 6 in it coming from the server (not sure if it even needs to
-        ## be from the server) the application will close... You might
-        ## want to do a double checking with the server again to ensure
-        ## that he sent you the paket... But thats just a advice ;)
-        ##
-
-        ## telling the Manager to close the connection
         self.cManager.closeConnection(self.Connection)
-
-        ## saying good bye
         sys.exit()
 
     def send(self, pkg):
@@ -385,38 +256,8 @@ class Client(DirectObject):
 
     def begin(self,value):
         self.gameEngine.textObject.setText("Begin")
-        #x = 
-        #try:
-        #    switch():
-        #     switch(TimeUntilStart):
-        #except nosuchcommandexpet:
-        #    print
-        #except Exception as e:
-        #    print(e)
-
-
-        #print(Invalid h)
-        ##consoleCmdExecutor()
-        #throw ene
-        #self.gameEngine.textObject.setText(msg)
-        
-
-
-######################################################################
-##
-## OK! After all of this preparation lets create a Instance of the
-## Client Class created above. Call it as you wish. Make sure that you
-## use the right Instance name in the dictionary "Handlers" as well...
-##
 
 aClient = Client()
-
-######################################################################
-##
-## That is the second piece of code from the
-## def handleDatagram(self, data, msgID): - Method. If you have
-## trouble understanding this, please ask.
-##
 
 Handlers = {
     SMSG_AUTH_RESPONSE: aClient.msgAuthResponse,
@@ -426,23 +267,6 @@ Handlers = {
     GAME_INITIALIZE: aClient.gameInitialize,
 }
 
-#######################################################################
-##
-## As Examples for other Instance names:
-##
-## justAExample = Client()
-##
-## Handlers = {
-##    SMSG_AUTH_RESPONSE  : justAExample.msgAuthResponse,
-##    SMSG_CHAT           : justAExample.msgChat,
-##    SMSG_DISCONNECT_ACK : justAExample.msgDisconnectAck,
-##    }
-
-
-########################################################################
-##
-## We need that loop. Otherwise it would run once and then quit.
-##
 if __name__ == '__main__':
     # IP = input("Enter server's IP: ")
     base.run()

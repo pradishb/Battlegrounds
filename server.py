@@ -5,6 +5,7 @@ from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from direct.gui.DirectGui import *
 import sys
+from game import GameEngine, Player
 
 import random 
 ######################################3
@@ -47,6 +48,8 @@ USERS = {
     'tester': 'anotherpass'
 }
 
+
+
 ###################################################################
 ##
 ## Creating a dictionary for the clients. Thats how we can adress
@@ -64,6 +67,11 @@ CLIENT_INPUT_RECEIVED = []
 class Server(DirectObject):
 
     def __init__(self):
+        DirectObject.__init__(self)
+        self.gameEngine = GameEngine()
+
+        self.X = 0
+        self.Y = 0
         ## If you press Escape @ the server window, the server will quit.
         self.accept("escape", self.quit)
         self.lastConnection = None
@@ -291,42 +299,74 @@ class Server(DirectObject):
     def clientInputHandler(self, msgID, data, client):
         found = False
         clientClock = data.getUint64()
-        print('my time is', self.serverClock, 'client clock is', clientClock)
-        for c in CLIENT_INPUT_RECEIVED:
-            if c == client:
-                found = True
-                break
-        if not found:
-            CLIENT_INPUT_RECEIVED.append(client)
-            w = data.getBool()
-            a = data.getBool()
-            s = data.getBool()
-            d = data.getBool()
-            space = data.getBool()
-            h = data.getFloat32()
-            self.val = [w, a, s, d, space, h]
-            self.clientInputList.addUint32(CLIENTS_ID[client])
-            self.clientInputList.addBool(w)
-            self.clientInputList.addBool(a)
-            self.clientInputList.addBool(s)
-            self.clientInputList.addBool(d)
-            self.clientInputList.addBool(space)
-            self.clientInputList.addFloat32(h)
+        # print('my time is', self.serverClock, 'client clock is', clientClock)
+        if clientClock == self.serverClock:
+            for c in CLIENT_INPUT_RECEIVED:
+                if c == client:
+                    found = True
+                    break
+            if not found:
+                CLIENT_INPUT_RECEIVED.append(client)
+                w = data.getBool()
+                a = data.getBool()
+                s = data.getBool()
+                d = data.getBool()
+                space = data.getBool()
+                h = data.getFloat32()
+                x = data.getFloat32()
+                y = data.getFloat32()
+
+                if self.X == 0 and self.Y == 0:
+                    self.X = x
+                    self.Y = y
+                else:
+                    print('X = ', self.X, 'x =', x, 'Y', self.Y, 'y = ', y)
+                    if self.X == x and self.Y == y:
+                        print('stated synced at', self.serverClock)
+                    else:
+                        print('STATE NOT SYNCED `AT ', self.serverClock)
+
+
+                if w:
+                    self.gameEngine.speed.setY(self.gameEngine.walk_speed)
+                if a:
+                    self.gameEngine.speed.setX(-self.gameEngine.walk_speed)
+                if s:
+                    self.gameEngine.speed.setY(-self.gameEngine.walk_speed)
+                if d:
+                    self.gameEngine.speed.setX(self.gameEngine.walk_speed)
+                if space:
+                    pass
+                    # playerNode.doJump()
+
+                player = self.gameEngine.players[CLIENTS_ID[client]].playerNP
+                player.setH(h)
+                player.node().setLinearMovement(self.gameEngine.speed, True)
+
+                self.val = [w, a, s, d, space, h]
+                self.clientInputList.addUint32(CLIENTS_ID[client])
+                self.clientInputList.addFloat32(player.getX())
+                self.clientInputList.addFloat32(player.getY())
+                self.clientInputList.addFloat32(player.getZ())
+                self.clientInputList.addFloat32(player.getH())
+
 
     def broadcastTask(self, task):
         if CLIENT_INPUT_RECEIVED.__len__() == CLIENTS.__len__():
-            print("Broadcasting. Server Clock = " + str(self.serverClock))
+            # print("Broadcasting. Server Clock = " + str(self.serverClock))
             for c in CLIENTS:
                 self.cWriter.send(self.clientInputList, c)
 
             self.serverClock += 1
+            self.X = self.Y = 0
             self.clientInputList = PyDatagram()
             self.clientInputList.addUint16(SERVER_INPUT)
             self.clientInputList.addUint64(self.serverClock)
             CLIENT_INPUT_RECEIVED.clear()
 
         else:
-            print("Waiting for all inputs. Server Clock = " + str(self.serverClock), "remaining users = " + str(CLIENTS.__len__() - CLIENT_INPUT_RECEIVED.__len__()))
+            pass
+            # print("Waiting for all inputs. Server Clock = " + str(self.serverClock), "remaining users = " + str(CLIENTS.__len__() - CLIENT_INPUT_RECEIVED.__len__()))
 
         return task.cont
 
@@ -351,15 +391,27 @@ class Server(DirectObject):
         ranValPkg.addUint16(GAME_INITIALIZE)
         ranValPkg.addUint32(self.playerCount) 
         for client in CLIENTS:
+            x = random.randint(1,5)
+            y = random.randint(1,5)
+            self.gameEngine.players.append(Player(x, y, 4))
+            self.gameEngine.world.attachCharacter(self.gameEngine.players[CLIENTS_ID[client]].playerNP.node())
             ranValPkg.addUint32(CLIENTS_ID[client])
-            ranValPkg.addFloat32(random.randint(1,5))
-            ranValPkg.addFloat32(random.randint(1,5))
+            ranValPkg.addFloat32(x)
+            ranValPkg.addFloat32(y)
         for client in CLIENTS:
             temp = ranValPkg.__copy__()
             temp.addUint32(CLIENTS_ID[client])
             print(CLIENTS_ID[client])
             self.cWriter.send(temp, client)
+
+        taskMgr.add(self.update, 'update')
         print("Starting game...")
+
+    # Update
+    def update(self, task):
+        dt = globalClock.getDt()
+        self.gameEngine.world.doPhysics(dt)
+        return task.cont
 
 # create a server object on port 9099
 serverHandler = Server()
