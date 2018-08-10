@@ -9,7 +9,7 @@ class Animation:
             self.player.playerModel.loop("idle", partName="legs")
             self.player.playerModel.loop("idle", partName="hips")
             self.player.playerModel.pose("pistol", 0, partName="upperBody")
-        elif xSpeed != 0 or ySpeed != 0 and self.current != "pistol walk":
+        elif (xSpeed != 0 or ySpeed != 0) and self.current != "pistol walk":
             self.current = "pistol walk"
             self.player.playerModel.loop("walk", partName="legs")
             self.player.playerModel.loop("idle", partName="hips")
