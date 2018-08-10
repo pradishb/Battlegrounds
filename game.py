@@ -88,7 +88,7 @@ class ClientGameEngine(GameEngine):
         GameEngine.__init__(self)
         # Light
         self.alight = AmbientLight('ambientLight')
-        self.alight.setColor(Vec4(0.2, 0.2, 0.2, 1))
+        self.alight.setColor(Vec4(0.5, 0.5, 0.5, 1))
         self.alightNP = base.render.attachNewNode(self.alight)
 
         self.dlight = DirectionalLight('directionalLight')
