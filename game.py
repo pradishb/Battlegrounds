@@ -76,8 +76,8 @@ class GameEngine():
         return task.cont
 
     def initCam(self):
-        base.cam.setHpr(-40, -40, 0)
-        base.cam.setPos(0, 0, 10)
+        base.cam.setHpr(0, -90, 0)
+        base.cam.setPos(0, 0, 80)
 
     # Debug
     def toggleDebug(self):
