@@ -15,13 +15,11 @@ class Player:
         self.playerModel = Actor('models/soldier.egg', {"idle": "models/soldier_ani_idle.egg",
                                                         "walk": "models/soldier_ani_walk.egg",
                                                         "pistol": "models/soldier_ani_pistol.egg",})
-        myTexture = base.loader.loadTexture("models/soldier_texture.png")
 
         self.playerModel.makeSubpart("legs", ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg"])
         self.playerModel.makeSubpart("hips", ["mixamorig:Hips"], ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg", "mixamorig:Spine"])
         self.playerModel.makeSubpart("upperBody", ["mixamorig:Spine"])
 
-        self.playerModel.setTexture(myTexture, 1)
         self.playerModel.setH(90)
         self.playerModel.setScale(.06)
         self.playerModel.setZ(-.45)
