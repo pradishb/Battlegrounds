@@ -4,7 +4,7 @@ import sys
 from direct.actor.Actor import AmbientLight, Vec4, DirectionalLight, Vec3, PNMImage, Filename, WindowProperties, GeoMipTerrain
 from panda3d.bullet import ZUp, BulletWorld, BulletHeightfieldShape, BulletRigidBodyNode, BulletDebugNode
 from panda3d.core import BitMask32, ClockObject
-
+from panda3d.bullet import BulletConvexHullShape
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
 
@@ -30,24 +30,28 @@ class GameEngine():
         self.world.setGravity(Vec3(0, 0, -9.81))
         self.world.setDebugNode(self.debugNP.node())
 
-        # # HeightField
-        self.height = 8.0
-        self.img = PNMImage(Filename('models/elevation.png'))
-        self.hshape = BulletHeightfieldShape(self.img, self.height, ZUp)
-        self.hnode = BulletRigidBodyNode('HGround')
-        self.hnode.addShape(self.hshape)
-        self.world.attachRigidBody(self.hnode)
 
         # Terrain
-        terrain = GeoMipTerrain('terrain')
-        terrain.setHeightfield(self.img)
+        visNP = loader.loadModel('models/terrain.egg')
 
-        offset = self.img.getXSize() / 2.0 - 0.5
-        rootNP = terrain.getRoot()
-        rootNP.reparentTo(base.render)
-        rootNP.setSz(self.height)
-        rootNP.setPos(-offset, -offset, -self.height / 2.0)
-        terrain.generate()
+        geom = visNP.findAllMatches('**/+GeomNode').getPath(0).node().getGeom(0)
+        mesh = BulletConvexHullShape()
+        mesh.addGeom(geom)
+        shape = BulletConvexHullShape(mesh)
+
+        body = BulletRigidBodyNode('Bowl')
+        bodyNP = base.render.attachNewNode(body)
+        bodyNP.node().addShape(shape)
+        # bodyNP.node().setMass(10.0)
+        bodyNP.setPos(0, 0, 1)
+        # bodyNP.setScale(600)
+        bodyNP.setCollideMask(BitMask32.allOn())
+        self.world.attachRigidBody(bodyNP.node())
+
+        visNP.reparentTo(bodyNP)
+
+        self.bowlNP = bodyNP
+        self.bowlNP.setScale(20)
 
         # Player
         self.players = []
