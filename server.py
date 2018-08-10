@@ -6,21 +6,8 @@ import sys
 from game import GameEngine, Player
 
 import random 
-######################################3
-##
-## Config
-##
 
 PORT = 9099
-
-######################################3
-##
-## Defines
-##
-## Quote Yellow: This are server opcodes. It tells the server
-## or client what pkt it is receiving. Ie if the pkt starts
-## with 3, the server knows he has to deal with a chat msg
-
 
 MSG_NONE = 0
 CMSG_AUTH = 1
@@ -33,29 +20,10 @@ CLIENT_INPUT = 7
 SERVER_INPUT = 8
 GAME_INITIALIZE = 9
 
-
-##################################################################
-##
-## This is just a demo how to implement Users. Of course you can
-## use any other method of doing it... reading a plaintext file,
-## decrypting it, using your systems users, asking a Database...
-##
-
 USERS = {
     'yellow': 'mypass',
     'tester': 'anotherpass'
 }
-
-
-
-###################################################################
-##
-## Creating a dictionary for the clients. Thats how we can adress
-## them later on. For now they are adressed by their IP, but that
-## isn't the best solution. What if 2 clients have the same IP?
-## You can find of course any other working solution that will avoid
-## this. Feel free to distribute it! As for the Demo its OK as is.
-##
 
 CLIENTS = {}
 CLIENTS_ID = {}
@@ -68,7 +36,7 @@ class Server(DirectObject):
         DirectObject.__init__(self)
         self.gameEngine = GameEngine()
 
-        ## If you press Escape @ the server window, the server will quit.
+        # If you press Escape @ the server window, the server will quit.
         self.accept("escape", self.quit)
         self.lastConnection = None
         self.serverClock = 0
