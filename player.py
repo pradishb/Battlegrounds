@@ -24,7 +24,7 @@ class Player:
         self.playerModel.setScale(.06)
         self.playerModel.setZ(-.45)
         self.playerModel.flattenLight()
-        self.playerModel.setLightOff()
+        # self.playerModel.setLightOff()
         self.playerModel.reparentTo(self.playerNP)
 
         self.playerSpine = self.playerModel.controlJoint(None, 'modelRoot', 'mixamorig:Spine')
