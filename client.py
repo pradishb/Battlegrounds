@@ -6,6 +6,7 @@ from direct.showbase.InputStateGlobal import inputState
 
 from game import ClientGameEngine
 from player import Player
+from animation import Animation
 import math
 import sys
 
@@ -130,7 +131,7 @@ class Client(DirectObject):
 
                 xSpeed = data.getFloat32()
                 ySpeed = data.getFloat32()
-                self.gameEngine.animate(self.gameEngine.players[playerId], xSpeed, ySpeed)
+                Animation.animate(self.gameEngine.players[playerId], xSpeed, ySpeed)
 
 
             self.myClock += 1

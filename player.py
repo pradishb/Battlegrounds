@@ -16,6 +16,10 @@ class Player:
                                                         "pistol": "models/soldier_ani_pistol.egg",})
         myTexture = base.loader.loadTexture("models/soldier_texture.png")
 
+        self.playerModel.makeSubpart("legs", ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg"])
+        self.playerModel.makeSubpart("hips", ["mixamorig:Hips"], ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg", "mixamorig:Spine"])
+        self.playerModel.makeSubpart("upperBody", ["mixamorig:Spine"])
+
         self.playerModel.setTexture(myTexture, 1)
         self.playerModel.setH(90)
         self.playerModel.setScale(.06)
@@ -24,9 +28,6 @@ class Player:
         self.playerModel.setLightOff()
         self.playerModel.reparentTo(self.playerNP)
 
-        self.playerModel.makeSubpart("legs", ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg",])
-        self.playerModel.makeSubpart("hips", ["mixamorig:Hips"], ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg", "mixamorig:Spine"])
-        self.playerModel.makeSubpart("upperBody", ["mixamorig:Spine"])
         self.playerSpine = self.playerModel.controlJoint(None, 'modelRoot', 'mixamorig:Spine')
 
         # player weapon

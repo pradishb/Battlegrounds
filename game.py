@@ -82,6 +82,7 @@ class GameEngine():
         else:
             self.debugNP.hide()
 
+
 class ClientGameEngine(GameEngine):
     def __init__(self):
         GameEngine.__init__(self)
@@ -105,30 +106,11 @@ class ClientGameEngine(GameEngine):
         self.pointer.setSy(.02)
         self.pointer.setSz(.02)
 
-        #Onscreentext
+        # Onscreentext
         font = base.loader.loadFont('./fonts/neuropol.ttf')
         font.setPixelsPerUnit(60)
         self.textObject = OnscreenText(text="No Connection", pos=(0, 0), font=font, scale=0.25, fg=(255, 255, 255, 255))
         self.textObject.setColor(255, 255, 255, 255)
-
-    # player animation
-    def animate(self, player, xSpeed, ySpeed):
-        if xSpeed == 0 and ySpeed == 0:
-            if player.playerModel.get_current_anim("legs") != "idle":
-                player.playerModel.loop("idle", partName="legs")
-                player.playerModel.loop("idle", partName="hips")
-                player.playerModel.pose("pistol", 0, partName="upperBody")
-        else:
-            if player.playerModel.get_current_anim("legs") != "walk":
-                player.playerModel.loop("walk", partName="legs")
-                player.playerModel.loop("idle", partName="hips")
-                player.playerModel.pose("pistol", 0, partName="upperBody")
-        # if (xSpeed == 0 and ySpeed == 0):
-        #     if (player.playerModel.get_current_anim() != "idle"):
-        #         player.playerModel.loop("idle")
-        # else:
-        #     if (player.playerModel.get_current_anim() != "walk"):
-        #         player.playerModel.loop("walk")
 
     def makeArc(self, angleDegrees=360, numSteps=16):
         ls = LineSegs()
