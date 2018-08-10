@@ -2,7 +2,7 @@ from direct.directbase.DirectStart import base
 import math
 import sys
 from direct.actor.Actor import AmbientLight, Vec4, DirectionalLight, Vec3, PNMImage, Filename, WindowProperties, GeoMipTerrain
-from panda3d.bullet import ZUp, BulletWorld, BulletHeightfieldShape, BulletRigidBodyNode, BulletDebugNode
+from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletDebugNode
 from panda3d.core import BitMask32, ClockObject
 from panda3d.bullet import BulletConvexHullShape
 from direct.gui.OnscreenText import OnscreenText
@@ -21,18 +21,18 @@ class GameEngine():
         self.debugNode = BulletDebugNode('Debug')
         self.debugNode.showWireframe(True)
         self.debugNode.showConstraints(True)
-        self.debugNode.showBoundingBoxes(False)
-        self.debugNode.showNormals(False)
+        self.debugNode.showBoundingBoxes(True)
+        self.debugNode.showNormals(True)
         self.debugNP = base.render.attachNewNode(self.debugNode)
+        self.debugNP.show()
 
         # World
         self.world = BulletWorld()
         self.world.setGravity(Vec3(0, 0, -9.81))
         self.world.setDebugNode(self.debugNP.node())
 
-
         # Terrain
-        visNP = loader.loadModel('models/terrain.egg')
+        visNP = base.loader.loadModel('models/terrain.egg')
 
         geom = visNP.findAllMatches('**/+GeomNode').getPath(0).node().getGeom(0)
         mesh = BulletConvexHullShape()
