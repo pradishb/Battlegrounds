@@ -131,8 +131,7 @@ class Client(DirectObject):
 
                 xSpeed = data.getFloat32()
                 ySpeed = data.getFloat32()
-                Animation.animate(self.gameEngine.players[playerId], xSpeed, ySpeed)
-
+                self.gameEngine.players[playerId].animation.animate(xSpeed, ySpeed)
 
             self.myClock += 1
             self.serverWait = False

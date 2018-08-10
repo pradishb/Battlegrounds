@@ -1,22 +1,23 @@
 class Animation:
-    current = "idle"
+    def __init__(self, player):
+        self.current = "idle"
+        self.player = player
 
-    @staticmethod
-    def animate(player, xSpeed, ySpeed):
-        if xSpeed == 0 and ySpeed == 0 and Animation.current != "pistol idle":
-            Animation.current = "pistol idle"
-            player.playerModel.loop("idle", partName="legs")
-            player.playerModel.loop("idle", partName="hips")
-            player.playerModel.pose("pistol", 0, partName="upperBody")
-        elif xSpeed > 0 or ySpeed > 0 and Animation.current != "pistol walk":
-            Animation.current = "pistol walk"
-            player.playerModel.loop("walk", partName="legs")
-            player.playerModel.loop("idle", partName="hips")
-            player.playerModel.pose("pistol", 0, partName="upperBody")
+    def animate(self, xSpeed, ySpeed):
+        if xSpeed == 0 and ySpeed == 0 and self.current != "pistol idle":
+            self.current = "pistol idle"
+            self.player.playerModel.loop("idle", partName="legs")
+            self.player.playerModel.loop("idle", partName="hips")
+            self.player.playerModel.pose("pistol", 0, partName="upperBody")
+        elif xSpeed != 0 or ySpeed != 0 and self.current != "pistol walk":
+            self.current = "pistol walk"
+            self.player.playerModel.loop("walk", partName="legs")
+            self.player.playerModel.loop("idle", partName="hips")
+            self.player.playerModel.pose("pistol", 0, partName="upperBody")
 
         # if (xSpeed == 0 and ySpeed == 0):
-        #     if (player.playerModel.get_current_anim() != "idle"):
-        #         player.playerModel.loop("idle")
+        #     if (self.player.playerModel.get_current_anim() != "idle"):
+        #         self.player.playerModel.loop("idle")
         # else:
-        #     if (player.playerModel.get_current_anim() != "walk"):
-        #         player.playerModel.loop("walk")
+        #     if (self.player.playerModel.get_current_anim() != "walk"):
+        #         self.player.playerModel.loop("walk")

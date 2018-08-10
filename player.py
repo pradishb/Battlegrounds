@@ -1,6 +1,7 @@
 from direct.actor.Actor import Actor
 from panda3d.bullet import BulletCapsuleShape, BulletCharacterControllerNode, ZUp
 from weapon import Weapon
+from animation import Animation
 
 
 class Player:
@@ -29,9 +30,14 @@ class Player:
         self.playerModel.reparentTo(self.playerNP)
 
         self.playerSpine = self.playerModel.controlJoint(None, 'modelRoot', 'mixamorig:Spine')
+        self.hand = self.playerModel.exposeJoint(None, 'modelRoot', 'mixamorig:RightHand')
 
         # player weapon
         myWeapon = Weapon()
+        myWeapon.object_model.reparentTo(self.hand)
+
+        # player animation
+        self.animation = Animation(self)
 
         base.taskMgr.add(self.bendBody, "bendBody")
 
