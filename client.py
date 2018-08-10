@@ -4,7 +4,8 @@ from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from direct.showbase.InputStateGlobal import inputState
 
-from game import Player, ClientGameEngine
+from game import ClientGameEngine
+from player import Player
 import math
 import sys
 
@@ -143,7 +144,7 @@ class Client(DirectObject):
             x = data.getFloat32()
             y = data.getFloat32()
             self.gameEngine.players.append(Player(x, y, 4))
-            self.gameEngine.world.attachCharacter(self.gameEngine.players[i].playerNP.node())
+            self.gameEngine.world.attachCharacter(self.gameEngine.players[playerId].playerNP.node())
         self.gameEngine.showPointer()
         self.id = data.getUint32()
         taskMgr.add(self.update, 'update')
