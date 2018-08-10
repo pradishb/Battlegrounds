@@ -10,5 +10,6 @@ class Weapon:
         rate_of_fire = 1
 
         Weapon.object_model = base.loader.loadModel("models/m1911.egg")
-        Weapon.object_model.setScale(0.5)
-        Weapon.object_model.setPos(1, 1, 1)
+        Weapon.object_model.setScale(0.35)
+        Weapon.object_model.setPos(0, 0.5, 0)
+        Weapon.object_model.setHpr(90, -90, 0)
