@@ -8,8 +8,10 @@ from panda3d.core import BitMask32, ClockObject
 
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
+import weapon
 
-class Player():
+
+class Player:
     def __init__(self, x, y, z):
         shape = BulletCapsuleShape(.2, .6, ZUp)
         self.playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
@@ -35,6 +37,9 @@ class Player():
         self.playerModel.makeSubpart("hips", ["mixamorig:Hips"], ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg", "mixamorig:Spine"])
         self.playerModel.makeSubpart("upperBody", ["mixamorig:Spine"])
         self.playerSpine = self.playerModel.controlJoint(None, 'modelRoot', 'mixamorig:Spine')
+
+        # player weapon
+        myWeapon = weapon.Weapon()
 
         base.taskMgr.add(self.bendBody, "bendBody")
 
@@ -77,7 +82,7 @@ class GameEngine():
         self.hnode.addShape(self.hshape)
         self.world.attachRigidBody(self.hnode)
 
-        # Terrian
+        # Terrain
         # visNP = base.loader.loadModel("models/world.egg")
         # geom = visNP.findAllMatches('**/+GeomNode').getPath(0).node().getGeom(0)
         # shape = BulletConvexHullShape()
