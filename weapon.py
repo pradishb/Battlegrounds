@@ -1,6 +1,7 @@
 from direct.directbase.DirectStart import base
 from panda3d.core import NodePath
 
+
 class Weapon:
     object_model = NodePath()
 
