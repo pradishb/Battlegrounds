@@ -101,6 +101,8 @@ class Client(DirectObject):
         if(not self.serverWait):
             self.processInput()
             self.serverWait = True
+        dt = globalClock.getDt()
+        self.gameEngine.world.doPhysics(dt)
         return task.cont
 
     def sendUserInput(self, inputArr = [], *args):
