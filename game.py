@@ -109,7 +109,7 @@ class ClientGameEngine(GameEngine):
         # Onscreentext
         font = base.loader.loadFont('./fonts/neuropol.ttf')
         font.setPixelsPerUnit(60)
-        self.textObject = OnscreenText(text="No Connection", pos=(0, 0), font=font, scale=0.25, fg=(255, 255, 255, 255))
+        self.textObject = OnscreenText(text="No Connection", pos=(0, 0), font=font, scale=0.25, fg=(0, 0, 0, 255))
         self.textObject.setColor(255, 255, 255, 255)
 
     def makeArc(self, angleDegrees=360, numSteps=16):
