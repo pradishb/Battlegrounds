@@ -2,7 +2,7 @@ from direct.actor.Actor import Actor
 from panda3d.bullet import BulletCapsuleShape, BulletCharacterControllerNode, ZUp
 from weapon import Weapon
 from animation import Animation
-from raycollider import RayCollider
+from raycollider import RayCollider, LineSeg
 
 
 class Player:
@@ -30,6 +30,7 @@ class Player:
 
         self.playerSpine = self.playerModel.controlJoint(None, 'modelRoot', 'mixamorig:Spine')
         self.hand = self.playerModel.exposeJoint(None, 'modelRoot', 'mixamorig:RightHand')
+        self.spineExpose = self.playerModel.exposeJoint(None, 'modelRoot', 'mixamorig:Spine')
 
         # player weapon
         myWeapon = Weapon()
@@ -38,15 +39,16 @@ class Player:
         # player animation
         self.animation = Animation(self)
 
+        self.model = loader.loadModel("smiley")
+        self.model.reparentTo(render)
+        self.model.setScale(0.1)
         base.taskMgr.add(self.bendBody, "bendBody")
         self.playerSpine.setH(-15)
 
     def bendBody(self, task):
         if base.mouseWatcherNode.hasMouse():
-            # self.playerSpine.setP(base.cam.getP() * 1.5)
-            h = self.playerSpine.getH()
+            self.model.setPos(self.spineExpose, 0, 0, 0)
             obj = RayCollider.getObjectHit()
-            if obj:
-                self.playerSpine.lookAt(obj)
-            self.playerSpine.setH(h)
+            self.model.lookAt(obj)
+            self.playerSpine.setP(self.model.getP())
         return task.cont
