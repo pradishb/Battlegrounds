@@ -56,7 +56,7 @@ class GameEngine():
         # Player
         self.players = []
         self.speed = Vec3(0, 0, 0)
-        self.walk_speed = 1.5
+        self.walk_speed = 5
 
         # Camera
         base.disableMouse()
@@ -65,15 +65,6 @@ class GameEngine():
         base.win.requestProperties(props)
 
         self.initCam()
-        # taskMgr.add(self.spinCameraTask, "SpinCameraTask")
-
-    # Define a procedure to move the camera.
-    def spinCameraTask(self, task):
-        angleDegrees = task.time * 6.0
-        angleRadians = angleDegrees * (math.pi / 180.0)
-        base.cam.setPos(20 * math.sin(angleRadians), -20.0 * math.cos(angleRadians), 50)
-        base.cam.setHpr(angleDegrees, -45, 0)
-        return task.cont
 
     def initCam(self):
         base.cam.setHpr(0, -90, 0)
