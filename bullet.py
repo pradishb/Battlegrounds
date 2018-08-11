@@ -13,7 +13,7 @@ class Bullet:
         v *= 10.0
 
         # Create bullet
-        shape = BulletBoxShape(Vec3(0.05, 0.05, 0.05))
+        shape = BulletBoxShape(Vec3(0.01, 0.01, 0.01))
         body = BulletRigidBodyNode('Bullet')
         self.bodyNP = base.render.attachNewNode(body)
         self.bodyNP.node().addShape(shape)
@@ -23,7 +23,7 @@ class Bullet:
         self.bodyNP.setCollideMask(BitMask32.allOn())
 
         bulletmodel = base.loader.loadModel("smiley")
-        bulletmodel.setScale(0.05)
+        bulletmodel.setScale(0.01)
         bulletmodel.reparentTo(self.bodyNP)
 
         # Enable CCD
