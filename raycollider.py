@@ -28,7 +28,7 @@ class RayCollider():
     picker.addCollider(pickerNP, queue)
 
     @staticmethod
-    def getObjectHit():
+    def getObjectHitSlow():
         RayCollider.pickerRay.setFromLens(base.camNode, 0, 0)
         RayCollider.picker.traverse(render)
         if RayCollider.queue.getNumEntries() > 0:
@@ -44,3 +44,23 @@ class RayCollider():
         pTo = base.render.getRelativePoint(base.cam, pTo)
 
         return pTo
+
+    @staticmethod
+    def getObjectHit():
+        pFrom = Point3()
+        pTo = Point3()
+        base.camLens.extrude((0, 0), pFrom, pTo)
+        pTo = base.render.getRelativePoint(base.cam, pTo)
+
+        return pTo
+
+
+class LineSeg:
+    def __init__(self, x, y):
+        eyepos = LineSegs()
+        eyepos.setColor(0, 1, 0, 1)
+        eyepos.drawTo(x)
+        eyepos.drawTo(y)
+        # eyepos.setThickness(30)
+        node = eyepos.create()
+        self.np = base.render.attachNewNode(node)
