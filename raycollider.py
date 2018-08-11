@@ -24,12 +24,12 @@ class LineSeg:
 
 class RayCollider():
     # setup eyepos
-    # eyepos = LineSegs()
-    # eyepos.setColor(0, 1, 0, 1)
-    # eyepos.drawTo(0, 0, 0)
-    # eyepos.setThickness(30)
-    # node = eyepos.create()
-    # np = base.render.attachNewNode(node)
+    eyepos = LineSegs()
+    eyepos.setColor(0, 1, 0, 1)
+    eyepos.drawTo(0, 0, 0)
+    eyepos.setThickness(30)
+    node = eyepos.create()
+    np = base.render.attachNewNode(node)
 
     cameraToPointer = LineSeg()
 
@@ -56,14 +56,13 @@ class RayCollider():
             RayCollider.queue.sortEntries()
 
             point = RayCollider.queue.getEntry(0).getSurfacePoint(render)
-            # RayCollider.np.setPos(point)
-
+            RayCollider.np.setPos(point)
+            # print(point)
             return point
         pFrom = Point3()
         pTo = Point3()
         base.camLens.extrude((0, 0), pFrom, pTo)
         pTo = base.render.getRelativePoint(base.cam, pTo)
-
         return pTo
 
     @staticmethod

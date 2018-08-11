@@ -73,7 +73,6 @@ class Client(DirectObject):
         if inputState.isSet('jump'):
             # playerNode.doJump()
             self.gameEngine.players[self.id].weapon.fire(self.gameEngine.world,
-                                                         self.gameEngine.players[self.id].hand.getPos(render),
                                                          RayCollider.getBulletHitPos())
             inputList[4] = True
         self.sendUserInput(inputList)
