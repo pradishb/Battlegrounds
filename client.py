@@ -129,20 +129,23 @@ class Client(DirectObject):
         if self.myClock == serverClock:
             while(data.getRemainingSize() != 0):
                 playerId = data.getUint32()
-                player = self.gameEngine.players[playerId].playerNP
-                player.setX(data.getFloat32())
-                player.setY(data.getFloat32())
-                player.setZ(data.getFloat32())
+                player = self.gameEngine.players[playerId]
+                player.playerNP.setX(data.getFloat32())
+                player.playerNP.setY(data.getFloat32())
+                player.playerNP.setZ(data.getFloat32())
                 h = data.getFloat32()
                 p = data.getFloat32()
                 if playerId != self.id:
-                    player.setH(h)
-                    self.gameEngine.players[playerId].playerSpine.setP(p)
+                    player.playerNP.setH(h)
+                    player.playerSpine.setP(p)
                     pass
 
                 xSpeed = data.getFloat32()
                 ySpeed = data.getFloat32()
-                self.gameEngine.players[playerId].animation.animate(xSpeed, ySpeed)
+                player.animation.animate(xSpeed, ySpeed)
+                space = data.getBool()
+                if space:
+                    player.weapon.fire(self.gameEngine.world, RayCollider.getBulletHitPos())
 
             self.myClock += 1
             self.serverWait = False
