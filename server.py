@@ -283,6 +283,8 @@ class Server(DirectObject):
                     x = data.getFloat32()
                     y = data.getFloat32()
                     z = data.getFloat32()
+                    playerHitId = data.getString()
+                    print(playerHitId)
                     player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
                 h = data.getFloat32()
                 p = data.getFloat32()

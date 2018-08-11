@@ -68,7 +68,7 @@ class Client(DirectObject):
     def processInput(self):
         self.gameEngine.speed.setX(0)
         self.gameEngine.speed.setY(0)
-        inputList = [False] * 8
+        inputList = [False] * 9
         if inputState.isSet('forward'):
             inputList[0] = True
         if inputState.isSet('left'):
@@ -84,6 +84,7 @@ class Client(DirectObject):
                 inputList[5] = pos.getX()
                 inputList[6] = pos.getY()
                 inputList[7] = pos.getZ()
+                inputList[8] = RayCollider.playerHitId
                 self.mouseDelayCount = 0
         self.mouseDelayCount += 1
         self.sendUserInput(inputList)
@@ -101,6 +102,7 @@ class Client(DirectObject):
             pkg.addFloat32(inputArr[5])
             pkg.addFloat32(inputArr[6])
             pkg.addFloat32(inputArr[7])
+            pkg.addString(str(inputArr[8]))
         pkg.addFloat32(self.gameEngine.players[self.id].playerNP.getH() % 360)
         pkg.addFloat32(self.gameEngine.players[self.id].playerSpine.getP() % 360)
         # Now lets send the whole thing...

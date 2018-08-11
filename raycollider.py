@@ -31,6 +31,8 @@ class RayCollider():
     node = eyepos.create()
     np = base.render.attachNewNode(node)
 
+    playerHitId = None
+
     # cameraToPointer = LineSeg()
 
     # setup collision stuff
@@ -57,7 +59,10 @@ class RayCollider():
 
             point = RayCollider.queue.getEntry(0).getSurfacePoint(render)
             RayCollider.np.setPos(point)
-            print(RayCollider.queue.getEntry(0).getIntoNodePath().getParent().getParent().getParent().getName())
+            if RayCollider.queue.getEntry(0).getIntoNodePath().getParent().getName() == "__Actor_modelRoot":
+                RayCollider.playerHitId = RayCollider.queue.getEntry(0).getIntoNodePath().getParent().getParent().getParent().getName()
+            else:
+                RayCollider.playerHitId = None
             return point
         pFrom = Point3()
         pTo = Point3()
