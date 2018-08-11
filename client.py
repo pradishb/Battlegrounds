@@ -7,7 +7,6 @@ from direct.showbase.InputStateGlobal import inputState
 
 from game import ClientGameEngine
 from player import Player
-from bullet import Bullet
 from raycollider import RayCollider
 import math
 import sys
@@ -32,7 +31,6 @@ class Client(DirectObject):
     def __init__(self):
         DirectObject.__init__(self)
         self.gameEngine = ClientGameEngine()
-        self.myBullet = Bullet(self.gameEngine.world)
         self.accept("escape", self.sendMsgDisconnectReq)
 
         self.gameStart = False
@@ -75,7 +73,6 @@ class Client(DirectObject):
         if inputState.isSet('right'):
             inputList[3] = True
         if inputState.isSet('jump'):
-            self.myBullet.update()
             # playerNode.doJump()
             inputList[4] = True
         self.sendUserInput(inputList)
