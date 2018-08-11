@@ -27,6 +27,7 @@ CLIENT_INPUT = 7
 SERVER_INPUT = 8
 GAME_INITIALIZE = 9
 
+
 class Client(DirectObject):
     def __init__(self):
         DirectObject.__init__(self)
@@ -37,6 +38,8 @@ class Client(DirectObject):
         self.myClock = 0
         self.heading = 0
         self.pitch = 40
+        self.skip = 0
+        self.loss = 1
 
         inputState.watchWithModifiers('forward', 'w')
         inputState.watchWithModifiers('left', 'a')
@@ -102,9 +105,13 @@ class Client(DirectObject):
     # Update
     def update(self, task):
         self.moveCamera()
-        if(not self.serverWait):
+        if not self.serverWait:
             self.processInput()
             self.serverWait = True
+        else:
+            self.loss += 1
+
+        print("loss % =", self.loss * 100.0 / (self.loss + self.myClock))
         dt = globalClock.getDt()
         self.gameEngine.players[self.id].bendBody()
         self.gameEngine.world.doPhysics(dt)
