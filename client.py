@@ -118,7 +118,7 @@ class Client(DirectObject):
         pkg.addBool(inputArr[2])
         pkg.addBool(inputArr[3])
         pkg.addBool(inputArr[4])
-        pkg.addFloat32(self.heading % 360)
+        pkg.addFloat32(self.gameEngine.players[self.id].playerNP.getH() % 360)
         # Now lets send the whole thing...
         self.send(pkg)
 
@@ -132,8 +132,8 @@ class Client(DirectObject):
                 player.setY(data.getFloat32())
                 player.setZ(data.getFloat32())
                 h = data.getFloat32()
-                if(playerId != self.id):
-                    # player.setH(h)
+                if playerId != self.id:
+                    player.setH(h)
                     pass
 
                 xSpeed = data.getFloat32()
