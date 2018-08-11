@@ -7,6 +7,7 @@ from raycollider import RayCollider
 
 class Player:
     def __init__(self, x, y, z, id):
+        self.health = 100
         radius = .15
         height = 1
         shape = BulletCylinderShape(radius, height, ZUp)

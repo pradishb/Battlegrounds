@@ -284,7 +284,10 @@ class Server(DirectObject):
                     y = data.getFloat32()
                     z = data.getFloat32()
                     playerHitId = data.getString()
-                    print(playerHitId)
+                    if playerHitId != "None":
+                        self.gameEngine.players[int(playerHitId)].health -= 30
+                        if self.gameEngine.players[int(playerHitId)].health < 0:
+                            self.gameEngine.players[int(playerHitId)].health = 0
                     player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
                 h = data.getFloat32()
                 p = data.getFloat32()
@@ -315,6 +318,7 @@ class Server(DirectObject):
                     self.clientInputList.addFloat32(x)
                     self.clientInputList.addFloat32(y)
                     self.clientInputList.addFloat32(z)
+                self.clientInputList.addUint8(player.health)
                 self.gameEngine.speed.setX(0)
                 self.gameEngine.speed.setY(0)
 

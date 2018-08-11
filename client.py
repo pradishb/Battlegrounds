@@ -134,9 +134,9 @@ class Client(DirectObject):
                     if shoot:
                         player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
 
-
-                # if shoot:
-                #     player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
+                player.health = data.getUint8()
+                if playerId == self.id:
+                    GameUI.updateHealth(player.health)
 
             self.myClock += 1
             self.serverWait = False
