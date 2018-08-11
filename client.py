@@ -88,8 +88,8 @@ class Client(DirectObject):
         if base.win.movePointer(0, 300, 300):
             self.heading = self.heading - (x - 300) * 0.2
             self.pitch = self.pitch - (y - 300) * 0.2
-            if (self.pitch < -30.0):
-                self.pitch = -30.0
+            if (self.pitch < -45.0):
+                self.pitch = -45.0
             elif (self.pitch > 45.0):
                 self.pitch = 45.0
 
