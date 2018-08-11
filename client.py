@@ -8,6 +8,7 @@ from direct.showbase.InputStateGlobal import inputState
 from game import ClientGameEngine
 from player import Player
 from raycollider import RayCollider
+from gameui import GameUI
 import math
 import sys
 
@@ -187,6 +188,7 @@ class Client(DirectObject):
         self.gameEngine.showPointer()
         self.id = data.getUint32()
         taskMgr.add(self.update, 'update')
+        GameUI.showInGameUI()
         self.serverWait = False
 
     def readTask(self, task):
