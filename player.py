@@ -1,5 +1,5 @@
 from direct.actor.Actor import Actor
-from panda3d.bullet import BulletCapsuleShape, BulletCharacterControllerNode, ZUp
+from panda3d.bullet import BulletCapsuleShape, BulletCharacterControllerNode, ZUp, BulletCylinderShape
 from weapon import Weapon
 from animation import Animation
 from raycollider import RayCollider
@@ -7,7 +7,9 @@ from raycollider import RayCollider
 
 class Player:
     def __init__(self, x, y, z):
-        shape = BulletCapsuleShape(.2, .6, ZUp)
+        radius = .15
+        height = 1
+        shape = BulletCylinderShape(radius, height, ZUp)
         self.playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
         self.playerNode.setMaxJumpHeight(2.0)
         self.playerNode.setJumpSpeed(4.0)
