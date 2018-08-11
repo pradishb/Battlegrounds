@@ -12,6 +12,7 @@ import math
 import sys
 
 IP = '127.0.0.1'
+IP = input("Enter server's IP: ")
 PORT = 9099
 USERNAME = "yellow"
 PASSWORD = "mypass"
@@ -283,8 +284,8 @@ class Client(DirectObject):
     def begin(self,value):
         self.gameEngine.textObject.setText("Begin")
 
-aClient = Client()
 
+aClient = Client()
 Handlers = {
     SMSG_AUTH_RESPONSE: aClient.msgAuthResponse,
     SMSG_CHAT: aClient.msgChat,
@@ -293,6 +294,4 @@ Handlers = {
     GAME_INITIALIZE: aClient.gameInitialize,
 }
 
-if __name__ == '__main__':
-    # IP = input("Enter server's IP: ")
-    base.run()
+base.run()
