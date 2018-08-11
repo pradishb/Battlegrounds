@@ -31,7 +31,7 @@ class RayCollider():
     node = eyepos.create()
     np = base.render.attachNewNode(node)
 
-    cameraToPointer = LineSeg()
+    # cameraToPointer = LineSeg()
 
     # setup collision stuff
     picker = CollisionTraverser()

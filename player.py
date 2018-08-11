@@ -47,6 +47,6 @@ class Player:
     def bendBody(self):
         self.model.setPos(self.spineExpose, 0, 0, 0)
         obj = RayCollider.getObjectHit()
-        RayCollider.cameraToPointer.update(self.hand.getPos(base.render), obj)
+        # RayCollider.cameraToPointer.update(self.hand.getPos(base.render), obj)
         self.model.lookAt(obj)
         self.playerSpine.setP(self.model.getP())

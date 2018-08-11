@@ -2,6 +2,7 @@ from direct.directbase.DirectStart import base
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode
 from panda3d.core import Point3, LineSegs, Geom, Vec3, BitMask32, CollisionRay, GeomNode, CollisionNode, NodePath, LPoint3f
 from raycollider import RayCollider
+from direct.interval.IntervalGlobal import Sequence
 
 
 class Bullet:
@@ -16,35 +17,27 @@ class Bullet:
         self.shootPos = LPoint3f(x, y, z)
 
     def shoot(self):
-        v = self.shootPos - self.gunPos
-        v.normalize()
-        v *= 10.0
+        BulletModel(self.gunPos, self.shootPos)
 
-        # Create bullet
-        shape = BulletBoxShape(Vec3(0.01, 0.01, 0.01))
-        body = BulletRigidBodyNode('Bullet')
-        self.bodyNP = base.render.attachNewNode(body)
-        self.bodyNP.node().addShape(shape)
-        self.bodyNP.node().setMass(2.0)
-        self.bodyNP.node().setLinearVelocity(v)
-        self.bodyNP.setPos(self.gunPos)
-        self.bodyNP.setCollideMask(BitMask32.allOn())
 
-        bulletmodel = base.loader.loadModel("smiley")
-        bulletmodel.setScale(0.01)
-        bulletmodel.reparentTo(self.bodyNP)
+class BulletModel:
+    def __init__(self, x, y):
+        self.np = loader.loadModel("smiley")
+        self.np.setCollideMask(BitMask32(0x10))
+        self.np.setScale(0.05)
+        self.np.reparentTo(base.render)
 
-        # Enable CCD
-        self.bodyNP.node().setCcdMotionThreshold(1e-7)
-        self.bodyNP.node().setCcdSweptSphereRadius(0.50)
+        vec = y - x
+        vec.normalize()
+        vec = vec * 100
+        vec = vec + x
+        pandaPosInterval1 = self.np.posInterval(1, vec, startPos=x)
 
-        self.world.attachRigidBody(self.bodyNP.node())
-
-        # Remove the bullet again after 1 second
+        # Create and play the sequence that coordinates the intervals.
+        pandaPace = Sequence(pandaPosInterval1, name="pandaPace")
+        pandaPace.start()
         base.taskMgr.doMethodLater(1, self.removeBullet, 'removeBullet')
-        
-    def removeBullet(self, task):
-        self.world.removeRigidBody(self.bodyNP.node())
-        self.bodyNP.detachNode()
-        return task.done
 
+    def removeBullet(self, task):
+        self.np.detachNode()
+        return task.done

@@ -47,6 +47,8 @@ class Client(DirectObject):
         inputState.watchWithModifiers('reverse', 's')
         inputState.watchWithModifiers('right', 'd')
         inputState.watchWithModifiers('shoot', 'mouse1')
+        self.mouseDelay = 10
+        self.mouseDelayCount = self.mouseDelay
 
         self.cManager = QueuedConnectionManager()
         self.cListener = QueuedConnectionListener(self.cManager, 0)
@@ -75,12 +77,14 @@ class Client(DirectObject):
         if inputState.isSet('right'):
             inputList[3] = True
         if inputState.isSet('shoot'):
-            pos = self.gameEngine.players[self.id].weapon.fire(self.gameEngine.world)
-            inputList[4] = True
-            inputList[5] = pos.getX()
-            inputList[6] = pos.getY()
-            inputList[7] = pos.getZ()
-
+            if self.mouseDelayCount > self.mouseDelay:
+                pos = self.gameEngine.players[self.id].weapon.fire(self.gameEngine.world)
+                inputList[4] = True
+                inputList[5] = pos.getX()
+                inputList[6] = pos.getY()
+                inputList[7] = pos.getZ()
+                self.mouseDelayCount = 0
+        self.mouseDelayCount += 1
         self.sendUserInput(inputList)
 
     def sendUserInput(self, inputArr = [], *args):
