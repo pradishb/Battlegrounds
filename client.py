@@ -1,3 +1,4 @@
+from panda3d.bullet import ZUp
 from pandac.PandaModules import *
 from direct.showbase.DirectObject import DirectObject
 from direct.distributed.PyDatagram import PyDatagram
@@ -6,7 +7,8 @@ from direct.showbase.InputStateGlobal import inputState
 
 from game import ClientGameEngine
 from player import Player
-from animation import Animation
+from bullet import Bullet
+from raycollider import RayCollider
 import math
 import sys
 
@@ -30,12 +32,15 @@ class Client(DirectObject):
     def __init__(self):
         DirectObject.__init__(self)
         self.gameEngine = ClientGameEngine()
+        self.myBullet = Bullet(self.gameEngine.world)
         self.accept("escape", self.sendMsgDisconnectReq)
 
         self.gameStart = False
         self.myClock = 0
         self.heading = 0
         self.pitch = 40
+
+
 
         inputState.watchWithModifiers('forward', 'w')
         inputState.watchWithModifiers('left', 'a')
@@ -70,6 +75,7 @@ class Client(DirectObject):
         if inputState.isSet('right'):
             inputList[3] = True
         if inputState.isSet('jump'):
+            self.myBullet.update()
             # playerNode.doJump()
             inputList[4] = True
         self.sendUserInput(inputList)
@@ -87,13 +93,14 @@ class Client(DirectObject):
             elif (self.pitch > 45.0):
                 self.pitch = 45.0
 
-        self.gameEngine.players[self.id].playerNP.setH(self.heading)
+        self.gameEngine.players[self.id].playerNP.lookAt(RayCollider.getObjectHit())
         base.cam.setHpr(self.heading, self.pitch, 0)
-        base.cam.setX(self.gameEngine.players[self.id].playerNP.getX() + 3 * math.sin(
-            math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
-        base.cam.setY(self.gameEngine.players[self.id].playerNP.getY() - 3 * math.cos(
-            math.pi / 180.0 * self.gameEngine.players[self.id].playerNP.getH()))
-        base.cam.setZ(self.gameEngine.players[self.id].playerNP.getZ() - 0.05 * self.pitch + .7)
+        base.cam.setX(self.gameEngine.players[self.id].playerNP.getX() + 2 * math.sin(
+            math.pi / 180.0 * self.heading))
+        base.cam.setY(self.gameEngine.players[self.id].playerNP.getY() - 2 * math.cos(
+            math.pi / 180.0 * self.heading))
+        base.cam.setZ(self.gameEngine.players[self.id].playerNP.getZ() - 0.03 * self.pitch + .5)
+        base.cam.setPos(base.cam, .5, 0, 0)
 
     # Update
     def update(self, task):
@@ -129,7 +136,8 @@ class Client(DirectObject):
                 player.setZ(data.getFloat32())
                 h = data.getFloat32()
                 if(playerId != self.id):
-                    player.setH(h)
+                    # player.setH(h)
+                    pass
 
                 xSpeed = data.getFloat32()
                 ySpeed = data.getFloat32()
