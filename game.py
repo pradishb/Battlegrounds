@@ -32,7 +32,7 @@ class GameEngine():
         self.world.setDebugNode(self.debugNP.node())
 
         # Terrain
-        visNP = base.loader.loadModel('models/terrain2.egg')
+        visNP = base.loader.loadModel('models/terraintex.egg')
 
         geom = visNP.findAllMatches('**/+GeomNode').getPath(0).node().getGeom(0)
         mesh = BulletConvexHullShape()
