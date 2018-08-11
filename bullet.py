@@ -1,16 +1,24 @@
 from direct.directbase.DirectStart import base
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode
-from panda3d.core import Point3, LineSegs, Geom, Vec3, BitMask32, CollisionRay, GeomNode, CollisionNode, NodePath
+from panda3d.core import Point3, LineSegs, Geom, Vec3, BitMask32, CollisionRay, GeomNode, CollisionNode, NodePath, LPoint3f
+from raycollider import RayCollider
 
 
 class Bullet:
-    def __init__(self, world, gunPos, shootPos):
+    def __init__(self, world, gunPos):
+        self.gunPos = gunPos
         self.world = world
-        # print(gunPos)
 
-        v = shootPos - gunPos
+    def initialize(self):
+        self.shootPos = RayCollider.getBulletHitPos()
+
+    def initializeWithPos(self, x, y, z):
+        self.shootPos = LPoint3f(x, y, z)
+
+    def shoot(self):
+        v = self.shootPos - self.gunPos
         v.normalize()
-        v *= 500.0
+        v *= 10.0
 
         # Create bullet
         shape = BulletBoxShape(Vec3(0.01, 0.01, 0.01))
@@ -19,7 +27,7 @@ class Bullet:
         self.bodyNP.node().addShape(shape)
         self.bodyNP.node().setMass(2.0)
         self.bodyNP.node().setLinearVelocity(v)
-        self.bodyNP.setPos(gunPos)
+        self.bodyNP.setPos(self.gunPos)
         self.bodyNP.setCollideMask(BitMask32.allOn())
 
         bulletmodel = base.loader.loadModel("smiley")

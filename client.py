@@ -39,13 +39,14 @@ class Client(DirectObject):
         self.heading = 0
         self.pitch = 40
         self.skip = 0
-        self.loss = 1
+        self.loss = 0
+        self.id = 0
 
         inputState.watchWithModifiers('forward', 'w')
         inputState.watchWithModifiers('left', 'a')
         inputState.watchWithModifiers('reverse', 's')
         inputState.watchWithModifiers('right', 'd')
-        inputState.watchWithModifiers('jump', 'space')
+        inputState.watchWithModifiers('shoot', 'mouse1')
 
         self.cManager = QueuedConnectionManager()
         self.cListener = QueuedConnectionListener(self.cManager, 0)
@@ -64,7 +65,7 @@ class Client(DirectObject):
     def processInput(self):
         self.gameEngine.speed.setX(0)
         self.gameEngine.speed.setY(0)
-        inputList = [False] * 5
+        inputList = [False] * 8
         if inputState.isSet('forward'):
             inputList[0] = True
         if inputState.isSet('left'):
@@ -73,12 +74,65 @@ class Client(DirectObject):
             inputList[2] = True
         if inputState.isSet('right'):
             inputList[3] = True
-        if inputState.isSet('jump'):
-            # playerNode.doJump()
-            self.gameEngine.players[self.id].weapon.fire(self.gameEngine.world,
-                                                         RayCollider.getBulletHitPos())
+        if inputState.isSet('shoot'):
+            pos = self.gameEngine.players[self.id].weapon.fire(self.gameEngine.world)
             inputList[4] = True
+            inputList[5] = pos.getX()
+            inputList[6] = pos.getY()
+            inputList[7] = pos.getZ()
+
         self.sendUserInput(inputList)
+
+    def sendUserInput(self, inputArr = [], *args):
+        pkg = PyDatagram()
+        pkg.addUint16(CLIENT_INPUT)
+        pkg.addUint64(self.myClock)
+        pkg.addBool(inputArr[0])
+        pkg.addBool(inputArr[1])
+        pkg.addBool(inputArr[2])
+        pkg.addBool(inputArr[3])
+        pkg.addBool(inputArr[4])
+        if inputArr[4]:
+            pkg.addFloat32(inputArr[5])
+            pkg.addFloat32(inputArr[6])
+            pkg.addFloat32(inputArr[7])
+        pkg.addFloat32(self.gameEngine.players[self.id].playerNP.getH() % 360)
+        pkg.addFloat32(self.gameEngine.players[self.id].playerSpine.getP() % 360)
+        # Now lets send the whole thing...
+        self.send(pkg)
+
+    def serverInputHanlder(self, msgID, data):
+        serverClock = data.getUint64()
+        if self.myClock == serverClock:
+            while(data.getRemainingSize() != 0):
+                playerId = data.getUint32()
+                player = self.gameEngine.players[playerId]
+                player.playerNP.setX(data.getFloat32())
+                player.playerNP.setY(data.getFloat32())
+                player.playerNP.setZ(data.getFloat32())
+                h = data.getFloat32()
+                p = data.getFloat32()
+                xSpeed = data.getFloat32()
+                ySpeed = data.getFloat32()
+                player.animation.animate(xSpeed, ySpeed)
+                shoot = data.getBool()
+                x, y, z = 0, 0, 0
+                if shoot:
+                    x = data.getFloat32()
+                    y = data.getFloat32()
+                    z = data.getFloat32()
+                if playerId != self.id:
+                    player.playerNP.setH(h)
+                    player.playerSpine.setP(p)
+                    if shoot:
+                        player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
+
+
+                # if shoot:
+                #     player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
+
+            self.myClock += 1
+            self.serverWait = False
 
     def moveCamera(self):
         md = base.win.getPointer(0)
@@ -110,52 +164,12 @@ class Client(DirectObject):
             self.serverWait = True
         else:
             self.loss += 1
-
-        print("loss % =", self.loss * 100.0 / (self.loss + self.myClock))
+        # if self.myClock > 0:
+        #     print("loss % =", self.loss * 100.0 / (self.loss + self.myClock))
         dt = globalClock.getDt()
         self.gameEngine.players[self.id].bendBody()
         self.gameEngine.world.doPhysics(dt)
         return task.cont
-
-    def sendUserInput(self, inputArr = [], *args):
-        pkg = PyDatagram()
-        pkg.addUint16(CLIENT_INPUT)
-        pkg.addUint64(self.myClock)
-        pkg.addBool(inputArr[0])
-        pkg.addBool(inputArr[1])
-        pkg.addBool(inputArr[2])
-        pkg.addBool(inputArr[3])
-        pkg.addBool(inputArr[4])
-        pkg.addFloat32(self.gameEngine.players[self.id].playerNP.getH() % 360)
-        pkg.addFloat32(self.gameEngine.players[self.id].playerSpine.getP() % 360)
-        # Now lets send the whole thing...
-        self.send(pkg)
-
-    def serverInputHanlder(self, msgID, data):
-        serverClock = data.getUint64()
-        if self.myClock == serverClock:
-            while(data.getRemainingSize() != 0):
-                playerId = data.getUint32()
-                player = self.gameEngine.players[playerId]
-                player.playerNP.setX(data.getFloat32())
-                player.playerNP.setY(data.getFloat32())
-                player.playerNP.setZ(data.getFloat32())
-                h = data.getFloat32()
-                p = data.getFloat32()
-                if playerId != self.id:
-                    player.playerNP.setH(h)
-                    player.playerSpine.setP(p)
-                    pass
-
-                xSpeed = data.getFloat32()
-                ySpeed = data.getFloat32()
-                player.animation.animate(xSpeed, ySpeed)
-                space = data.getBool()
-                if space:
-                    player.weapon.fire(self.gameEngine.world, RayCollider.getBulletHitPos())
-
-            self.myClock += 1
-            self.serverWait = False
 
     def gameInitialize(self, msgID, data):
         self.gameEngine.textObject.destroy()

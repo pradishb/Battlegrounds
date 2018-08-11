@@ -273,15 +273,21 @@ class Server(DirectObject):
                     break
             if not found:
                 CLIENT_INPUT_RECEIVED.append(client)
+                player = self.gameEngine.players[CLIENTS_ID[client]]
+
+                x, y, z = 0, 0, 0
                 w = data.getBool()
                 a = data.getBool()
                 s = data.getBool()
                 d = data.getBool()
-                space = data.getBool()
+                shoot = data.getBool()
+                if shoot:
+                    x = data.getFloat32()
+                    y = data.getFloat32()
+                    z = data.getFloat32()
+                    player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
                 h = data.getFloat32()
                 p = data.getFloat32()
-
-                player = self.gameEngine.players[CLIENTS_ID[client]]
 
                 if w:
                     self.gameEngine.speed.setY(self.gameEngine.walk_speed)
@@ -291,10 +297,6 @@ class Server(DirectObject):
                     self.gameEngine.speed.setY(-self.gameEngine.walk_speed)
                 if d:
                     self.gameEngine.speed.setX(self.gameEngine.walk_speed)
-                if space:
-                    player.weapon.fire(self.gameEngine.world, RayCollider.getBulletHitPos())
-                    pass
-                    # playerNode.doJump()
 
                 player.playerNP.setH(h)
                 player.playerSpine.setP(p)
@@ -308,7 +310,11 @@ class Server(DirectObject):
                 self.clientInputList.addFloat32(player.playerSpine.getP())
                 self.clientInputList.addFloat32(self.gameEngine.speed.getX())
                 self.clientInputList.addFloat32(self.gameEngine.speed.getY())
-                self.clientInputList.addBool(space)
+                self.clientInputList.addBool(shoot)
+                if shoot:
+                    self.clientInputList.addFloat32(x)
+                    self.clientInputList.addFloat32(y)
+                    self.clientInputList.addFloat32(z)
                 self.gameEngine.speed.setX(0)
                 self.gameEngine.speed.setY(0)
 

@@ -17,7 +17,14 @@ class Weapon:
         Weapon.object_model.setHpr(90, -90, 0)
         self.gunHole = self.object_model.exposeJoint(None, 'modelRoot', 'gunhole')
 
+    def fire(self, world):
+        b = Bullet(world, self.gunHole.getPos(render))
+        b.initialize()
+        b.shoot()
+        return b.shootPos
 
-    def fire(self, world, shootPos):
-        b = Bullet(world, self.gunHole.getPos(render), shootPos)
+    def fireWithPos(self, world, x, y, z):
+        b = Bullet(world, self.gunHole.getPos(render))
+        b.initializeWithPos(x, y, z)
+        b.shoot()
 
