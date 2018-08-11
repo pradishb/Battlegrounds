@@ -6,11 +6,11 @@ from raycollider import RayCollider
 
 
 class Player:
-    def __init__(self, x, y, z):
+    def __init__(self, x, y, z, id):
         radius = .15
         height = 1
         shape = BulletCylinderShape(radius, height, ZUp)
-        self.playerNode = BulletCharacterControllerNode(shape, 0.4, 'Player')
+        self.playerNode = BulletCharacterControllerNode(shape, 0.4, str(id))
         self.playerNode.setMaxJumpHeight(2.0)
         self.playerNode.setJumpSpeed(4.0)
         self.playerNP = base.render.attachNewNode(self.playerNode)

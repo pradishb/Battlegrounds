@@ -183,7 +183,7 @@ class Client(DirectObject):
             playerId = data.getUint32()
             x = data.getFloat32()
             y = data.getFloat32()
-            self.gameEngine.players.append(Player(x, y, 4))
+            self.gameEngine.players.append(Player(x, y, 4, playerId))
             self.gameEngine.world.attachCharacter(self.gameEngine.players[playerId].playerNP.node())
         self.gameEngine.showPointer()
         self.id = data.getUint32()

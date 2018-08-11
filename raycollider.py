@@ -57,7 +57,7 @@ class RayCollider():
 
             point = RayCollider.queue.getEntry(0).getSurfacePoint(render)
             RayCollider.np.setPos(point)
-            # print(point)
+            print(RayCollider.queue.getEntry(0).getIntoNodePath().getParent().getParent().getParent().getName())
             return point
         pFrom = Point3()
         pTo = Point3()

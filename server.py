@@ -5,9 +5,7 @@ from direct.distributed.PyDatagramIterator import PyDatagramIterator
 import sys
 from game import GameEngine
 from player import Player
-from raycollider import RayCollider
-
-import random 
+import random
 
 PORT = 9099
 
@@ -345,7 +343,7 @@ class Server(DirectObject):
         for client in CLIENTS:
             x = random.randint(1,5)
             y = random.randint(1,5)
-            self.gameEngine.players.append(Player(x, y, 10))
+            self.gameEngine.players.append(Player(x, y, 10, CLIENTS_ID[client]))
             self.gameEngine.world.attachCharacter(self.gameEngine.players[CLIENTS_ID[client]].playerNP.node())
             ranValPkg.addUint32(CLIENTS_ID[client])
             ranValPkg.addFloat32(x)
