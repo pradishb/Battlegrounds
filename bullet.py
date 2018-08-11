@@ -10,7 +10,7 @@ class Bullet:
 
         v = shootPos - gunPos
         v.normalize()
-        v *= 10.0
+        v *= 500.0
 
         # Create bullet
         shape = BulletBoxShape(Vec3(0.01, 0.01, 0.01))
