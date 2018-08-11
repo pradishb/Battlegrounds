@@ -21,8 +21,8 @@ class GameEngine():
         self.debugNode = BulletDebugNode('Debug')
         self.debugNode.showWireframe(True)
         self.debugNode.showConstraints(True)
-        self.debugNode.showBoundingBoxes(True)
-        self.debugNode.showNormals(True)
+        self.debugNode.showBoundingBoxes(False)
+        self.debugNode.showNormals(False)
         self.debugNP = base.render.attachNewNode(self.debugNode)
         self.debugNP.show()
 
@@ -109,6 +109,8 @@ class ClientGameEngine(GameEngine):
 
     def makeArc(self, angleDegrees=360, numSteps=16):
         ls = LineSegs()
+        ls.setColor(0, 1, 0, 1)
+        ls.setThickness(3)
         angleRadians = deg2Rad(angleDegrees)
         for i in range(numSteps + 1):
             a = angleRadians * i / numSteps
