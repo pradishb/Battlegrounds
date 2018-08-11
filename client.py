@@ -38,8 +38,6 @@ class Client(DirectObject):
         self.heading = 0
         self.pitch = 40
 
-
-
         inputState.watchWithModifiers('forward', 'w')
         inputState.watchWithModifiers('left', 'a')
         inputState.watchWithModifiers('reverse', 's')
@@ -74,6 +72,9 @@ class Client(DirectObject):
             inputList[3] = True
         if inputState.isSet('jump'):
             # playerNode.doJump()
+            self.gameEngine.players[self.id].weapon.fire(self.gameEngine.world,
+                                                         self.gameEngine.players[self.id].hand.getPos(render),
+                                                         RayCollider.getBulletHitPos())
             inputList[4] = True
         self.sendUserInput(inputList)
 

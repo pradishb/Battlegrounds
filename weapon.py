@@ -1,5 +1,6 @@
 from direct.directbase.DirectStart import base
 from panda3d.core import NodePath
+from bullet import Bullet
 
 
 class Weapon:
@@ -14,3 +15,7 @@ class Weapon:
         Weapon.object_model.setScale(0.35)
         Weapon.object_model.setPos(0, 0.5, 0)
         Weapon.object_model.setHpr(90, -90, 0)
+
+    def fire(self, world, gunPos, shootPos):
+        b = Bullet(world, gunPos, shootPos)
+

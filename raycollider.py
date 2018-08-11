@@ -49,14 +49,14 @@ class RayCollider():
     picker.addCollider(pickerNP, queue)
 
     @staticmethod
-    def getObjectHitSlow():
+    def getBulletHitPos():
         RayCollider.pickerRay.setFromLens(base.camNode, 0, 0)
         RayCollider.picker.traverse(render)
         if RayCollider.queue.getNumEntries() > 0:
             RayCollider.queue.sortEntries()
 
             point = RayCollider.queue.getEntry(0).getSurfacePoint(render)
-            RayCollider.np.setPos(point)
+            # RayCollider.np.setPos(point)
 
             return point
         pFrom = Point3()
