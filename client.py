@@ -106,6 +106,7 @@ class Client(DirectObject):
             self.processInput()
             self.serverWait = True
         dt = globalClock.getDt()
+        self.gameEngine.players[self.id].bendBody()
         self.gameEngine.world.doPhysics(dt)
         return task.cont
 
@@ -119,6 +120,7 @@ class Client(DirectObject):
         pkg.addBool(inputArr[3])
         pkg.addBool(inputArr[4])
         pkg.addFloat32(self.gameEngine.players[self.id].playerNP.getH() % 360)
+        pkg.addFloat32(self.gameEngine.players[self.id].playerSpine.getP() % 360)
         # Now lets send the whole thing...
         self.send(pkg)
 
@@ -132,8 +134,10 @@ class Client(DirectObject):
                 player.setY(data.getFloat32())
                 player.setZ(data.getFloat32())
                 h = data.getFloat32()
+                p = data.getFloat32()
                 if playerId != self.id:
                     player.setH(h)
+                    self.gameEngine.players[playerId].playerSpine.setP(p)
                     pass
 
                 xSpeed = data.getFloat32()

@@ -278,6 +278,7 @@ class Server(DirectObject):
                 d = data.getBool()
                 space = data.getBool()
                 h = data.getFloat32()
+                p = data.getFloat32()
 
                 if w:
                     self.gameEngine.speed.setY(self.gameEngine.walk_speed)
@@ -293,14 +294,15 @@ class Server(DirectObject):
 
                 player = self.gameEngine.players[CLIENTS_ID[client]].playerNP
                 player.setH(h)
+                self.gameEngine.players[CLIENTS_ID[client]].playerSpine.setP(p)
                 player.node().setLinearMovement(self.gameEngine.speed, True)
 
-                self.val = [w, a, s, d, space, h]
                 self.clientInputList.addUint32(CLIENTS_ID[client])
                 self.clientInputList.addFloat32(player.getX())
                 self.clientInputList.addFloat32(player.getY())
                 self.clientInputList.addFloat32(player.getZ())
                 self.clientInputList.addFloat32(player.getH())
+                self.clientInputList.addFloat32(self.gameEngine.players[CLIENTS_ID[client]].playerSpine.getP())
                 self.clientInputList.addFloat32(self.gameEngine.speed.getX())
                 self.clientInputList.addFloat32(self.gameEngine.speed.getY())
                 self.gameEngine.speed.setX(0)

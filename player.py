@@ -43,13 +43,10 @@ class Player:
         self.model = loader.loadModel("smiley")
         self.model.reparentTo(render)
         self.model.setScale(0.1)
-        base.taskMgr.add(self.bendBody, "bendBody")
 
-    def bendBody(self, task):
-        if base.mouseWatcherNode.hasMouse():
-            self.model.setPos(self.spineExpose, 0, 0, 0)
-            obj = RayCollider.getObjectHit()
-            RayCollider.cameraToPointer.update(self.hand.getPos(base.render), obj)
-            self.model.lookAt(obj)
-            self.playerSpine.setP(self.model.getP())
-        return task.cont
+    def bendBody(self):
+        self.model.setPos(self.spineExpose, 0, 0, 0)
+        obj = RayCollider.getObjectHit()
+        RayCollider.cameraToPointer.update(self.hand.getPos(base.render), obj)
+        self.model.lookAt(obj)
+        self.playerSpine.setP(self.model.getP())
