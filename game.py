@@ -3,9 +3,8 @@ import math
 import sys
 from direct.actor.Actor import AmbientLight, Vec4, DirectionalLight, Vec3, PNMImage, Filename, WindowProperties, GeoMipTerrain
 from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletDebugNode, BulletTriangleMesh, \
-    BulletTriangleMeshShape, ZUp, BulletCylinderShape, BulletBoxShape
+    BulletTriangleMeshShape, BulletBoxShape
 from panda3d.core import BitMask32, ClockObject
-from panda3d.bullet import BulletConvexHullShape
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
 
@@ -35,11 +34,10 @@ class GameEngine():
         # Terrain
         visNP = base.loader.loadModel('models/terrainwithrock.egg')
 
-        geom = visNP.findAllMatches('**/+GeomNode').getPath(0).node().getGeom(0)
-        geom1 = visNP.findAllMatches('**/+GeomNode').getPath(1).node().getGeom(0)
         mesh = BulletTriangleMesh()
-        mesh.addGeom(geom)
-        mesh.addGeom(geom1)
+        for x in visNP.findAllMatches('**/+GeomNode'):
+            geom = x.node().getGeom(0)
+            mesh.addGeom(geom)
         shape = BulletTriangleMeshShape(mesh, dynamic=True)
 
         body = BulletRigidBodyNode('Bowl')
