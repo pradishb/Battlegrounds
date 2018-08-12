@@ -1,5 +1,6 @@
 from direct.actor.Actor import Actor
-from panda3d.bullet import BulletCapsuleShape, BulletCharacterControllerNode, ZUp, BulletCylinderShape
+from panda3d.bullet import BulletCharacterControllerNode, ZUp, BulletCylinderShape
+from panda3d.core import NodePath
 from weapon import Weapon
 from animation import Animation
 from raycollider import RayCollider
@@ -46,14 +47,10 @@ class Player:
         self.ySpeed = 0
         self.animation = Animation(self)
 
-        self.model = loader.loadModel("smiley")
-        self.model.reparentTo(render)
-        self.model.setScale(0.1)
-
+        self.model = NodePath("MySpineNode")
 
     def bendBody(self):
         self.model.setPos(self.spineExpose, 0, 0, 0)
         obj = RayCollider.getObjectHit()
-        # RayCollider.cameraToPointer.update(self.hand.getPos(base.render), obj)
         self.model.lookAt(obj)
         self.playerSpine.setP(self.model.getP())
