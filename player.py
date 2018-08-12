@@ -18,7 +18,8 @@ class Player:
         self.playerNP.setPos(x, y, z)
         self.playerModel = Actor('models/soldier.egg', {"idle": "models/soldier_ani_idle.egg",
                                                         "walk": "models/soldier_ani_walk.egg",
-                                                        "pistol": "models/soldier_ani_pistol.egg",})
+                                                        "pistol": "models/soldier_ani_pistol.egg",
+                                                        "death": "models/soldier_ani_death.egg",})
 
         self.playerModel.makeSubpart("legs", ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg"])
         self.playerModel.makeSubpart("hips", ["mixamorig:Hips"], ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg", "mixamorig:Spine"])
