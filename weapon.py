@@ -16,15 +16,17 @@ class Weapon:
         Weapon.object_model.setPos(0, 0.5, 0)
         Weapon.object_model.setHpr(90, -90, 0)
         self.gunHole = self.object_model.exposeJoint(None, 'modelRoot', 'gunhole')
-
-    def fire(self, world):
-        b = Bullet(world, self.gunHole.getPos(render))
-        b.initialize()
-        b.shoot()
-        return b.shootPos
+        self.position = loader.loadModel("smiley")
+        self.position.setScale(0.1)
+        self.position.reparentTo(self.gunHole)
+        taskMgr.add(self.update)
 
     def fireWithPos(self, world, x, y, z):
-        b = Bullet(world, self.gunHole.getPos(render))
+        b = Bullet(world, self.gunHole)
+        print(self.gunHole.getPos(render))
         b.initializeWithPos(x, y, z)
         b.shoot()
 
+    def update(self, task):
+        # self.position.setPos(self.gunHole, 0, 0, 0)
+        return task.cont

@@ -1,6 +1,5 @@
 from direct.directbase.DirectStart import base
 from panda3d.core import Point3, LineSegs, Geom, Vec3, BitMask32, CollisionRay, GeomNode, CollisionNode, NodePath, LPoint3f
-from raycollider import RayCollider
 from direct.interval.IntervalGlobal import Sequence
 
 
@@ -8,9 +7,6 @@ class Bullet:
     def __init__(self, world, gunPos):
         self.gunPos = gunPos
         self.world = world
-
-    def initialize(self):
-        self.shootPos = RayCollider.getBulletHitPos()
 
     def initializeWithPos(self, x, y, z):
         self.shootPos = LPoint3f(x, y, z)
@@ -27,6 +23,7 @@ class BulletModel:
         self.np.lookAt(y)
         self.np.reparentTo(base.render)
 
+        x = x.getPos(render)
         vec = y - x
         vec.normalize()
         vec = vec * 100

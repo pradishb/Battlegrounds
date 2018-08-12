@@ -79,7 +79,7 @@ class Client(DirectObject):
             inputList[3] = True
         if inputState.isSet('shoot'):
             if self.mouseDelayCount > self.mouseDelay:
-                pos = self.gameEngine.players[self.id].weapon.fire(self.gameEngine.world)
+                pos = RayCollider.getBulletHitPos()
                 inputList[4] = True
                 inputList[5] = pos.getX()
                 inputList[6] = pos.getY()
@@ -127,11 +127,10 @@ class Client(DirectObject):
                     x = data.getFloat32()
                     y = data.getFloat32()
                     z = data.getFloat32()
+                    player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
                 if playerId != self.id:
                     player.playerNP.setH(h)
                     player.playerSpine.setP(p)
-                    if shoot:
-                        player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
 
                 player.health = data.getUint8()
                 if playerId == self.id:

@@ -70,7 +70,7 @@ class GameEngine():
         props.setCursorHidden(True)
         base.win.requestProperties(props)
 
-        #SkySphere
+        # SkySphere
         Sky()
 
         self.initCam()
