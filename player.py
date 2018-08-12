@@ -42,11 +42,14 @@ class Player:
         self.weapon.object_model.reparentTo(self.hand)
 
         # player animation
+        self.xSpeed = 0
+        self.ySpeed = 0
         self.animation = Animation(self)
 
         self.model = loader.loadModel("smiley")
         self.model.reparentTo(render)
         self.model.setScale(0.1)
+
 
     def bendBody(self):
         self.model.setPos(self.spineExpose, 0, 0, 0)

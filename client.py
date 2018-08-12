@@ -119,9 +119,8 @@ class Client(DirectObject):
                 player.playerNP.setZ(data.getFloat32())
                 h = data.getFloat32()
                 p = data.getFloat32()
-                xSpeed = data.getFloat32()
-                ySpeed = data.getFloat32()
-                player.animation.animate(xSpeed, ySpeed)
+                player.xSpeed = data.getFloat32()
+                player.ySpeed = data.getFloat32()
                 shoot = data.getBool()
                 x, y, z = 0, 0, 0
                 if shoot:
@@ -137,6 +136,9 @@ class Client(DirectObject):
                 player.health = data.getUint8()
                 if playerId == self.id:
                     GameUI.updateHealth(player.health)
+                    if player.health == 0:
+                        taskMgr.remove('update')
+                        self.gameover()
 
             self.myClock += 1
             self.serverWait = False
@@ -179,7 +181,7 @@ class Client(DirectObject):
         return task.cont
 
     def gameInitialize(self, msgID, data):
-        self.gameEngine.textObject.destroy()
+        GameUI.display.destroy()
         playerCount = data.getUint32()
         for i in range(0, playerCount):
             playerId = data.getUint32()
@@ -190,8 +192,21 @@ class Client(DirectObject):
         self.gameEngine.showPointer()
         self.id = data.getUint32()
         taskMgr.add(self.update, 'update')
-        GameUI.showInGameUI()
         self.serverWait = False
+
+    def gameover(self):
+        gameoverDisplay = GameUI.createDisplayUI("Game Over!")
+        # playerCount = data.getUint32()
+        # for i in range(0, playerCount):
+        #     playerId = data.getUint32()
+        #     x = data.getFloat32()
+        #     y = data.getFloat32()
+        #     self.gameEngine.players.append(Player(x, y, 20, playerId))
+        #     self.gameEngine.world.attachCharacter(self.gameEngine.players[playerId].playerNP.node())
+        # self.gameEngine.showPointer()
+        # self.id = data.getUint32()
+        # taskMgr.add(self.update, 'update')
+        # self.serverWait = False
 
     def readTask(self, task):
         while 1:
@@ -297,13 +312,13 @@ class Client(DirectObject):
 
 
     def countdown(self,value):
-        self.gameEngine.textObject.setText(str(int(value)-1))
+        GameUI.display.setText(str(int(value)-1))
 
     def error(self,value):
         print("Invalid command for " + value)
 
     def begin(self,value):
-        self.gameEngine.textObject.setText("Begin")
+        GameUI.display.setText("Begin")
 
 aClient = Client()
 

@@ -50,6 +50,7 @@ class Server(DirectObject):
         self.clientInputList = PyDatagram()
         self.clientInputList.addUint16(SERVER_INPUT)
         self.clientInputList.addUint64(self.serverClock)
+        self.clientsAlive = {}
         # Create network layer objects
 
         # Deals with the basic network stuff
@@ -107,6 +108,7 @@ class Server(DirectObject):
                     self.cReader.addConnection(newConnection)
                     CLIENTS[newConnection] = netAddress.getIpString()
                     CLIENTS_ID[newConnection] = self.playerCount
+                    self.clientsAlive[self.playerCount] = newConnection
                     self.lastConnection = newConnection
                     print("Got a connection!")
                     self.playerCount += 1 
@@ -285,9 +287,12 @@ class Server(DirectObject):
                     z = data.getFloat32()
                     playerHitId = data.getString()
                     if playerHitId != "None":
-                        self.gameEngine.players[int(playerHitId)].health -= 30
-                        if self.gameEngine.players[int(playerHitId)].health < 0:
-                            self.gameEngine.players[int(playerHitId)].health = 0
+                        playerHitId = int(playerHitId)
+                        self.gameEngine.players[playerHitId].health -= 30
+                        if self.gameEngine.players[playerHitId].health <= 0:
+                            self.gameEngine.players[playerHitId].health = 0
+                            if playerHitId in self.clientsAlive:
+                                self.clientsAlive.pop(playerHitId)
                     player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
                 h = data.getFloat32()
                 p = data.getFloat32()
@@ -323,7 +328,7 @@ class Server(DirectObject):
                 self.gameEngine.speed.setY(0)
 
     def broadcastTask(self, task):
-        if CLIENT_INPUT_RECEIVED.__len__() == CLIENTS.__len__():
+        if CLIENT_INPUT_RECEIVED.__len__() >= self.clientsAlive.__len__():
             # print("Broadcasting. Server Clock = " + str(self.serverClock))
             for c in CLIENTS:
                 self.cWriter.send(self.clientInputList, c)
@@ -337,7 +342,7 @@ class Server(DirectObject):
 
         else:
             pass
-            # print("Waiting for all inputs. Server Clock = " + str(self.serverClock), "remaining users = " + str(CLIENTS.__len__() - CLIENT_INPUT_RECEIVED.__len__()))
+            # print("Waiting for all inputs. Server Clock = " + str(self.serverClock), "remaining users = " + str(self.clientsAlive.__len__() - CLIENT_INPUT_RECEIVED.__len__()))
 
         return task.cont
 
