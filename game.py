@@ -2,7 +2,8 @@ from direct.directbase.DirectStart import base
 import math
 import sys
 from direct.actor.Actor import AmbientLight, Vec4, DirectionalLight, Vec3, PNMImage, Filename, WindowProperties, GeoMipTerrain
-from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletDebugNode
+from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletDebugNode, BulletTriangleMesh, \
+    BulletTriangleMeshShape, ZUp, BulletCylinderShape, BulletBoxShape
 from panda3d.core import BitMask32, ClockObject
 from panda3d.bullet import BulletConvexHullShape
 from direct.gui.OnscreenText import OnscreenText
@@ -32,26 +33,33 @@ class GameEngine():
         self.world.setDebugNode(self.debugNP.node())
 
         # Terrain
-        visNP = base.loader.loadModel('models/terraintex.egg')
+        visNP = base.loader.loadModel('models/terrainwithrock.egg')
 
         geom = visNP.findAllMatches('**/+GeomNode').getPath(0).node().getGeom(0)
-        mesh = BulletConvexHullShape()
+        geom1 = visNP.findAllMatches('**/+GeomNode').getPath(1).node().getGeom(0)
+        mesh = BulletTriangleMesh()
         mesh.addGeom(geom)
-        shape = BulletConvexHullShape(mesh)
+        mesh.addGeom(geom1)
+        shape = BulletTriangleMeshShape(mesh, dynamic=True)
 
         body = BulletRigidBodyNode('Bowl')
         bodyNP = base.render.attachNewNode(body)
         bodyNP.node().addShape(shape)
-        # bodyNP.node().setMass(10.0)
         bodyNP.setPos(0, 0, 1)
-        # bodyNP.setScale(600)
         bodyNP.setCollideMask(BitMask32.allOn())
         self.world.attachRigidBody(bodyNP.node())
 
         visNP.reparentTo(bodyNP)
 
-        self.bowlNP = bodyNP
-        self.bowlNP.setScale(20)
+        shapex = BulletBoxShape(5)
+        bodyx = BulletRigidBodyNode('Egg')
+        bodyNPx = base.render.attachNewNode(bodyx)
+        bodyNPx.setPos(0, 0, 3)
+        bodyNPx.node().setMass(100.0)
+        bodyNPx.node().addShape(shapex)
+        self.world.attachRigidBody(bodyNPx.node())
+        # visNP.reparentTo(bodyNPx)
+
 
         # Player
         self.players = []
@@ -68,7 +76,7 @@ class GameEngine():
 
     def initCam(self):
         base.cam.setHpr(0, -90, 0)
-        base.cam.setPos(0, 0, 80)
+        base.cam.setPos(0, 0, 170)
 
     # Debug
     def toggleDebug(self):
