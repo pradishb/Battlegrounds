@@ -5,31 +5,31 @@ from pandac.PandaModules import *
 
 class LineSeg:
     def __init__(self, x=(0, 0, 0), y=(0, 0, 0)):
-        eyepos = LineSegs()
-        eyepos.setColor(0, 1, 0, 1)
-        eyepos.drawTo(x)
-        eyepos.drawTo(y)
-        self.node = eyepos.create()
+        line = LineSegs()
+        line.setColor(0, 1, 0, 1)
+        line.drawTo(x)
+        line.drawTo(y)
+        self.node = line.create()
         self.np = base.render.attachNewNode(self.node)
 
     def update(self, x, y):
-        eyepos = LineSegs()
-        eyepos.setColor(0, 1, 0, 1)
-        eyepos.drawTo(x)
-        eyepos.drawTo(y)
-        self.node = eyepos.create()
+        line = LineSegs()
+        line.setColor(0, 1, 0, 1)
+        line.drawTo(x)
+        line.drawTo(y)
+        self.node = line.create()
         self.np.detachNode()
         self.np = base.render.attachNewNode(self.node)
 
 
 class RayCollider():
     # setup eyepos
-    eyepos = LineSegs()
-    eyepos.setColor(0, 1, 0, 1)
-    eyepos.drawTo(0, 0, 0)
-    eyepos.setThickness(30)
-    node = eyepos.create()
-    np = base.render.attachNewNode(node)
+    # eyepos = LineSegs()
+    # eyepos.setColor(0, 1, 0, 1)
+    # eyepos.drawTo(0, 0, 0)
+    # eyepos.setThickness(30)
+    # node = eyepos.create()
+    # eyeNP = base.render.attachNewNode(node)
 
     playerHitId = None
 
@@ -58,7 +58,7 @@ class RayCollider():
             RayCollider.queue.sortEntries()
 
             point = RayCollider.queue.getEntry(0).getSurfacePoint(render)
-            RayCollider.np.setPos(point)
+            # RayCollider.eyeNP.setPos(point)
             RayCollider.playerHitId = None
             if RayCollider.queue.getEntry(0).getIntoNodePath().getParent().getName() == "__Actor_modelRoot":
                 body_part = RayCollider.queue.getEntry(0).getIntoNodePath().getParent().getParent().getParent().getName()
