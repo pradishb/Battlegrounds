@@ -12,7 +12,6 @@ class Bullet:
     def initialize(self):
         self.shootPos = RayCollider.getBulletHitPos()
 
-
     def initializeWithPos(self, x, y, z):
         self.shootPos = LPoint3f(x, y, z)
 
@@ -22,7 +21,7 @@ class Bullet:
 
 class BulletModel:
     def __init__(self, x, y):
-        self.np = loader.loadModel("models/bullet.egg")
+        self.np = loader.loadModel("smiley")
         self.np.setCollideMask(BitMask32(0x10))
         self.np.setScale(0.05)
         self.np.lookAt(y)

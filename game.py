@@ -6,6 +6,7 @@ from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletDebugNode, Bu
     BulletTriangleMeshShape, BulletBoxShape
 from panda3d.core import BitMask32, ClockObject
 from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
+from sky import Sky
 
 
 class GameEngine():
@@ -68,6 +69,9 @@ class GameEngine():
         props = WindowProperties()
         props.setCursorHidden(True)
         base.win.requestProperties(props)
+
+        #SkySphere
+        Sky()
 
         self.initCam()
 
