@@ -32,7 +32,7 @@ class GameEngine():
         self.world.setDebugNode(self.debugNP.node())
 
         # Terrain
-        visNP = base.loader.loadModel('models/terrainwithrock.egg')
+        visNP = base.loader.loadModel('models/terrain.egg')
 
         mesh = BulletTriangleMesh()
         for x in visNP.findAllMatches('**/+GeomNode'):
