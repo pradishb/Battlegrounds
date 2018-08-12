@@ -94,7 +94,7 @@ class ClientGameEngine(GameEngine):
 
         self.dlight = DirectionalLight('directionalLight')
         self.dlight.setDirection(Vec3(1, 1, -1))
-        self.dlight.setColor(Vec4(0.7, 0.7, 0.7, 1))
+        self.dlight.setColor(Vec4(1, 1, 1, 1))
         self.dlightNP = base.render.attachNewNode(self.dlight)
 
         base.render.clearLight()
