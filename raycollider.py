@@ -59,10 +59,11 @@ class RayCollider():
 
             point = RayCollider.queue.getEntry(0).getSurfacePoint(render)
             RayCollider.np.setPos(point)
+            RayCollider.playerHitId = None
             if RayCollider.queue.getEntry(0).getIntoNodePath().getParent().getName() == "__Actor_modelRoot":
-                RayCollider.playerHitId = RayCollider.queue.getEntry(0).getIntoNodePath().getParent().getParent().getParent().getName()
-            else:
-                RayCollider.playerHitId = None
+                body_part = RayCollider.queue.getEntry(0).getIntoNodePath().getParent().getParent().getParent().getName()
+                if body_part != "mixamorig:RightHand":
+                    RayCollider.playerHitId = body_part
             return point
         pFrom = Point3()
         pTo = Point3()
