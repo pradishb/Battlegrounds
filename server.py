@@ -349,7 +349,7 @@ class Server(DirectObject):
         for client in CLIENTS:
             x = random.randint(1,5)
             y = random.randint(1,5)
-            self.gameEngine.players.append(Player(x, y, 10, CLIENTS_ID[client]))
+            self.gameEngine.players.append(Player(x, y, 20, CLIENTS_ID[client]))
             self.gameEngine.world.attachCharacter(self.gameEngine.players[CLIENTS_ID[client]].playerNP.node())
             ranValPkg.addUint32(CLIENTS_ID[client])
             ranValPkg.addFloat32(x)
