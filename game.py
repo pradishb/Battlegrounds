@@ -5,7 +5,6 @@ from direct.actor.Actor import AmbientLight, Vec4, DirectionalLight, Vec3, PNMIm
 from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletDebugNode, BulletTriangleMesh, \
     BulletTriangleMeshShape, BulletBoxShape
 from panda3d.core import BitMask32, ClockObject
-from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
 
 
@@ -58,9 +57,9 @@ class GameEngine():
         self.world.attachRigidBody(bodyNPx.node())
         # visNP.reparentTo(bodyNPx)
 
-
         # Player
         self.players = []
+        self.myId = -1
         self.speed = Vec3(0, 0, 0)
         self.walk_speed = 5
 
@@ -75,6 +74,14 @@ class GameEngine():
     def initCam(self):
         base.cam.setHpr(0, -90, 0)
         base.cam.setPos(0, 0, 170)
+
+    def deathCamTask(self, task):
+        angleDegrees = task.time * 20.0
+        angleRadians = angleDegrees * (math.pi / 180.0)
+        player = self.players[self.myId].playerNP
+        base.cam.setPos(player.getX() + 10 * math.sin(angleRadians), player.getY() - 10.0 * math.cos(angleRadians), player.getZ() + 5)
+        base.cam.lookAt(player.getPos())
+        return task.cont
 
     # Debug
     def toggleDebug(self):

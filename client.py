@@ -137,7 +137,6 @@ class Client(DirectObject):
                 if playerId == self.id:
                     GameUI.updateHealth(player.health)
                     if player.health == 0:
-                        taskMgr.remove('update')
                         self.gameover()
 
             self.myClock += 1
@@ -195,18 +194,12 @@ class Client(DirectObject):
         self.serverWait = False
 
     def gameover(self):
+        taskMgr.remove('update')
+        taskMgr.add(self.gameEngine.deathCamTask, "DeathCameraTask")
+        self.gameEngine.myId = self.id
+
         gameoverDisplay = GameUI.createDisplayUI("Game Over!")
-        # playerCount = data.getUint32()
-        # for i in range(0, playerCount):
-        #     playerId = data.getUint32()
-        #     x = data.getFloat32()
-        #     y = data.getFloat32()
-        #     self.gameEngine.players.append(Player(x, y, 20, playerId))
-        #     self.gameEngine.world.attachCharacter(self.gameEngine.players[playerId].playerNP.node())
-        # self.gameEngine.showPointer()
-        # self.id = data.getUint32()
-        # taskMgr.add(self.update, 'update')
-        # self.serverWait = False
+
 
     def readTask(self, task):
         while 1:
@@ -305,7 +298,7 @@ class Client(DirectObject):
         temp = msg.split(' ')
         switcher = {
             'timeToStart': self.countdown,
-            'begin' : self.begin            #game startwas already takken
+            'begin': self.begin            #game startwas already takken
             }
         fucn = switcher.get(temp[0],"error")
         fucn(temp[1])
