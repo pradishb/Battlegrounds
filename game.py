@@ -23,7 +23,7 @@ class GameEngine():
         self.debugNode.showBoundingBoxes(False)
         self.debugNode.showNormals(False)
         self.debugNP = base.render.attachNewNode(self.debugNode)
-        self.debugNP.show()
+        # self.debugNP.show()
 
         # World
         self.world = BulletWorld()
