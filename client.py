@@ -49,9 +49,6 @@ class Client(DirectObject):
         inputState.watchWithModifiers('right', 'd')
         inputState.watchWithModifiers('shoot', 'mouse1')
 
-        self.mouseDelay = 10
-        self.mouseDelayCount = self.mouseDelay
-
         # GameUI
         self.healthUI = None
         self.displayUI = GameUI.createDisplayUI("")
@@ -85,15 +82,14 @@ class Client(DirectObject):
         if inputState.isSet('right'):
             inputList[3] = True
         if inputState.isSet('shoot'):
-            if self.mouseDelayCount > self.mouseDelay:
+            if self.gameEngine.players[self.id].weapon.get_reload():
                 pos = RayCollider.getBulletHitPos()
                 inputList[4] = True
                 inputList[5] = pos.getX()
                 inputList[6] = pos.getY()
                 inputList[7] = pos.getZ()
                 inputList[8] = RayCollider.playerHitId
-                self.mouseDelayCount = 0
-        self.mouseDelayCount += 1
+
         self.sendUserInput(inputList)
 
     def sendUserInput(self, inputArr = [], *args):
@@ -176,6 +172,7 @@ class Client(DirectObject):
         self.moveCamera()
         if not self.serverWait:
             self.processInput()
+            self.gameEngine.players[self.id].weapon.update_reload_time()
             self.serverWait = True
         else:
             self.loss += 1
