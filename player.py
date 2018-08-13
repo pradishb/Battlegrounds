@@ -34,7 +34,6 @@ class Player:
         self.playerModel.reparentTo(self.playerNP)
 
         self.playerSpine = self.playerModel.controlJoint(None, 'modelRoot', 'mixamorig:Spine')
-        self.playerSpine.setH(-15)
         self.hand = self.playerModel.exposeJoint(None, 'modelRoot', 'mixamorig:RightHand')
         self.spineExpose = self.playerModel.exposeJoint(None, 'modelRoot', 'mixamorig:Spine')
 
