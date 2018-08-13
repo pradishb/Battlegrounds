@@ -43,7 +43,7 @@ class Server(DirectObject):
         self.accept("escape", self.quit)
         self.lastConnection = None
         self.serverClock = 0
-        self.lobbyWaitTime = 15
+        self.lobbyWaitTime = 6
         self.randomValue = {}
 
         self.playerCount = 0
@@ -83,12 +83,12 @@ class Server(DirectObject):
         taskMgr.add(self.readTask, "serverReadTask", -39)
 
     def listenTask(self, task):
-        if (self.listenStat < 60 * self.lobbyWaitTime):
+        if self.listenStat < 60 * self.lobbyWaitTime:
             x = int(self.listenStat / 60)
-            if(x == (self.listenStat / 60)):
+            if x == (self.listenStat / 60):
                 self.timeToStart = self.lobbyWaitTime - x
                 self.displayText.setText(str(self.timeToStart))
-                self.broadcastMsg(str(self.timeToStart))
+                self.broadcastMsg('/timeToStart ' + str(self.timeToStart))
 
             self.listenStat += 1 
             if self.cListener.newConnectionAvailable():
@@ -108,7 +108,7 @@ class Server(DirectObject):
                     self.playerCount += 1 
                 else:
                     print("getNewConnection returned false")
-            elif (self.listenStat ==  60 * self.lobbyWaitTime):
+            elif self.listenStat ==  60 * self.lobbyWaitTime:
                 self.gameStart()
                 taskMgr.add(self.broadcastTask, "broadcastTask")
         return task.cont
@@ -196,7 +196,7 @@ class Server(DirectObject):
             # authenticated, come on in
             flag = 1
             # CLIENTS[username] = 1
-            print("User: %s, logged in with pass: %s" % (username, password))
+            # print("User: %s, logged in with pass: %s" % (username, password))
         else:
             # Wrong password, try again or bugger off
             flag = 2
@@ -363,8 +363,10 @@ class Server(DirectObject):
                 print(CLIENTS_ID[client])
                 self.cWriter.send(temp, client)
 
+            self.broadcastMsg("/timeToStart Begin")
             taskMgr.add(self.update, 'update')
         else:
+            self.broadcastMsg("/info no_clients")
             GameUI.createWhiteBgUI("Not enough clients connected.")
         self.displayText.destroy()
 
@@ -376,21 +378,6 @@ class Server(DirectObject):
         return task.cont
 
     def broadcastMsg(self, msg):
-        pkg = PyDatagram()
-        pkg.addUint16(SMSG_CHAT)
-        if(self.timeToStart == 1 ):
-            msg = '/' + 'begin' + " " + msg
-        else:
-            msg = '/'+ 'timeToStart' + " " + msg
-
-        #remainingTime_
-        pkg.addString(msg)
-        # print(CLIENTS)
-        for c in CLIENTS:
-            # print(c)
-            self.cWriter.send(pkg,c)
-
-    def broadcastMyMsg(self, msg):
         pkg = PyDatagram()
         pkg.addUint16(SMSG_CHAT)
         pkg.addString(msg)

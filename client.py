@@ -280,7 +280,7 @@ class Client(DirectObject):
             print("Wrong pass, please try again...")
 
         if flag == 1:
-            print("Authentication Successfull")
+            print("Authentication Successful")
 
     def msgChat(self, msgID, data):
         msg = data.getString()
@@ -307,16 +307,21 @@ class Client(DirectObject):
             'timeToStart': self.countdown,
             'begin': self.begin,
             'gameend': self.game_end,
+            'info': self.info,
             }
-        fucn = switcher.get(temp[0], "error")
+        fucn = switcher.get(temp[0], "invalid")
         fucn(temp[1])
 
-
     def countdown(self, value):
-        self.displayUI.setText(str(int(value)-1))
+        self.displayUI.setText(value)
 
-    def error(self, value):
-        print("Invalid command for " + value)
+    def invalid(self, value):
+        GameUI.createWhiteBgUI("Invalid command for " + value)
+
+    def info(self, value):
+        if value == "no_clients":
+            GameUI.createWhiteBgUI("Not enough clients connected.")
+            self.displayUI.destroy()
 
     def begin(self, value):
         self.displayUI.setText("Begin")
