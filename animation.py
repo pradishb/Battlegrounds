@@ -5,7 +5,10 @@ class Animation:
         taskMgr.add(self.animate, 'animate')
 
     def animate(self, task):
-        if self.current == "shooting" or self.current == "shooting idle" or self.current == "shooting walk":
+        if self.player.health == 0 and self.current != "death":
+            self.current = "death"
+            self.player.playerModel.play("death")
+        elif self.current == "shooting" or self.current == "shooting idle" or self.current == "shooting walk":
             if self.player.playerModel.get_current_frame(partName="upperBody") == 23:
                 self.current = None
             if self.player.xSpeed == 0 and self.player.ySpeed == 0 and self.current != "shooting idle":
@@ -17,9 +20,6 @@ class Animation:
         elif self.current == "shoot" and self.current != "shooting":
             self.player.playerModel.play("pistol", partName="upperBody")
             self.current = "shooting"
-        elif self.player.health == 0 and self.current != "death":
-            self.current = "death"
-            self.player.playerModel.play("death")
         elif self.current != "death" and self.current != "shooting":
             if self.player.xSpeed == 0 and self.player.ySpeed == 0 and self.current != "pistol idle":
                 self.current = "pistol idle"
