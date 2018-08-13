@@ -135,6 +135,7 @@ class Client(DirectObject):
                     y = data.getFloat32()
                     z = data.getFloat32()
                     player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
+                    player.animation.current = "shoot"
                 if playerId != self.id:
                     player.playerNP.setH(h)
                     player.playerSpine.setP(p)
