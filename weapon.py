@@ -19,7 +19,6 @@ class Weapon:
 
     def fireWithPos(self, world, x, y, z):
         b = Bullet(world, self.gunHole)
-        print(self.gunHole.getPos(render))
         b.initializeWithPos(x, y, z)
         b.shoot()
 
