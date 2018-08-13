@@ -194,7 +194,7 @@ class Client(DirectObject):
             self.gameEngine.world.attachCharacter(self.gameEngine.players[playerId].playerNP.node())
         self.gameEngine.showPointer()
         self.id = data.getUint32()
-        self.healthUI = GameUI.createHealthUI()
+        self.healthUI = GameUI.createWhiteBgUI("")
         self.serverWait = False
         taskMgr.add(self.update, 'update')
 

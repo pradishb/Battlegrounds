@@ -345,24 +345,29 @@ class Server(DirectObject):
     #to send game's initial stats
     def gameStart(self):
         self.displayText.setText("Starting game...")
-        ranValPkg = PyDatagram()
-        ranValPkg.addUint16(GAME_INITIALIZE)
-        ranValPkg.addUint32(self.playerCount) 
-        for client in CLIENTS:
-            x = random.randint(1,5)
-            y = random.randint(1,5)
-            self.gameEngine.players.append(Player(x, y, 20, CLIENTS_ID[client]))
-            self.gameEngine.world.attachCharacter(self.gameEngine.players[CLIENTS_ID[client]].playerNP.node())
-            ranValPkg.addUint32(CLIENTS_ID[client])
-            ranValPkg.addFloat32(x)
-            ranValPkg.addFloat32(y)
-        for client in CLIENTS:
-            temp = ranValPkg.__copy__()
-            temp.addUint32(CLIENTS_ID[client])
-            print(CLIENTS_ID[client])
-            self.cWriter.send(temp, client)
+        if CLIENTS.__len__() > 0:
+            ranValPkg = PyDatagram()
+            ranValPkg.addUint16(GAME_INITIALIZE)
+            ranValPkg.addUint32(self.playerCount)
+            for client in CLIENTS:
+                x = random.randint(1, 5)
+                y = random.randint(1, 5)
+                self.gameEngine.players.append(Player(x, y, 20, CLIENTS_ID[client]))
+                self.gameEngine.world.attachCharacter(self.gameEngine.players[CLIENTS_ID[client]].playerNP.node())
+                ranValPkg.addUint32(CLIENTS_ID[client])
+                ranValPkg.addFloat32(x)
+                ranValPkg.addFloat32(y)
+            for client in CLIENTS:
+                temp = ranValPkg.__copy__()
+                temp.addUint32(CLIENTS_ID[client])
+                print(CLIENTS_ID[client])
+                self.cWriter.send(temp, client)
 
-        taskMgr.add(self.update, 'update')
+            taskMgr.add(self.update, 'update')
+        else:
+            GameUI.createWhiteBgUI("No clients connected.")
+        self.displayText.destroy()
+
 
     # Update
     def update(self, task):

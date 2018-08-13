@@ -12,7 +12,7 @@ class GameUI:
         return display
 
     @staticmethod
-    def createHealthUI():
-        health = OnscreenText(text="Health = 100", pos=(-.85, 0.9), font=GameUI.font, scale=0.1, fg=(0, 0, 0, 1),
+    def createWhiteBgUI(text):
+        display = OnscreenText(text=text, pos=(-.85, 0.9), font=GameUI.font, scale=0.1, fg=(0, 0, 0, 1),
                                      bg=(1, 1, 1, 1))
-        return health
+        return display
