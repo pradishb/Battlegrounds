@@ -19,7 +19,7 @@ class BulletModel:
     def __init__(self, x, y):
         self.np = loader.loadModel("models/bullet.egg")
         self.np.setCollideMask(BitMask32(0x10))
-        self.np.setScale(0.05)
+        self.np.setScale(0.025)
         self.np.setPos(x.getPos(render))
         self.np.lookAt(y)
         self.np.reparentTo(base.render)
