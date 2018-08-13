@@ -334,8 +334,7 @@ class Server(DirectObject):
             self.clientInputList.addUint64(self.serverClock)
             CLIENT_INPUT_RECEIVED.clear()
             if self.clientsAlive.__len__() == 1:
-                print("game end")
-                self.broadcastMyMsg("/game_end " + str(self.clientsAlive.popitem()[0]))
+                self.broadcastMsg("/game_end " + str(self.clientsAlive.popitem()[0]))
         else:
             pass
             # print("Waiting for all inputs. Server Clock = " + str(self.serverClock), "remaining users = " + str(self.clientsAlive.__len__() - CLIENT_INPUT_RECEIVED.__len__()))
@@ -360,7 +359,6 @@ class Server(DirectObject):
             for client in CLIENTS:
                 temp = ranValPkg.__copy__()
                 temp.addUint32(CLIENTS_ID[client])
-                print(CLIENTS_ID[client])
                 self.cWriter.send(temp, client)
             taskMgr.add(self.update, 'update')
         else:
