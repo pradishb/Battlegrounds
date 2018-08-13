@@ -7,7 +7,7 @@ class ParticleEffects:
     p = ParticleEffect()
     p.cleanup()
     p = ParticleEffect()
-    p.loadConfig(Filename('yellow.ptf'))
+    p.loadConfig(Filename('bullet_trail.ptf'))
     p.setH(-90)
     p.setY(20)
 
