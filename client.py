@@ -67,6 +67,8 @@ class Client(DirectObject):
             self.cReader.addConnection(self.Connection)
             taskMgr.add(self.readTask, "serverReaderPollTask", -39)
             self.sendMsgAuth()
+        else:
+            self.informationUI = GameUI.createWhiteBgUI("No server found.")
         self.serverWait = True
 
     # player inputs
