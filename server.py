@@ -43,7 +43,7 @@ class Server(DirectObject):
         self.accept("escape", self.quit)
         self.lastConnection = None
         self.serverClock = 0
-        self.lobbyWaitTime = 5
+        self.lobbyWaitTime = 15
         self.randomValue = {}
 
         self.playerCount = 0
