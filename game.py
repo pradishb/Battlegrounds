@@ -62,7 +62,7 @@ class GameEngine():
         self.players = []
         self.myId = -1
         self.speed = Vec3(0, 0, 0)
-        self.walk_speed = 2
+        self.walk_speed = 3
 
         # Camera
         base.disableMouse()
