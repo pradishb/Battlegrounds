@@ -305,8 +305,7 @@ class Client(DirectObject):
         temp = msg.split(' ')
         switcher = {
             'timeToStart': self.countdown,
-            'begin': self.begin,
-            'gameend': self.game_end,
+            'game_end': self.game_end,
             'info': self.info,
             }
         fucn = switcher.get(temp[0], "invalid")
@@ -322,9 +321,6 @@ class Client(DirectObject):
         if value == "no_clients":
             GameUI.createWhiteBgUI("Not enough clients connected.")
             self.displayUI.destroy()
-
-    def begin(self, value):
-        self.displayUI.setText("Begin")
 
     def game_end(self, value):
         if int(value) == self.id:
