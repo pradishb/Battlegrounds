@@ -345,7 +345,7 @@ class Server(DirectObject):
     #to send game's initial stats
     def gameStart(self):
         self.displayText.setText("Starting game...")
-        if CLIENTS.__len__() > 0:
+        if CLIENTS.__len__() > 1:
             ranValPkg = PyDatagram()
             ranValPkg.addUint16(GAME_INITIALIZE)
             ranValPkg.addUint32(self.playerCount)
@@ -365,7 +365,7 @@ class Server(DirectObject):
 
             taskMgr.add(self.update, 'update')
         else:
-            GameUI.createWhiteBgUI("No clients connected.")
+            GameUI.createWhiteBgUI("Not enough clients connected.")
         self.displayText.destroy()
 
 
