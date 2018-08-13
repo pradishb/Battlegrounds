@@ -48,8 +48,13 @@ class Client(DirectObject):
         inputState.watchWithModifiers('reverse', 's')
         inputState.watchWithModifiers('right', 'd')
         inputState.watchWithModifiers('shoot', 'mouse1')
+
         self.mouseDelay = 10
         self.mouseDelayCount = self.mouseDelay
+
+        # GameUI
+        self.healthUI = None
+        self.displayUI = GameUI.createDisplayUI("")
 
         self.cManager = QueuedConnectionManager()
         self.cListener = QueuedConnectionListener(self.cManager, 0)
@@ -134,7 +139,7 @@ class Client(DirectObject):
 
                 player.health = data.getUint8()
                 if playerId == self.id:
-                    GameUI.updateHealth(player.health)
+                    self.healthUI.setText("Health : " + str(player.health))
                     if player.health == 0:
                         self.gameover()
 
@@ -179,7 +184,7 @@ class Client(DirectObject):
         return task.cont
 
     def gameInitialize(self, msgID, data):
-        GameUI.display.destroy()
+        self.displayUI.destroy()
         playerCount = data.getUint32()
         for i in range(0, playerCount):
             playerId = data.getUint32()
@@ -189,8 +194,9 @@ class Client(DirectObject):
             self.gameEngine.world.attachCharacter(self.gameEngine.players[playerId].playerNP.node())
         self.gameEngine.showPointer()
         self.id = data.getUint32()
-        taskMgr.add(self.update, 'update')
+        self.healthUI = GameUI.createHealthUI()
         self.serverWait = False
+        taskMgr.add(self.update, 'update')
 
     def gameover(self):
         taskMgr.remove('update')
@@ -304,13 +310,13 @@ class Client(DirectObject):
 
 
     def countdown(self, value):
-        GameUI.display.setText(str(int(value)-1))
+        self.displayUI.setText(str(int(value)-1))
 
     def error(self, value):
         print("Invalid command for " + value)
 
     def begin(self, value):
-        GameUI.display.setText("Begin")
+        self.displayUI.setText("Begin")
 
     def game_end(self, value):
         if int(value) == self.id:

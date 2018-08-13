@@ -1,11 +1,14 @@
-from direct.showbase.DirectObject import DirectObject
+import sys
+import random
+
 from pandac.PandaModules import *
+from direct.showbase.DirectObject import DirectObject
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
-import sys
+
 from game import GameEngine
 from player import Player
-import random
+from gameui import GameUI
 
 PORT = 9099
 
@@ -41,7 +44,6 @@ class Server(DirectObject):
         self.lastConnection = None
         self.serverClock = 0
         self.lobbyWaitTime = 5
-
         self.randomValue = {}
 
         self.playerCount = 0
@@ -51,6 +53,8 @@ class Server(DirectObject):
         self.clientInputList.addUint16(SERVER_INPUT)
         self.clientInputList.addUint64(self.serverClock)
         self.clientsAlive = {}
+
+        self.displayText = GameUI.createDisplayUI("Loading...")
         # Create network layer objects
 
         # Deals with the basic network stuff
@@ -79,21 +83,11 @@ class Server(DirectObject):
         taskMgr.add(self.readTask, "serverReadTask", -39)
 
     def listenTask(self, task):
-        """
-        Accept new incoming connections from the client
-        """
-        # Run this task after the dataLoop
-
-        # If there's a new connection Handle it
         if (self.listenStat < 60 * self.lobbyWaitTime):
-            x = 0
-            y = 0
-            timeToStart = 0
-            ranVal = {}
             x = int(self.listenStat / 60)
             if(x == (self.listenStat / 60)):
                 self.timeToStart = self.lobbyWaitTime - x
-                print(self.timeToStart)
+                self.displayText.setText(str(self.timeToStart))
                 self.broadcastMsg(str(self.timeToStart))
 
             self.listenStat += 1 
@@ -350,6 +344,7 @@ class Server(DirectObject):
 
     #to send game's initial stats
     def gameStart(self):
+        self.displayText.setText("Starting game...")
         ranValPkg = PyDatagram()
         ranValPkg.addUint16(GAME_INITIALIZE)
         ranValPkg.addUint32(self.playerCount) 
@@ -368,7 +363,6 @@ class Server(DirectObject):
             self.cWriter.send(temp, client)
 
         taskMgr.add(self.update, 'update')
-        print("Starting game...")
 
     # Update
     def update(self, task):
