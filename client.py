@@ -293,24 +293,28 @@ class Client(DirectObject):
         sys.exit()
 
     def consoleCmdExecutor(self,msg):
-        temp = []
         temp = msg.split(' ')
         switcher = {
             'timeToStart': self.countdown,
-            'begin': self.begin            #game startwas already takken
+            'begin': self.begin,
+            'gameend': self.game_end,
             }
-        fucn = switcher.get(temp[0],"error")
+        fucn = switcher.get(temp[0], "error")
         fucn(temp[1])
 
 
-    def countdown(self,value):
+    def countdown(self, value):
         GameUI.display.setText(str(int(value)-1))
 
-    def error(self,value):
+    def error(self, value):
         print("Invalid command for " + value)
 
-    def begin(self,value):
+    def begin(self, value):
         GameUI.display.setText("Begin")
+
+    def game_end(self, value):
+        if int(value) == self.id:
+            GameUI.createDisplayUI("You Win!")
 
 aClient = Client()
 

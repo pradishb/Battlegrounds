@@ -339,7 +339,9 @@ class Server(DirectObject):
             self.clientInputList.addUint16(SERVER_INPUT)
             self.clientInputList.addUint64(self.serverClock)
             CLIENT_INPUT_RECEIVED.clear()
-
+            if self.clientsAlive.__len__() == 1:
+                print("game end")
+                self.broadcastMyMsg("/gameend " + str(self.clientsAlive.popitem()[0]))
         else:
             pass
             # print("Waiting for all inputs. Server Clock = " + str(self.serverClock), "remaining users = " + str(self.clientsAlive.__len__() - CLIENT_INPUT_RECEIVED.__len__()))
@@ -387,6 +389,13 @@ class Server(DirectObject):
         # print(CLIENTS)
         for c in CLIENTS:
             # print(c)
+            self.cWriter.send(pkg,c)
+
+    def broadcastMyMsg(self, msg):
+        pkg = PyDatagram()
+        pkg.addUint16(SMSG_CHAT)
+        pkg.addString(msg)
+        for c in CLIENTS:
             self.cWriter.send(pkg,c)
 
 # create a server object on port 9099
