@@ -1,6 +1,6 @@
+from direct.distributed.PyDatagram import PyDatagram
 from pandac.PandaModules import *
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
-
 
 PORT = 9099
 
@@ -96,12 +96,33 @@ class ServerNetwork:
             print(data)
         return
 
+    def broadcast_pkg(self, pkg):
+        for c in CLIENTS:
+            self.cWriter.send(pkg, c)
+
+    def broadcastMsg(self, msg):
+        pkg = PyDatagram()
+        pkg.addUint16(SMSG_CHAT)
+        pkg.addString(msg)
+        self.broadcast_pkg(pkg)
+
     def msgChat(self, msgID, data, client):
         print("ChatMsg: %s" % data.getString())
+
+    def send_server_info(self):
+        pkg = PyDatagram()
+        pkg.addUint16(SMSG_INFO)
+        for client, ip in CLIENTS.items():
+            pkg.addUint8(CLIENTS_ID[client])
+            pkg.addString(CLIENTS_USER_NAMES[client])
+            pkg.addString(ip)
+            pkg.addBool(False)
+        self.broadcast_pkg(pkg)
 
     def handle_client_info(self, msgID, data, client):
         CLIENTS_USER_NAMES[client] = data.getString()
         self.create_table_list()
+        self.send_server_info()
 
     def create_table_list(self):
         client_list = []
@@ -114,5 +135,4 @@ class ServerNetwork:
             ip_list.append(ip)
             ready_list.append(False)
 
-        self.gui.update_server_table(client_list, name_list, ip_list, ready_list)
-
+        self.gui.update_table(client_list, name_list, ip_list, ready_list)

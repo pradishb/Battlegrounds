@@ -1,6 +1,5 @@
 from direct.gui.DirectGui import *
 from panda3d.core import *
-from client_network import ClientNetwork
 
 
 class LobbyGui:
@@ -32,12 +31,18 @@ class LobbyGui:
 
         Layout.create_table(self.chat_box, 2.4, -1.2, 0.2, None, chat_size, chat_values, None)
 
+    def update_table(self, client_list, name_list, ip_list, ready_list):
+        self.table_labels = ["id", "name", "ip address", "ready"]
+        self.table_values = [client_list, name_list, ip_list, ready_list]
+        self.table_size = [.10, .30, .40, .20]
+        Layout.create_table(self.lobby_table, 2.4, -1.2, 0.35,
+                            self.table_labels, self.table_size, self.table_values, 0)
+
 
 class ClientGui(LobbyGui):
-    def __init__(self):
+    def __init__(self, client):
         LobbyGui.__init__(self)
-        self.myNetwork = ClientNetwork()
-
+        self.client = client
         self.server_ip_text = DirectEntry(text="", scale=.1, initialText="127.0.0.1", focus=1)
         self.connect_server_button = DirectButton(text="Connect Server", scale=0.1, command=self.connect_button_handler)
         self.ready_button = DirectButton(text="Ready", scale=0.1)
@@ -55,7 +60,7 @@ class ClientGui(LobbyGui):
     def connect_button_handler(self):
         if self.dialog:
             self.dialog.destroy()
-        msg = self.myNetwork.connect_to_server(self.server_ip_text.get())
+        msg = self.client.myNetwork.connect_to_server(self.server_ip_text.get())
         self.dialog = OkDialog(text=msg, command=self.del_dialog)
 
     def del_dialog(self, arg):
@@ -72,13 +77,6 @@ class ServerGui(LobbyGui):
         Layout.add_object(self.lobby_table, 1, 0.05)
         Layout.add_object(self.chat_text, 0.1, -0.05)
         Layout.add_object(self.chat_box, 1, 0.05)
-
-    def update_server_table(self, client_list, name_list, ip_list, ready_list):
-        self.table_labels = ["id", "name", "ip address", "ready"]
-        self.table_values = [client_list, name_list, ip_list, ready_list]
-        self.table_size = [.10, .30, .40, .20]
-        Layout.create_table(self.lobby_table, 2.4, -1.2, 0.35,
-                            self.table_labels, self.table_size, self.table_values, 0)
 
 
 class Layout:
