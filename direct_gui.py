@@ -1,6 +1,7 @@
 from direct.gui.DirectGui import *
 from panda3d.core import *
 from client_network import ClientNetwork
+from server_network import ServerNetwork
 
 
 class LobbyGui:
@@ -29,7 +30,6 @@ class LobbyGui:
         self.chat_box = DirectScrolledFrame(frameColor=(1, 1, 1, 1),
                                        frameSize=(-1.2, 1.2, -0.2, 0.2),
                                        canvasSize=(-1.2, 1.1, -0.2, 0.2), )
-        self.ready_button = DirectButton(text="Ready", scale=0.1)
 
         Layout.create_table(self.lobby_table, 2.4, -1.2, 0.35,
                             self.table_labels, self.table_size, self.table_values, my_id)
@@ -43,7 +43,10 @@ class ClientGui(LobbyGui):
 
         self.server_ip_text = DirectEntry(text="", scale=.1, initialText="127.0.0.1", focus=1)
         self.connect_server_button = DirectButton(text="Connect Server", scale=0.1, command=self.connect_button_handler)
+        self.ready_button = DirectButton(text="Ready", scale=0.1)
+        self.init_layout()
 
+    def init_layout(self):
         Layout.add_object(self.server_ip_text, 0.1, 0)
         Layout.add_object(self.connect_server_button, 0.1, 0)
         Layout.add_object(self.lobby_text, 0.1, -0.05)
@@ -62,11 +65,17 @@ class ClientGui(LobbyGui):
         self.dialog.destroy()
 
 
-
-
 class ServerGui(LobbyGui):
     def __init__(self):
         LobbyGui.__init__(self)
+        self.myNetwork = ServerNetwork()
+        self.init_layout()
+
+    def init_layout(self):
+        Layout.add_object(self.lobby_text, 0.1, -0.05)
+        Layout.add_object(self.lobby_table, 1, 0.05)
+        Layout.add_object(self.chat_text, 0.1, -0.05)
+        Layout.add_object(self.chat_box, 1, 0.05)
 
 
 class Layout:

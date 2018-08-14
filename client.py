@@ -1,6 +1,6 @@
+from direct.showbase.ShowBase import ShowBase
 from panda3d.bullet import ZUp
 from pandac.PandaModules import *
-from direct.showbase.DirectObject import DirectObject
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from direct.showbase.InputStateGlobal import inputState
@@ -30,10 +30,10 @@ SERVER_INPUT = 8
 GAME_INITIALIZE = 9
 
 
-class Client(DirectObject):
+class Client(ShowBase):
     def __init__(self):
-        DirectObject.__init__(self)
-        base.setFrameRateMeter(True)
+        ShowBase.__init__(self)
+        self.setFrameRateMeter(True)
         globalClock.setFrameRate(60)
         globalClock.setMode(ClockObject.MLimited)
 
