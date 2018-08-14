@@ -43,7 +43,7 @@ class ClientNetwork:
 
             if self.Connection:
                 self.cReader.addConnection(self.Connection)
-                self.send_user_info("lmao")
+                self.send_user_info(self.gui.username_text.get())
                 taskMgr.add(self.read_task, "serverReaderPollTask", -39)
                 return "Connection Successful!"
             else:
