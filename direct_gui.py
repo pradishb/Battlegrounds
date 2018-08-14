@@ -1,9 +1,13 @@
 from direct.gui.DirectGui import *
 from panda3d.core import *
+from client_network import ClientNetwork
 
 
 class LobbyGui:
     def __init__(self):
+        self.myNetwork = ClientNetwork()
+        self.dialog = None
+
         my_id = 1
 
         client_list = [0, 1, 2]
@@ -19,7 +23,7 @@ class LobbyGui:
         table_size = [.10, .30, .40, .20]
 
         server_ip_text = DirectEntry(text="", scale=.1, initialText="Enter Server Ip", focus=1)
-        connect_server_button = DirectButton(text="Connect Server", scale=0.1)
+        connect_server_button = DirectButton(text="Connect Server", scale=0.1, command=self.connect_button_handler)
         lobby_text = DirectLabel(text="Lobby", scale=0.1)
         lobby_table = DirectScrolledFrame(frameColor=(1, 1, 1, 1),
                                           frameSize=(-1.2, 1.2, -0.35, 0.35),
@@ -40,6 +44,18 @@ class LobbyGui:
         Layout.add_object(chat_text, 0.1, -0.05)
         Layout.add_object(chat_box, 1, 0.05)
         Layout.add_object(ready_button, 0.1, -0.05)
+
+        self.myNetwork.connect_to_server()
+
+    def connect_button_handler(self):
+        if self.myNetwork.connect_to_server():
+            self.dialog = OkDialog(text="Connection Successful!", command=self.del_dialog)
+        else:
+            self.dialog = OkDialog(text="Connection Failed!", command=self.del_dialog)
+
+    def del_dialog(self, arg):
+        self.dialog.destroy()
+
 
 
 class Layout:

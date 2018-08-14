@@ -59,19 +59,6 @@ class Client(DirectObject):
         # self.healthUI = None
         # self.displayUI = GameUI.createDisplayUI("")
         #
-        # self.cManager = QueuedConnectionManager()
-        # self.cListener = QueuedConnectionListener(self.cManager, 0)
-        # self.cReader = QueuedConnectionReader(self.cManager, 0)
-        # self.cWriter = ConnectionWriter(self.cManager, 0)
-        #
-        # self.Connection = self.cManager.openTCPClientConnection(IP, PORT, 1)
-        #
-        # if(self.Connection):
-        #     self.cReader.addConnection(self.Connection)
-        #     taskMgr.add(self.readTask, "serverReaderPollTask", -39)
-        #     self.sendMsgAuth()
-        # else:
-        #     self.informationUI = GameUI.createWhiteBgUI("No server found.")
         # self.serverWait = True
 
     # player inputs
