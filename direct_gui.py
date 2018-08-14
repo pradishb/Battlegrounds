@@ -55,10 +55,8 @@ class ClientGui(LobbyGui):
     def connect_button_handler(self):
         if self.dialog:
             self.dialog.destroy()
-        if self.myNetwork.connect_to_server(self.server_ip_text.get()):
-            self.dialog = OkDialog(text="Connection Successful!", command=self.del_dialog)
-        else:
-            self.dialog = OkDialog(text="Connection Failed!", command=self.del_dialog)
+        msg = self.myNetwork.connect_to_server(self.server_ip_text.get())
+        self.dialog = OkDialog(text=msg, command=self.del_dialog)
 
     def del_dialog(self, arg):
         self.dialog.destroy()

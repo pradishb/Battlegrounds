@@ -30,15 +30,17 @@ class ClientNetwork:
         }
 
     def connect_to_server(self, ip):
-        self.Connection = self.cManager.openTCPClientConnection(ip, 9099, 1)
+        if not self.Connection:
+            self.Connection = self.cManager.openTCPClientConnection(ip, 9099, 1)
 
-        if self.Connection:
-            self.cReader.addConnection(self.Connection)
-            taskMgr.add(self.read_task, "serverReaderPollTask", -39)
-            # self.sendMsgAuth()
-            return True
+            if self.Connection:
+                self.cReader.addConnection(self.Connection)
+                taskMgr.add(self.read_task, "serverReaderPollTask", -39)
+                return "Connection Successful!"
+            else:
+                return "Connection Failed!"
         else:
-            return False
+            return "Already connected to a server."
 
     def read_task(self, task):
         while 1:
