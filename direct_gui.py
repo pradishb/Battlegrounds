@@ -22,7 +22,7 @@ class LobbyGui:
         table_values = [client_list, client_names, client_ip, client_ready]
         table_size = [.10, .30, .40, .20]
 
-        server_ip_text = DirectEntry(text="", scale=.1, initialText="Enter Server Ip", focus=1)
+        self.server_ip_text = DirectEntry(text="", scale=.1, initialText="127.0.0.1", focus=1)
         connect_server_button = DirectButton(text="Connect Server", scale=0.1, command=self.connect_button_handler)
         lobby_text = DirectLabel(text="Lobby", scale=0.1)
         lobby_table = DirectScrolledFrame(frameColor=(1, 1, 1, 1),
@@ -37,7 +37,7 @@ class LobbyGui:
         Layout.create_table(lobby_table, 2.4, -1.2, 0.35, table_labels, table_size, table_values, my_id)
         Layout.create_table(chat_box, 2.4, -1.2, 0.2, None, chat_size, chat_values, None)
 
-        Layout.add_object(server_ip_text, 0.1, 0)
+        Layout.add_object(self.server_ip_text, 0.1, 0)
         Layout.add_object(connect_server_button, 0.1, 0)
         Layout.add_object(lobby_text, 0.1, -0.05)
         Layout.add_object(lobby_table, 1, 0.05)
@@ -45,10 +45,8 @@ class LobbyGui:
         Layout.add_object(chat_box, 1, 0.05)
         Layout.add_object(ready_button, 0.1, -0.05)
 
-        self.myNetwork.connect_to_server()
-
     def connect_button_handler(self):
-        if self.myNetwork.connect_to_server():
+        if self.myNetwork.connect_to_server(self.server_ip_text.get()):
             self.dialog = OkDialog(text="Connection Successful!", command=self.del_dialog)
         else:
             self.dialog = OkDialog(text="Connection Failed!", command=self.del_dialog)
