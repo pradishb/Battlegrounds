@@ -9,7 +9,7 @@ from game import ClientGameEngine
 from player import Player
 from raycollider import RayCollider
 from gameui import GameUI
-from direct_gui import LobbyGui
+from direct_gui import ClientGui
 import math
 import sys
 
@@ -37,7 +37,7 @@ class Client(DirectObject):
         globalClock.setFrameRate(60)
         globalClock.setMode(ClockObject.MLimited)
 
-        self.lobbyGui = LobbyGui()
+        self.clientGui = ClientGui()
         # self.gameEngine = ClientGameEngine()
         # self.accept("escape", self.sendMsgDisconnectReq)
         #

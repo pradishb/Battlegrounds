@@ -5,7 +5,6 @@ from client_network import ClientNetwork
 
 class LobbyGui:
     def __init__(self):
-        self.myNetwork = ClientNetwork()
         self.dialog = None
 
         my_id = 1
@@ -18,32 +17,40 @@ class LobbyGui:
         chat_values = [["Server : hello", "me : hi"]]
         chat_size = [1]
 
-        table_labels = ["id", "name", "ip address", "ready"]
-        table_values = [client_list, client_names, client_ip, client_ready]
-        table_size = [.10, .30, .40, .20]
+        self.table_labels = ["id", "name", "ip address", "ready"]
+        self.table_values = [client_list, client_names, client_ip, client_ready]
+        self.table_size = [.10, .30, .40, .20]
 
-        self.server_ip_text = DirectEntry(text="", scale=.1, initialText="127.0.0.1", focus=1)
-        connect_server_button = DirectButton(text="Connect Server", scale=0.1, command=self.connect_button_handler)
-        lobby_text = DirectLabel(text="Lobby", scale=0.1)
-        lobby_table = DirectScrolledFrame(frameColor=(1, 1, 1, 1),
+        self.lobby_text = DirectLabel(text="Lobby", scale=0.1)
+        self.lobby_table = DirectScrolledFrame(frameColor=(1, 1, 1, 1),
                                           frameSize=(-1.2, 1.2, -0.35, 0.35),
                                           canvasSize=(-1.2, 1.1, -0.35, 0.35), )
-        chat_text = DirectLabel(text="Chat", scale=0.1)
-        chat_box = DirectScrolledFrame(frameColor=(1, 1, 1, 1),
+        self.chat_text = DirectLabel(text="Chat", scale=0.1)
+        self.chat_box = DirectScrolledFrame(frameColor=(1, 1, 1, 1),
                                        frameSize=(-1.2, 1.2, -0.2, 0.2),
                                        canvasSize=(-1.2, 1.1, -0.2, 0.2), )
-        ready_button = DirectButton(text="Ready", scale=0.1)
+        self.ready_button = DirectButton(text="Ready", scale=0.1)
 
-        Layout.create_table(lobby_table, 2.4, -1.2, 0.35, table_labels, table_size, table_values, my_id)
-        Layout.create_table(chat_box, 2.4, -1.2, 0.2, None, chat_size, chat_values, None)
+        Layout.create_table(self.lobby_table, 2.4, -1.2, 0.35,
+                            self.table_labels, self.table_size, self.table_values, my_id)
+        Layout.create_table(self.chat_box, 2.4, -1.2, 0.2, None, chat_size, chat_values, None)
+
+
+class ClientGui(LobbyGui):
+    def __init__(self):
+        LobbyGui.__init__(self)
+        self.myNetwork = ClientNetwork()
+
+        self.server_ip_text = DirectEntry(text="", scale=.1, initialText="127.0.0.1", focus=1)
+        self.connect_server_button = DirectButton(text="Connect Server", scale=0.1, command=self.connect_button_handler)
 
         Layout.add_object(self.server_ip_text, 0.1, 0)
-        Layout.add_object(connect_server_button, 0.1, 0)
-        Layout.add_object(lobby_text, 0.1, -0.05)
-        Layout.add_object(lobby_table, 1, 0.05)
-        Layout.add_object(chat_text, 0.1, -0.05)
-        Layout.add_object(chat_box, 1, 0.05)
-        Layout.add_object(ready_button, 0.1, -0.05)
+        Layout.add_object(self.connect_server_button, 0.1, 0)
+        Layout.add_object(self.lobby_text, 0.1, -0.05)
+        Layout.add_object(self.lobby_table, 1, 0.05)
+        Layout.add_object(self.chat_text, 0.1, -0.05)
+        Layout.add_object(self.chat_box, 1, 0.05)
+        Layout.add_object(self.ready_button, 0.1, -0.05)
 
     def connect_button_handler(self):
         if self.myNetwork.connect_to_server(self.server_ip_text.get()):
@@ -54,6 +61,12 @@ class LobbyGui:
     def del_dialog(self, arg):
         self.dialog.destroy()
 
+
+
+
+class ServerGui(LobbyGui):
+    def __init__(self):
+        LobbyGui.__init__(self)
 
 
 class Layout:
