@@ -121,7 +121,7 @@ class ClientNetwork:
         if msg[:1] == '/':
             msg = msg.strip('/')
             args = msg.split(' ')
-            cmd = self.command_handlers.pop(args[0], "invalid")
+            cmd = self.command_handlers.get(args[0], self.invalid)
             cmd(args)
         else:
             self.client.clientGui.update_chat(msg)
@@ -143,6 +143,7 @@ class ClientNetwork:
         pass
 
     def invalid(self, value):
+        print("Invalid command.")
         pass
 
     def info(self, value):

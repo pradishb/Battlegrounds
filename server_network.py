@@ -149,6 +149,10 @@ class ServerNetwork:
         CLIENTS_READY[RELATION_OBJ_ID[client]] = True
         self.create_table_list()
         self.send_server_info()
+        if self.playerCount >= 2 and all(v for k, v in CLIENTS_READY.items()):
+            chat_msg = "/start"
+            self.broadcastMsg(chat_msg)
+            self.gui.update_chat(chat_msg)
 
     def create_table_list(self):
         client_list = []
