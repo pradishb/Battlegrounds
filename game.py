@@ -11,9 +11,6 @@ from sky import Sky
 
 class GameEngine():
     def __init__(self):
-        base.setFrameRateMeter(True)
-        globalClock.setFrameRate(60)
-        globalClock.setMode(ClockObject.MLimited)
 
         base.accept('f1', self.toggleDebug)
         base.accept('escape', sys.exit, [0])

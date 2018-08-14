@@ -9,6 +9,7 @@ from game import ClientGameEngine
 from player import Player
 from raycollider import RayCollider
 from gameui import GameUI
+from direct_gui import LobbyGui
 import math
 import sys
 
@@ -32,41 +33,46 @@ GAME_INITIALIZE = 9
 class Client(DirectObject):
     def __init__(self):
         DirectObject.__init__(self)
-        self.gameEngine = ClientGameEngine()
-        self.accept("escape", self.sendMsgDisconnectReq)
+        base.setFrameRateMeter(True)
+        globalClock.setFrameRate(60)
+        globalClock.setMode(ClockObject.MLimited)
 
-        self.gameStart = False
-        self.myClock = 0
-        self.heading = 0
-        self.pitch = 40
-        self.skip = 0
-        self.loss = 0
-        self.id = 0
-
-        inputState.watchWithModifiers('forward', 'w')
-        inputState.watchWithModifiers('left', 'a')
-        inputState.watchWithModifiers('reverse', 's')
-        inputState.watchWithModifiers('right', 'd')
-        inputState.watchWithModifiers('shoot', 'mouse1')
-
-        # GameUI
-        self.healthUI = None
-        self.displayUI = GameUI.createDisplayUI("")
-
-        self.cManager = QueuedConnectionManager()
-        self.cListener = QueuedConnectionListener(self.cManager, 0)
-        self.cReader = QueuedConnectionReader(self.cManager, 0)
-        self.cWriter = ConnectionWriter(self.cManager, 0)
-
-        self.Connection = self.cManager.openTCPClientConnection(IP, PORT, 1)
-
-        if(self.Connection):
-            self.cReader.addConnection(self.Connection)
-            taskMgr.add(self.readTask, "serverReaderPollTask", -39)
-            self.sendMsgAuth()
-        else:
-            self.informationUI = GameUI.createWhiteBgUI("No server found.")
-        self.serverWait = True
+        self.lobbyGui = LobbyGui()
+        # self.gameEngine = ClientGameEngine()
+        # self.accept("escape", self.sendMsgDisconnectReq)
+        #
+        # self.gameStart = False
+        # self.myClock = 0
+        # self.heading = 0
+        # self.pitch = 40
+        # self.skip = 0
+        # self.loss = 0
+        # self.id = 0
+        #
+        # inputState.watchWithModifiers('forward', 'w')
+        # inputState.watchWithModifiers('left', 'a')
+        # inputState.watchWithModifiers('reverse', 's')
+        # inputState.watchWithModifiers('right', 'd')
+        # inputState.watchWithModifiers('shoot', 'mouse1')
+        #
+        # # GameUI
+        # self.healthUI = None
+        # self.displayUI = GameUI.createDisplayUI("")
+        #
+        # self.cManager = QueuedConnectionManager()
+        # self.cListener = QueuedConnectionListener(self.cManager, 0)
+        # self.cReader = QueuedConnectionReader(self.cManager, 0)
+        # self.cWriter = ConnectionWriter(self.cManager, 0)
+        #
+        # self.Connection = self.cManager.openTCPClientConnection(IP, PORT, 1)
+        #
+        # if(self.Connection):
+        #     self.cReader.addConnection(self.Connection)
+        #     taskMgr.add(self.readTask, "serverReaderPollTask", -39)
+        #     self.sendMsgAuth()
+        # else:
+        #     self.informationUI = GameUI.createWhiteBgUI("No server found.")
+        # self.serverWait = True
 
     # player inputs
     def processInput(self):
