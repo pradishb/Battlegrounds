@@ -123,6 +123,9 @@ class ServerNetwork:
         CLIENTS_USER_NAMES[client] = data.getString()
         self.create_table_list()
         self.send_server_info()
+        chat_msg = "Server : " + CLIENTS_USER_NAMES[client] + "has joined the lobby."
+        self.broadcastMsg(chat_msg)
+        self.gui.update_chat(chat_msg)
 
     def create_table_list(self):
         client_list = []

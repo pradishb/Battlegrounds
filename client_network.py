@@ -40,7 +40,6 @@ class ClientNetwork:
     def connect_to_server(self, ip):
         if not self.Connection:
             self.Connection = self.cManager.openTCPClientConnection(ip, 9099, 1)
-
             if self.Connection:
                 self.cReader.addConnection(self.Connection)
                 self.send_user_info(self.gui.username_text.get())
@@ -110,7 +109,9 @@ class ClientNetwork:
             msg = msg.strip('/')
             self.console_cmd_executor(msg)
         else:
+            self.gui.update_chat(msg)
             print(msg)
+
 
     def create_table_list(self):
         client_list = []

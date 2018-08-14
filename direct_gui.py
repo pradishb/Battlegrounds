@@ -6,8 +6,7 @@ class LobbyGui:
     def __init__(self):
         self.dialog = None
 
-        chat_values = [["Server : hello", "me : hi"]]
-        chat_size = [1]
+        self.chat_values = [[]]
 
         self.lobby_text = DirectLabel(text="Lobby", scale=0.05)
         self.lobby_table = DirectScrolledFrame(frameColor=(1, 1, 1, 1),
@@ -18,13 +17,15 @@ class LobbyGui:
                                             frameSize=(-1.2, 1.2, -0.2, 0.2),
                                             canvasSize=(-1.2, 1.1, -0.2, 0.2), )
 
-        Layout.create_table(self.chat_box, 2.4, -1.2, 0.2, None, chat_size, chat_values, None)
-
     def update_table(self, client_list, name_list, ip_list, ready_list):
         table_labels = ["id", "name", "ip address", "ready"]
         table_values = [client_list, name_list, ip_list, ready_list]
         table_size = [.10, .30, .40, .20]
         Layout.create_table(self.lobby_table, 2.4, -1.2, 0.35, table_labels, table_size, table_values, 0)
+
+    def update_chat(self, msg):
+        self.chat_values[0].append(msg)
+        Layout.create_table(self.chat_box, 2.4, -1.2, 0.2, None, [1], self.chat_values, None)
 
 
 class ClientGui(LobbyGui):
@@ -32,13 +33,13 @@ class ClientGui(LobbyGui):
         LobbyGui.__init__(self)
         self.client = client
         self.client_info_frame = DirectFrame(frameColor=(1, 1, 1, 0),
-                                             frameSize=(0, 2.4, -0.07, 0),)
+                                             frameSize=(0, 2.4, -0.07, 0), )
         self.username_label = DirectLabel(parent=self.client_info_frame, text="Username", scale=0.05,
                                           pos=(.12, 0, -0.05))
         self.username_text = DirectEntry(parent=self.client_info_frame, text="", scale=0.05, initialText="",
-                                          focus=1, pos=(0.3, 0, -0.05))
+                                         focus=1, pos=(0.3, 0, -0.05))
         self.server_ip_label = DirectLabel(parent=self.client_info_frame, text="Server IP", scale=0.05,
-                                          pos=(1, 0, -0.05))
+                                           pos=(1, 0, -0.05))
         self.server_ip_text = DirectEntry(parent=self.client_info_frame, text="", scale=0.05, initialText="127.0.0.1",
                                           focus=1, pos=(1.15, 0, -0.05))
         self.connect_server_button = DirectButton(parent=self.client_info_frame, text="Connect Server", scale=0.05,
