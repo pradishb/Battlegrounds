@@ -5,8 +5,8 @@ from direct.distributed.PyDatagramIterator import PyDatagramIterator
 PORT = 9099
 
 MSG_NONE = 0
-CMSG_AUTH = 1
-SMSG_AUTH_RESPONSE = 2
+CMSG_INFO = 1
+SMSG_INFO = 2
 CMSG_CHAT = 3
 SMSG_CHAT = 4
 CMSG_DISCONNECT_REQ = 5
@@ -17,6 +17,7 @@ GAME_INITIALIZE = 9
 
 CLIENTS = {}
 CLIENTS_ID = {}
+CLIENTS_USER_NAMES = {}
 CLIENT_INPUT_RECEIVED = []
 
 
@@ -35,6 +36,7 @@ class ServerNetwork:
 
         self.handlers = {
             CMSG_CHAT: self.msgChat,
+            CMSG_INFO: self.handle_client_info,
         }
 
         taskMgr.add(self.listenTask, "serverListenTask", -40)
@@ -52,6 +54,7 @@ class ServerNetwork:
                 self.cReader.addConnection(newConnection)
                 CLIENTS[newConnection] = netAddress.getIpString()
                 CLIENTS_ID[newConnection] = self.playerCount
+                CLIENTS_USER_NAMES[newConnection] = "Unknown"
                 self.clientsAlive[self.playerCount] = newConnection
                 self.playerCount += 1
                 self.create_table_list()
@@ -96,6 +99,10 @@ class ServerNetwork:
     def msgChat(self, msgID, data, client):
         print("ChatMsg: %s" % data.getString())
 
+    def handle_client_info(self, msgID, data, client):
+        CLIENTS_USER_NAMES[client] = data.getString()
+        self.create_table_list()
+
     def create_table_list(self):
         client_list = []
         name_list = []
@@ -103,7 +110,7 @@ class ServerNetwork:
         ready_list = []
         for client, ip in CLIENTS.items():
             client_list.append(CLIENTS_ID[client])
-            name_list.append("Unknown")
+            name_list.append(CLIENTS_USER_NAMES[client])
             ip_list.append(ip)
             ready_list.append(False)
 

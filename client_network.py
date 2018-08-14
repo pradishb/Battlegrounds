@@ -1,9 +1,10 @@
+from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from pandac.PandaModules import *
 
 MSG_NONE = 0
-CMSG_AUTH = 1
-SMSG_AUTH_RESPONSE = 2
+CMSG_INFO = 1
+SMSG_INFO = 2
 CMSG_CHAT = 3
 SMSG_CHAT = 4
 CMSG_DISCONNECT_REQ = 5
@@ -35,6 +36,7 @@ class ClientNetwork:
 
             if self.Connection:
                 self.cReader.addConnection(self.Connection)
+                self.send_user_info("lmao")
                 taskMgr.add(self.read_task, "serverReaderPollTask", -39)
                 return "Connection Successful!"
             else:
@@ -73,6 +75,15 @@ class ClientNetwork:
             print("Unknown msgID: %d" % msgID)
             print(data)
         return
+
+    def send(self, pkg):
+        self.cWriter.send(pkg, self.Connection)
+
+    def send_user_info(self, username):
+        pkg = PyDatagram()
+        pkg.addUint16(CMSG_INFO)
+        pkg.addString(username)
+        self.send(pkg)
 
     def msgChat(self, msgID, data):
         msg = data.getString()
