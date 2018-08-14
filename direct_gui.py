@@ -18,6 +18,8 @@ class LobbyGui:
         table_values = [client_list, client_names, client_ip, client_ready]
         table_size = [.10, .30, .40, .20]
 
+        server_ip_text = DirectEntry(text="", scale=.1, initialText="Enter Server Ip", focus=1)
+        connect_server_button = DirectButton(text="Connect Server", scale=0.1)
         lobby_text = DirectLabel(text="Lobby", scale=0.1)
         lobby_table = DirectScrolledFrame(frameColor=(1, 1, 1, 1),
                                           frameSize=(-1.2, 1.2, -0.35, 0.35),
@@ -31,6 +33,8 @@ class LobbyGui:
         Layout.create_table(lobby_table, 2.4, -1.2, 0.35, table_labels, table_size, table_values, my_id)
         Layout.create_table(chat_box, 2.4, -1.2, 0.2, None, chat_size, chat_values, None)
 
+        Layout.add_object(server_ip_text, 0.1, 0)
+        Layout.add_object(connect_server_button, 0.1, 0)
         Layout.add_object(lobby_text, 0.1, -0.05)
         Layout.add_object(lobby_table, 1, 0.05)
         Layout.add_object(chat_text, 0.1, -0.05)
