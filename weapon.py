@@ -9,8 +9,8 @@ class Weapon:
     def __init__(self):
         damage = 10
         range = 20
-        self.mouseDelay = 50
-        self.mouseDelayCount = 0
+        self.reloadTime = 20
+        self.reloadTimeCount = 0
 
         Weapon.object_model = Actor("models/m1911.egg")
         Weapon.object_model.setScale(0.35)
@@ -24,11 +24,11 @@ class Weapon:
         b.shoot()
 
     def get_reload(self):
-        if self.mouseDelayCount <= 0:
-            self.mouseDelayCount = self.mouseDelay
+        if self.reloadTimeCount <= 0:
+            self.reloadTimeCount = self.reloadTime
             return True
         return False
 
     def update_reload_time(self):
-        self.mouseDelayCount -= 1
+        self.reloadTimeCount -= 1
 
