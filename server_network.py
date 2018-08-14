@@ -53,8 +53,6 @@ class ServerNetwork:
                 CLIENTS[newConnection] = netAddress.getIpString()
                 CLIENTS_ID[newConnection] = self.playerCount
                 self.clientsAlive[self.playerCount] = newConnection
-                self.lastConnection = newConnection
-                print("Got a connection!")
                 self.playerCount += 1
                 self.create_table_list()
             else:

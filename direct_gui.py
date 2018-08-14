@@ -53,6 +53,8 @@ class ClientGui(LobbyGui):
         Layout.add_object(self.ready_button, 0.1, -0.05)
 
     def connect_button_handler(self):
+        if self.dialog:
+            self.dialog.destroy()
         if self.myNetwork.connect_to_server(self.server_ip_text.get()):
             self.dialog = OkDialog(text="Connection Successful!", command=self.del_dialog)
         else:
@@ -96,6 +98,7 @@ class Layout:
     @staticmethod
     def create_table(parent, width, left, start_y, table_labels, label_size, table_values, my_id):
         # Create table
+        [i.remove_node() for i in parent.canvas.getChildren()]  # clear the table first
         table_width = width
         table_left = left
         current_table_x = table_left
