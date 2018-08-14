@@ -15,9 +15,11 @@ CLIENT_INPUT = 7
 SERVER_INPUT = 8
 GAME_INITIALIZE = 9
 
-CLIENTS = {}
-CLIENTS_ID = {}
+CLIENTS_ID = []
+CLIENTS_OBJ = {}
+CLIENTS_IP = {}
 CLIENTS_USER_NAMES = {}
+CLIENTS_READY = {}
 CLIENT_INPUT_RECEIVED = []
 
 
@@ -52,10 +54,14 @@ class ServerNetwork:
                 newConnection = newConnection.p()
                 # tell the Reader that there's a new connection to read from
                 self.cReader.addConnection(newConnection)
-                CLIENTS[newConnection] = netAddress.getIpString()
-                CLIENTS_ID[newConnection] = self.playerCount
-                CLIENTS_USER_NAMES[newConnection] = "Unknown"
-                self.clientsAlive[self.playerCount] = newConnection
+                id = self.playerCount
+                CLIENTS_ID.append(id)
+                CLIENTS_OBJ[id] = newConnection
+                CLIENTS_OBJ[newConnection] = id
+                CLIENTS_IP[id] = netAddress.getIpString()
+                CLIENTS_USER_NAMES[id] = "Unknown"
+                CLIENTS_READY[id] = False
+                self.clientsAlive[id] = newConnection
                 self.playerCount += 1
                 self.create_table_list()
             else:
@@ -97,8 +103,8 @@ class ServerNetwork:
         return
 
     def broadcast_pkg(self, pkg):
-        for c in CLIENTS:
-            self.cWriter.send(pkg, c)
+        for c in CLIENTS_ID:
+            self.cWriter.send(pkg, CLIENTS_OBJ[c])
 
     def broadcastMsg(self, msg):
         pkg = PyDatagram()
@@ -107,23 +113,23 @@ class ServerNetwork:
         self.broadcast_pkg(pkg)
 
     def msgChat(self, msgID, data, client):
-        print("ChatMsg: %s" % data.getString())
+        print("%s: %s" % (CLIENTS_USER_NAMES[CLIENTS_OBJ[client]], data.getString()))
 
     def send_server_info(self):
         pkg = PyDatagram()
         pkg.addUint16(SMSG_INFO)
-        for client, ip in CLIENTS.items():
-            pkg.addUint8(CLIENTS_ID[client])
-            pkg.addString(CLIENTS_USER_NAMES[client])
-            pkg.addString(ip)
-            pkg.addBool(False)
+        for id in CLIENTS_ID:
+            pkg.addUint8(id)
+            pkg.addString(CLIENTS_USER_NAMES[id])
+            pkg.addString(CLIENTS_IP[id])
+            pkg.addBool(CLIENTS_READY[id])
         self.broadcast_pkg(pkg)
 
     def handle_client_info(self, msgID, data, client):
-        CLIENTS_USER_NAMES[client] = data.getString()
+        CLIENTS_USER_NAMES[CLIENTS_OBJ[client]] = data.getString()
         self.create_table_list()
         self.send_server_info()
-        chat_msg = "Server : " + CLIENTS_USER_NAMES[client] + "has joined the lobby."
+        chat_msg = "Server : " + CLIENTS_USER_NAMES[CLIENTS_OBJ[client]] + " has joined the lobby."
         self.broadcastMsg(chat_msg)
         self.gui.update_chat(chat_msg)
 
@@ -132,10 +138,10 @@ class ServerNetwork:
         name_list = []
         ip_list = []
         ready_list = []
-        for client, ip in CLIENTS.items():
-            client_list.append(CLIENTS_ID[client])
-            name_list.append(CLIENTS_USER_NAMES[client])
-            ip_list.append(ip)
-            ready_list.append(False)
+        for my_id in CLIENTS_ID:
+            client_list.append(my_id)
+            name_list.append(CLIENTS_USER_NAMES[my_id])
+            ip_list.append(CLIENTS_IP[my_id])
+            ready_list.append(CLIENTS_READY[my_id])
 
         self.gui.update_table(client_list, name_list, ip_list, ready_list)

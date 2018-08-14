@@ -44,7 +44,8 @@ class ClientGui(LobbyGui):
                                           focus=1, pos=(1.15, 0, -0.05))
         self.connect_server_button = DirectButton(parent=self.client_info_frame, text="Connect Server", scale=0.05,
                                                   command=self.connect_button_handler, pos=(2, 0, -0.05))
-        self.ready_button = DirectButton(text="Ready", scale=0.05)
+        self.ready_button = DirectButton(text="Ready", scale=0.05,
+                                         command=self.send_ready_signal)
         self.init_layout()
 
     def init_layout(self):
@@ -62,6 +63,10 @@ class ClientGui(LobbyGui):
             self.dialog.destroy()
         msg = self.client.myNetwork.connect_to_server(self.server_ip_text.get())
         self.dialog = OkDialog(text=msg, command=self.del_dialog)
+
+    def send_ready_signal(self):
+        if self.client.myNetwork.Connection:
+            self.client.myNetwork.send_msg("/ready")
 
     def del_dialog(self, arg):
         self.dialog.destroy()

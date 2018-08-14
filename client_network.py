@@ -20,8 +20,8 @@ CLIENTS_READY = {}
 
 
 class ClientNetwork:
-    def __init__(self, gui):
-        self.gui = gui
+    def __init__(self, client):
+        self.client = client
         self.Connection = None
         self.cManager = QueuedConnectionManager()
         self.cListener = QueuedConnectionListener(self.cManager, 0)
@@ -30,7 +30,7 @@ class ClientNetwork:
 
         self.handlers = {
             # SMSG_AUTH_RESPONSE: self.msgAuthResponse,
-            SMSG_CHAT: self.msgChat,
+            SMSG_CHAT: self.msg_chat,
             SMSG_INFO: self.handle_server_info,
             # SMSG_DISCONNECT_ACK: self.msgDisconnectAck,
             # SERVER_INPUT: self.serverInputHanlder,
@@ -42,7 +42,7 @@ class ClientNetwork:
             self.Connection = self.cManager.openTCPClientConnection(ip, 9099, 1)
             if self.Connection:
                 self.cReader.addConnection(self.Connection)
-                self.send_user_info(self.gui.username_text.get())
+                self.send_user_info(self.client.clientGui.username_text.get())
                 taskMgr.add(self.read_task, "serverReaderPollTask", -39)
                 return "Connection Successful!"
             else:
@@ -103,15 +103,20 @@ class ClientNetwork:
             CLIENTS_READY[id] = ready
         self.create_table_list()
 
-    def msgChat(self, msgID, data):
+    def send_msg(self, msg):
+        pkg = PyDatagram()
+        pkg.addUint16(CMSG_CHAT)
+        pkg.addString(msg)
+        self.send(pkg)
+
+    def msg_chat(self, msgID, data):
         msg = data.getString()
         if msg[:1] == '/':
             msg = msg.strip('/')
             self.console_cmd_executor(msg)
         else:
-            self.gui.update_chat(msg)
+            self.client.clientGui.update_chat(msg)
             print(msg)
-
 
     def create_table_list(self):
         client_list = []
@@ -123,7 +128,7 @@ class ClientNetwork:
             name_list.append(CLIENTS_USER_NAMES[id])
             ip_list.append(CLIENTS_IP[id])
             ready_list.append(CLIENTS_READY[id])
-        self.gui.update_table(client_list, name_list, ip_list, ready_list)
+        self.client.clientGui.update_table(client_list, name_list, ip_list, ready_list)
 
     def console_cmd_executor(self, msg):
         temp = msg.split(' ')

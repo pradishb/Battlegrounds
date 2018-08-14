@@ -11,8 +11,8 @@ class Client(ShowBase):
         globalClock.setFrameRate(60)
         globalClock.setMode(ClockObject.MLimited)
 
+        self.myNetwork = ClientNetwork(self)
         self.clientGui = ClientGui(self)
-        self.myNetwork = ClientNetwork(self.clientGui)
 
 
 Client().run()
