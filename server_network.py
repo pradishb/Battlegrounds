@@ -16,7 +16,7 @@ SERVER_INPUT = 8
 GAME_INITIALIZE = 9
 
 CLIENTS_ID = []
-CLIENTS_OBJ = {}
+RELATION_OBJ_ID = {}
 CLIENTS_IP = {}
 CLIENTS_USER_NAMES = {}
 CLIENTS_READY = {}
@@ -37,8 +37,12 @@ class ServerNetwork:
         self.cListener.addConnection(self.tcpSocket)
 
         self.handlers = {
-            CMSG_CHAT: self.msgChat,
+            CMSG_CHAT: self.msg_chat,
             CMSG_INFO: self.handle_client_info,
+        }
+
+        self.command_handlers = {
+            "ready": self.handle_client_ready_signal
         }
 
         taskMgr.add(self.listenTask, "serverListenTask", -40)
@@ -56,8 +60,8 @@ class ServerNetwork:
                 self.cReader.addConnection(newConnection)
                 id = self.playerCount
                 CLIENTS_ID.append(id)
-                CLIENTS_OBJ[id] = newConnection
-                CLIENTS_OBJ[newConnection] = id
+                RELATION_OBJ_ID[id] = newConnection
+                RELATION_OBJ_ID[newConnection] = id
                 CLIENTS_IP[id] = netAddress.getIpString()
                 CLIENTS_USER_NAMES[id] = "Unknown"
                 CLIENTS_READY[id] = False
@@ -104,7 +108,7 @@ class ServerNetwork:
 
     def broadcast_pkg(self, pkg):
         for c in CLIENTS_ID:
-            self.cWriter.send(pkg, CLIENTS_OBJ[c])
+            self.cWriter.send(pkg, RELATION_OBJ_ID[c])
 
     def broadcastMsg(self, msg):
         pkg = PyDatagram()
@@ -112,8 +116,16 @@ class ServerNetwork:
         pkg.addString(msg)
         self.broadcast_pkg(pkg)
 
-    def msgChat(self, msgID, data, client):
-        print("%s: %s" % (CLIENTS_USER_NAMES[CLIENTS_OBJ[client]], data.getString()))
+    def msg_chat(self, msgID, data, client):
+        msg = data.getString()
+        chat_msg = "%s: %s" % (CLIENTS_USER_NAMES[RELATION_OBJ_ID[client]], msg)
+        self.broadcastMsg(chat_msg)
+        self.gui.update_chat(chat_msg)
+        if msg[:1] == '/':
+            msg = msg.strip('/')
+            args = msg.split(' ')
+            cmd = self.command_handlers.get(args[0], "invalid")
+            cmd(args, client)
 
     def send_server_info(self):
         pkg = PyDatagram()
@@ -126,12 +138,17 @@ class ServerNetwork:
         self.broadcast_pkg(pkg)
 
     def handle_client_info(self, msgID, data, client):
-        CLIENTS_USER_NAMES[CLIENTS_OBJ[client]] = data.getString()
+        CLIENTS_USER_NAMES[RELATION_OBJ_ID[client]] = data.getString()
         self.create_table_list()
         self.send_server_info()
-        chat_msg = "Server : " + CLIENTS_USER_NAMES[CLIENTS_OBJ[client]] + " has joined the lobby."
+        chat_msg = "Server : " + CLIENTS_USER_NAMES[RELATION_OBJ_ID[client]] + " has joined the lobby."
         self.broadcastMsg(chat_msg)
         self.gui.update_chat(chat_msg)
+
+    def handle_client_ready_signal(self, args, client):
+        CLIENTS_READY[RELATION_OBJ_ID[client]] = True
+        self.create_table_list()
+        self.send_server_info()
 
     def create_table_list(self):
         client_list = []

@@ -37,6 +37,12 @@ class ClientNetwork:
             # GAME_INITIALIZE: self.gameInitialize,
         }
 
+        self.command_handlers = {
+            'timeToStart': self.countdown,
+            'game_end': self.game_end,
+            'info': self.info,
+        }
+
     def connect_to_server(self, ip):
         if not self.Connection:
             self.Connection = self.cManager.openTCPClientConnection(ip, 9099, 1)
@@ -92,6 +98,7 @@ class ClientNetwork:
         self.send(pkg)
 
     def handle_server_info(self, msgID, data):
+        CLIENTS_ID.clear()
         while data.getRemainingSize() != 0:
             id = data.getUint8()
             username = data.getString()
@@ -113,7 +120,9 @@ class ClientNetwork:
         msg = data.getString()
         if msg[:1] == '/':
             msg = msg.strip('/')
-            self.console_cmd_executor(msg)
+            args = msg.split(' ')
+            cmd = self.command_handlers.pop(args[0], "invalid")
+            cmd(args)
         else:
             self.client.clientGui.update_chat(msg)
             print(msg)
@@ -130,21 +139,11 @@ class ClientNetwork:
             ready_list.append(CLIENTS_READY[id])
         self.client.clientGui.update_table(client_list, name_list, ip_list, ready_list)
 
-    def console_cmd_executor(self, msg):
-        temp = msg.split(' ')
-        switcher = {
-            'timeToStart': self.countdown,
-            'game_end': self.game_end,
-            'info': self.info,
-        }
-        fucn = switcher.get(temp[0], "invalid")
-        fucn(temp[1])
-
     def countdown(self, value):
-        print(value)
+        pass
 
     def invalid(self, value):
-        print("Invalid command for " + value)
+        pass
 
     def info(self, value):
         pass
