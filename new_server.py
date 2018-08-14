@@ -1,6 +1,7 @@
 from direct.showbase.ShowBase import ShowBase
 from panda3d.core import ClockObject
 from direct_gui import ServerGui
+from server_network import ServerNetwork
 
 
 class Server(ShowBase):
@@ -11,6 +12,7 @@ class Server(ShowBase):
         globalClock.setMode(ClockObject.MLimited)
 
         self.serverGui = ServerGui()
+        self.myNetwork = ServerNetwork(self.serverGui)
 
 
 Server().run()

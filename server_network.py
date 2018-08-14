@@ -21,7 +21,8 @@ CLIENT_INPUT_RECEIVED = []
 
 
 class ServerNetwork:
-    def __init__(self):
+    def __init__(self, gui):
+        self.gui = gui
         self.playerCount = 0
         self.clientsAlive = {}
 
@@ -55,6 +56,7 @@ class ServerNetwork:
                 self.lastConnection = newConnection
                 print("Got a connection!")
                 self.playerCount += 1
+                self.create_table_list()
             else:
                 print("getNewConnection returned false")
         return task.cont
@@ -95,3 +97,17 @@ class ServerNetwork:
 
     def msgChat(self, msgID, data, client):
         print("ChatMsg: %s" % data.getString())
+
+    def create_table_list(self):
+        client_list = []
+        name_list = []
+        ip_list = []
+        ready_list = []
+        for client, ip in CLIENTS.items():
+            client_list.append(CLIENTS_ID[client])
+            name_list.append("Unknown")
+            ip_list.append(ip)
+            ready_list.append(False)
+
+        self.gui.update_server_table(client_list, name_list, ip_list, ready_list)
+

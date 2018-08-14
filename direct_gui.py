@@ -1,7 +1,6 @@
 from direct.gui.DirectGui import *
 from panda3d.core import *
 from client_network import ClientNetwork
-from server_network import ServerNetwork
 
 
 class LobbyGui:
@@ -31,8 +30,6 @@ class LobbyGui:
                                        frameSize=(-1.2, 1.2, -0.2, 0.2),
                                        canvasSize=(-1.2, 1.1, -0.2, 0.2), )
 
-        Layout.create_table(self.lobby_table, 2.4, -1.2, 0.35,
-                            self.table_labels, self.table_size, self.table_values, my_id)
         Layout.create_table(self.chat_box, 2.4, -1.2, 0.2, None, chat_size, chat_values, None)
 
 
@@ -68,7 +65,6 @@ class ClientGui(LobbyGui):
 class ServerGui(LobbyGui):
     def __init__(self):
         LobbyGui.__init__(self)
-        self.myNetwork = ServerNetwork()
         self.init_layout()
 
     def init_layout(self):
@@ -76,6 +72,13 @@ class ServerGui(LobbyGui):
         Layout.add_object(self.lobby_table, 1, 0.05)
         Layout.add_object(self.chat_text, 0.1, -0.05)
         Layout.add_object(self.chat_box, 1, 0.05)
+
+    def update_server_table(self, client_list, name_list, ip_list, ready_list):
+        self.table_labels = ["id", "name", "ip address", "ready"]
+        self.table_values = [client_list, name_list, ip_list, ready_list]
+        self.table_size = [.10, .30, .40, .20]
+        Layout.create_table(self.lobby_table, 2.4, -1.2, 0.35,
+                            self.table_labels, self.table_size, self.table_values, 0)
 
 
 class Layout:
