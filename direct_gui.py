@@ -59,17 +59,18 @@ class ClientGui(LobbyGui):
         Layout.add_object(self.ready_button, 0.05, -0.05)
 
     def connect_button_handler(self):
-        if self.dialog:
-            self.dialog.destroy()
+        self.del_dialog(0)
         msg = self.client.myNetwork.connect_to_server(self.server_ip_text.get())
         self.dialog = OkDialog(text=msg, command=self.del_dialog)
 
     def send_ready_signal(self):
+        self.del_dialog(0)
         if self.client.myNetwork.Connection:
             self.client.myNetwork.send_msg("/ready")
 
     def del_dialog(self, arg):
-        self.dialog.destroy()
+        if self.dialog:
+            self.dialog.destroy()
 
 
 class ServerGui(LobbyGui):
