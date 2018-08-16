@@ -18,11 +18,13 @@ class ClientGame:
 
         self.gameStart = False
         self.my_clock = 0
+        self.player_count = 0
         self.heading = 0
         self.pitch = 40
         self.skip = 0
         self.loss = 0
         self.id = 0
+        self.win = False
         self.lose = False
 
         inputState.watchWithModifiers('forward', 'w')
@@ -83,11 +85,13 @@ class ClientGame:
     def server_input_handler(self, msgID, data):
         server_clock = data.getUint64()
         if self.my_clock == server_clock:
+            alive_count = 0
             while data.getRemainingSize() != 0:
                 player_id = data.getUint32()
                 player = self.gameEngine.players[player_id]
                 alive = data.getBool()
                 if alive:
+                    alive_count += 1
                     player.playerNP.setX(data.getFloat32())
                     player.playerNP.setY(data.getFloat32())
                     player.playerNP.setZ(data.getFloat32())
@@ -114,6 +118,8 @@ class ClientGame:
                     if not self.lose and player_id == self.id:
                         self.healthUI.setText("Health : 0")
                         self.game_over()
+            if alive_count == 1 and self.gameEngine.players[self.id].health > 0 and not self.win:
+                self.you_win()
 
             self.my_clock += 1
             self.serverWait = False
@@ -162,8 +168,8 @@ class ClientGame:
 
     def game_initialize(self, msgID, data):
         self.displayUI.destroy()
-        player_count = data.getUint32()
-        for i in range(0, player_count):
+        self.player_count = data.getUint32()
+        for i in range(0, self.player_count):
             player_id = data.getUint32()
             x = data.getFloat32()
             y = data.getFloat32()
@@ -182,6 +188,6 @@ class ClientGame:
 
         gameoverDisplay = GameUI.createDisplayUI("Game Over!")
 
-    def game_end(self, value):
-        if int(value) == self.id:
-            GameUI.createDisplayUI("You Win!")
+    def you_win(self):
+        self.win = True
+        GameUI.createDisplayUI("You Win!")

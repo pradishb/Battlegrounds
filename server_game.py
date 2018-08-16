@@ -26,9 +26,11 @@ class ServerGame:
         self.clientsAlive = []
         self.clientsDead = []
         self.display_text = GameUI.createDisplayUI("Loading...")
+        self.count = 0
 
     def count_down_start(self):
         taskMgr.doMethodLater(1.0, self.count_down, 'Count Down')
+        # taskMgr.doMethodLater(1.0, self.debug_count, 'Debug Count')
 
     def count_down(self, task):
         if self.count_down_time == -1:
@@ -39,6 +41,11 @@ class ServerGame:
             self.network.broadcastMsg("/count_down " + str(self.count_down_time))
             self.display_text.setText(str(self.count_down_time))
             self.count_down_time -= 1
+        return task.again
+
+    def debug_count(self, task):
+        print(self.count)
+        self.count = 0
         return task.again
 
     # to send game's initial stats
@@ -135,10 +142,8 @@ class ServerGame:
     def broadcast_task(self):
         if self.client_received_list.__len__() >= self.clientsAlive.__len__():
             # print("Broadcasting. Server Clock = " + str(self.serverClock))
-
             for c in self.network.CLIENTS_ID:
                 self.network.cWriter.send(self.clientInputList, self.network.RELATION_OBJ_ID[c])
-
             self.serverClock += 1
             self.clientInputList = PyDatagram()
             self.clientInputList.addUint16(SERVER_INPUT)
@@ -148,8 +153,6 @@ class ServerGame:
                 self.clientInputList.addBool(False)
             self.client_received_list.clear()
             self.update()
-            if self.clientsAlive.__len__() == 1:
-                self.network.broadcastMsg("/game_end " + str(self.clientsAlive[0]))
         else:
             pass
             # print("Waiting for all inputs. Server Clock = " +
@@ -159,5 +162,4 @@ class ServerGame:
     # Update
     def update(self):
         dt = globalClock.getDt()
-        # print(dt)
         self.gameEngine.world.doPhysics(dt)
