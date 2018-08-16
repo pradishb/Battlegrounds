@@ -1,4 +1,3 @@
-from direct.directbase.DirectStart import base
 import math
 import sys
 from direct.actor.Actor import AmbientLight, Vec4, DirectionalLight, Vec3, PNMImage, Filename, WindowProperties, GeoMipTerrain
@@ -9,12 +8,8 @@ from direct.gui.OnscreenImage import LineSegs, deg2Rad, NodePath
 from sky import Sky
 
 
-class GameEngine():
+class GameEngine:
     def __init__(self):
-        base.setFrameRateMeter(True)
-        globalClock.setFrameRate(60)
-        globalClock.setMode(ClockObject.MLimited)
-
         base.accept('f1', self.toggleDebug)
         base.accept('escape', sys.exit, [0])
 

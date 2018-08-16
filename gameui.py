@@ -1,5 +1,4 @@
 from direct.gui.OnscreenText import OnscreenText
-from direct.directbase.DirectStart import base
 from panda3d.core import TextNode
 
 

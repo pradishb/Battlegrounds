@@ -1,6 +1,8 @@
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from pandac.PandaModules import *
+from client_game import ClientGame
+from direct_gui import Layout
 
 MSG_NONE = 0
 CMSG_INFO = 1
@@ -22,6 +24,7 @@ CLIENTS_READY = {}
 class ClientNetwork:
     def __init__(self, client):
         self.client = client
+        self.client_game = None
         self.Connection = None
         self.cManager = QueuedConnectionManager()
         self.cListener = QueuedConnectionListener(self.cManager, 0)
@@ -29,18 +32,16 @@ class ClientNetwork:
         self.cWriter = ConnectionWriter(self.cManager, 0)
 
         self.handlers = {
-            # SMSG_AUTH_RESPONSE: self.msgAuthResponse,
             SMSG_CHAT: self.msg_chat,
             SMSG_INFO: self.handle_server_info,
             # SMSG_DISCONNECT_ACK: self.msgDisconnectAck,
-            # SERVER_INPUT: self.serverInputHanlder,
-            # GAME_INITIALIZE: self.gameInitialize,
         }
 
         self.command_handlers = {
             'timeToStart': self.countdown,
             'game_end': self.game_end,
             'info': self.info,
+            'start': self.game_start,
         }
 
     def connect_to_server(self, ip):
@@ -121,7 +122,7 @@ class ClientNetwork:
         if msg[:1] == '/':
             msg = msg.strip('/')
             args = msg.split(' ')
-            cmd = self.command_handlers.get(args[0], self.invalid)
+            cmd = self.command_handlers.get(args[0], self.invalid_cmd)
             cmd(args)
         else:
             self.client.clientGui.update_chat(msg)
@@ -139,20 +140,26 @@ class ClientNetwork:
             ready_list.append(CLIENTS_READY[id])
         self.client.clientGui.update_table(client_list, name_list, ip_list, ready_list)
 
-    def countdown(self, value):
+    def countdown(self, args):
         pass
 
-    def invalid(self, value):
+    def invalid_cmd(self, args):
         print("Invalid command.")
         pass
 
-    def info(self, value):
+    def info(self, args):
         pass
         # if value == "no_clients":
         #     GameUI.createWhiteBgUI("Not enough clients connected.")
         # self.displayUI.destroy()
 
-    def game_end(self, value):
+    def game_end(self, args):
         pass
         # if int(value) == self.id:
         #     GameUI.createDisplayUI("You Win!")
+
+    def game_start(self, args):
+        self.client_game = ClientGame(self)
+        self.handlers[SERVER_INPUT] = self.client_game.serverInputHanlder
+        self.handlers[GAME_INITIALIZE] = self.client_game.gameInitialize
+        [obj.destroy() for obj in Layout.obj_list]

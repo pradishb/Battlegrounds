@@ -6,26 +6,26 @@ class LobbyGui:
     def __init__(self):
         self.dialog = None
 
-        self.chat_values = [[]]
+        self.chat_values = [["asdf"]]
 
         self.lobby_text = DirectLabel(text="Lobby", scale=0.05)
         self.lobby_table = DirectScrolledFrame(frameColor=(1, 1, 1, 1),
                                                frameSize=(-1.2, 1.2, -0.35, 0.35),
-                                               canvasSize=(-1.2, 1.1, -0.35, 0.35), )
+                                               canvasSize=(-1.2, 1.1, -0.6, 0.6), )
         self.chat_text = DirectLabel(text="Chat", scale=0.05)
         self.chat_box = DirectScrolledFrame(frameColor=(1, 1, 1, 1),
                                             frameSize=(-1.2, 1.2, -0.2, 0.2),
-                                            canvasSize=(-1.2, 1.1, -0.2, 0.2), )
+                                            canvasSize=(-1.2, 1.1, -0.6, 0.6), )
 
     def update_table(self, client_list, name_list, ip_list, ready_list):
         table_labels = ["id", "name", "ip address", "ready"]
         table_values = [client_list, name_list, ip_list, ready_list]
         table_size = [.10, .30, .40, .20]
-        Layout.create_table(self.lobby_table, 2.4, -1.2, 0.35, table_labels, table_size, table_values, 0)
+        Layout.create_table(self.lobby_table, 2.4, -1.2, 0.6, table_labels, table_size, table_values, 0)
 
     def update_chat(self, msg):
         self.chat_values[0].append(msg)
-        Layout.create_table(self.chat_box, 2.4, -1.2, 0.2, None, [1], self.chat_values, None)
+        Layout.create_table(self.chat_box, 2.4, -1.2, 0.6, None, [1], self.chat_values, None)
 
 
 class ClientGui(LobbyGui):
@@ -88,9 +88,11 @@ class Layout:
     spacing = 0.05
     start_y = 0.9
     start_x = -1.2
+    obj_list = []
 
     @staticmethod
     def add_object(obj, scale, offset):
+        Layout.obj_list.append(obj)
         width = obj.getWidth() * scale
         height = obj.getHeight() * scale
         obj.setPos(Layout.start_x + width / 2, 0, + Layout.start_y - height / 2)
@@ -98,6 +100,7 @@ class Layout:
 
     @staticmethod
     def add_object_left(obj, scale, offset):
+        Layout.obj_list.append(obj)
         height = obj.getHeight() * scale
         obj.setPos(Layout.start_x, 0, + Layout.start_y)
         Layout.start_y -= height + Layout.spacing + offset
