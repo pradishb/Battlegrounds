@@ -92,7 +92,6 @@ class ClientGame:
                 player.xSpeed = data.getFloat32()
                 player.ySpeed = data.getFloat32()
                 shoot = data.getBool()
-                x, y, z = 0, 0, 0
                 if shoot:
                     x = data.getFloat32()
                     y = data.getFloat32()
@@ -149,6 +148,9 @@ class ClientGame:
         self.gameEngine.players[self.id].bendBody()
         self.gameEngine.world.doPhysics(dt)
         return task.cont
+
+    def count_down(self, args):
+        self.displayUI.setText(args[1])
 
     def gameInitialize(self, msgID, data):
         self.displayUI.destroy()

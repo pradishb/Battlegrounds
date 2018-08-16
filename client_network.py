@@ -38,7 +38,6 @@ class ClientNetwork:
         }
 
         self.command_handlers = {
-            'timeToStart': self.countdown,
             'game_end': self.game_end,
             'info': self.info,
             'start': self.game_start,
@@ -160,6 +159,7 @@ class ClientNetwork:
 
     def game_start(self, args):
         self.client_game = ClientGame(self)
+        self.command_handlers['count_down'] = self.client_game.count_down
         self.handlers[SERVER_INPUT] = self.client_game.serverInputHanlder
         self.handlers[GAME_INITIALIZE] = self.client_game.gameInitialize
         [obj.destroy() for obj in Layout.obj_list]

@@ -120,7 +120,7 @@ class ServerGame:
 
     # to send game's initial stats
     def gameStart(self):
-        self.displayText.setText("Starting game...")
+        self.displayText.setText("Loading...")
         if CLIENTS.__len__() > 1:
             ranValPkg = PyDatagram()
             ranValPkg.addUint16(GAME_INITIALIZE)

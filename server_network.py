@@ -19,6 +19,7 @@ class ServerNetwork:
     def __init__(self, gui):
         self.gui = gui
         self.server_game = None
+        self.count_down_time = 10
         self.playerCount = 0
         self.clientsAlive = {}
         self.min_player = 1
@@ -41,7 +42,7 @@ class ServerNetwork:
 
         taskMgr.add(self.listenTask, "serverListenTask", -40)
         taskMgr.add(self.readTask, "serverReadTask", -39)
-        self.game_start([])
+        # self.game_start()
 
     def listenTask(self, task):
         if self.cListener.newConnectionAvailable():
@@ -163,8 +164,15 @@ class ServerNetwork:
 
         self.gui.update_table(client_list, name_list, ip_list, ready_list)
 
-    def game_start(self, args):
+    def game_start(self):
+        taskMgr.doMethodLater(1.0, self.count_down, 'Count Down')
         self.server_game = ServerGame(self)
         # self.handlers[SERVER_INPUT] = self.client_game.serverInputHanlder
         # self.handlers[GAME_INITIALIZE] = self.client_game.gameInitialize
         # [obj.destroy() for obj in Layout.obj_list]
+
+    def count_down(self, task):
+        self.broadcastMsg("/count_down " + str(self.count_down_time))
+        self.server_game.displayText.setText(str(self.count_down_time))
+        self.count_down_time -= 1
+        return task.again
