@@ -1,13 +1,13 @@
-from direct.showbase.ShowBase import ShowBase
+from direct.showbase.DirectObject import DirectObject
 from panda3d.core import ClockObject
 from direct_gui import ServerGui
 from server_network import ServerNetwork
 
 
-class Server(ShowBase):
+class Server(DirectObject):
     def __init__(self):
-        ShowBase.__init__(self)
-        self.setFrameRateMeter(True)
+        DirectObject.__init__(self)
+        base.setFrameRateMeter(True)
         globalClock.setFrameRate(60)
         globalClock.setMode(ClockObject.MLimited)
 
@@ -15,4 +15,5 @@ class Server(ShowBase):
         self.myNetwork = ServerNetwork(self.serverGui)
 
 
-Server().run()
+Server()
+base.run()

@@ -2,18 +2,10 @@ from direct.distributed.PyDatagram import PyDatagram
 from pandac.PandaModules import *
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 
-PORT = 9099
+from server_game import ServerGame
+from msg_id import *
 
-MSG_NONE = 0
-CMSG_INFO = 1
-SMSG_INFO = 2
-CMSG_CHAT = 3
-SMSG_CHAT = 4
-CMSG_DISCONNECT_REQ = 5
-SMSG_DISCONNECT_ACK = 6
-CLIENT_INPUT = 7
-SERVER_INPUT = 8
-GAME_INITIALIZE = 9
+PORT = 9099
 
 CLIENTS_ID = []
 RELATION_OBJ_ID = {}
@@ -26,8 +18,10 @@ CLIENT_INPUT_RECEIVED = []
 class ServerNetwork:
     def __init__(self, gui):
         self.gui = gui
+        self.server_game = None
         self.playerCount = 0
         self.clientsAlive = {}
+        self.min_player = 1
 
         self.cManager = QueuedConnectionManager()
         self.cListener = QueuedConnectionListener(self.cManager, 0)
@@ -47,6 +41,7 @@ class ServerNetwork:
 
         taskMgr.add(self.listenTask, "serverListenTask", -40)
         taskMgr.add(self.readTask, "serverReadTask", -39)
+        self.game_start([])
 
     def listenTask(self, task):
         if self.cListener.newConnectionAvailable():
@@ -149,10 +144,11 @@ class ServerNetwork:
         CLIENTS_READY[RELATION_OBJ_ID[client]] = True
         self.create_table_list()
         self.send_server_info()
-        if self.playerCount >= 2 and all(v for k, v in CLIENTS_READY.items()):
+        if self.playerCount >= self.min_player and all(v for k, v in CLIENTS_READY.items()):
             chat_msg = "/start"
             self.broadcastMsg(chat_msg)
             self.gui.update_chat(chat_msg)
+            self.game_start()
 
     def create_table_list(self):
         client_list = []
@@ -166,3 +162,9 @@ class ServerNetwork:
             ready_list.append(CLIENTS_READY[my_id])
 
         self.gui.update_table(client_list, name_list, ip_list, ready_list)
+
+    def game_start(self, args):
+        self.server_game = ServerGame(self)
+        # self.handlers[SERVER_INPUT] = self.client_game.serverInputHanlder
+        # self.handlers[GAME_INITIALIZE] = self.client_game.gameInitialize
+        # [obj.destroy() for obj in Layout.obj_list]
