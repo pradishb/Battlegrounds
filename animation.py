@@ -32,5 +32,3 @@ class Animation:
                 self.player.playerModel.loop("pistol", partName="hips")
                 self.player.playerModel.pose("pistol", 23, partName="upperBody")
         return task.cont
-
-
