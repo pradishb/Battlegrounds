@@ -11,7 +11,6 @@ from sky import Sky
 class GameEngine:
     def __init__(self):
         base.accept('f1', self.toggleDebug)
-        base.accept('escape', sys.exit, [0])
 
         self.debugNode = BulletDebugNode('Debug')
         self.debugNode.showWireframe(True)

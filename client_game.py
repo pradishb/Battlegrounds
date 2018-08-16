@@ -17,12 +17,13 @@ class ClientGame:
         # self.accept("escape", self.sendMsgDisconnectReq)
 
         self.gameStart = False
-        self.myClock = 0
+        self.my_clock = 0
         self.heading = 0
         self.pitch = 40
         self.skip = 0
         self.loss = 0
         self.id = 0
+        self.lose = False
 
         inputState.watchWithModifiers('forward', 'w')
         inputState.watchWithModifiers('left', 'a')
@@ -63,7 +64,7 @@ class ClientGame:
     def send_user_input(self, inputArr=[], *args):
         pkg = PyDatagram()
         pkg.addUint16(CLIENT_INPUT)
-        pkg.addUint64(self.myClock)
+        pkg.addUint64(self.my_clock)
         pkg.addBool(inputArr[0])
         pkg.addBool(inputArr[1])
         pkg.addBool(inputArr[2])
@@ -79,37 +80,42 @@ class ClientGame:
         # Now lets send the whole thing...
         self.network.send(pkg)
 
-    def serverInputHanlder(self, msgID, data):
+    def server_input_handler(self, msgID, data):
         server_clock = data.getUint64()
-        if self.myClock == server_clock:
-            while (data.getRemainingSize() != 0):
+        if self.my_clock == server_clock:
+            while data.getRemainingSize() != 0:
                 player_id = data.getUint32()
                 player = self.gameEngine.players[player_id]
-                player.playerNP.setX(data.getFloat32())
-                player.playerNP.setY(data.getFloat32())
-                player.playerNP.setZ(data.getFloat32())
-                h = data.getFloat32()
-                p = data.getFloat32()
-                player.xSpeed = data.getFloat32()
-                player.ySpeed = data.getFloat32()
-                shoot = data.getBool()
-                if shoot:
-                    x = data.getFloat32()
-                    y = data.getFloat32()
-                    z = data.getFloat32()
-                    player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
-                    player.animation.current = "shoot"
-                if player_id != self.id:
-                    player.playerNP.setH(h)
-                    player.playerSpine.setP(p)
+                alive = data.getBool()
+                if alive:
+                    player.playerNP.setX(data.getFloat32())
+                    player.playerNP.setY(data.getFloat32())
+                    player.playerNP.setZ(data.getFloat32())
+                    h = data.getFloat32()
+                    p = data.getFloat32()
+                    player.xSpeed = data.getFloat32()
+                    player.ySpeed = data.getFloat32()
+                    shoot = data.getBool()
+                    if shoot:
+                        x = data.getFloat32()
+                        y = data.getFloat32()
+                        z = data.getFloat32()
+                        player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
+                        player.animation.current = "shoot"
+                    if player_id != self.id:
+                        player.playerNP.setH(h)
+                        player.playerSpine.setP(p)
 
-                player.health = data.getUint8()
-                if player_id == self.id:
-                    self.healthUI.setText("Health : " + str(player.health))
-                    if player.health == 0:
-                        self.gameover()
+                    player.health = data.getUint8()
+                    if player_id == self.id:
+                        self.healthUI.setText("Health : " + str(player.health))
+                else:
+                    player.health = 0
+                    if not self.lose and player_id == self.id:
+                        self.healthUI.setText("Health : 0")
+                        self.game_over()
 
-            self.myClock += 1
+            self.my_clock += 1
             self.serverWait = False
 
     def move_camera(self):
@@ -136,17 +142,18 @@ class ClientGame:
 
     # Update
     def update(self, task):
-        self.move_camera()
-        if not self.serverWait:
-            self.process_input()
-            self.gameEngine.players[self.id].weapon.update_reload_time()
-            self.serverWait = True
-        else:
-            self.loss += 1
-        # if self.myClock > 0:
-        #     print("loss % =", self.loss * 100.0 / (self.loss + self.myClock))
+        if not self.lose:
+            self.move_camera()
+            if not self.serverWait:
+                self.process_input()
+                self.gameEngine.players[self.id].weapon.update_reload_time()
+                self.serverWait = True
+            else:
+                self.loss += 1
+            # if self.myClock > 0:
+            #     print("loss % =", self.loss * 100.0 / (self.loss + self.myClock))
+            self.gameEngine.players[self.id].bendBody()
         dt = globalClock.getDt()
-        self.gameEngine.players[self.id].bendBody()
         self.gameEngine.world.doPhysics(dt)
         return task.cont
 
@@ -166,10 +173,10 @@ class ClientGame:
         self.id = data.getUint32()
         self.healthUI = GameUI.createWhiteBgUI("")
         self.serverWait = False
-        # taskMgr.add(self.update, 'update')
+        taskMgr.add(self.update, 'update')
 
-    def gameover(self):
-        taskMgr.remove('update')
+    def game_over(self):
+        self.lose = True
         taskMgr.add(self.gameEngine.deathCamTask, "DeathCameraTask")
         self.gameEngine.myId = self.id
 

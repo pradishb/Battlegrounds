@@ -19,9 +19,7 @@ class ServerNetwork:
 
         self.gui = gui
         self.server_game = None
-        self.count_down_time = 3
         self.playerCount = 0
-        self.clientsAlive = {}
         self.min_player = 1
 
         self.cManager = QueuedConnectionManager()
@@ -61,7 +59,6 @@ class ServerNetwork:
                 self.CLIENTS_IP[id] = netAddress.getIpString()
                 self.CLIENTS_USER_NAMES[id] = "Unknown"
                 self.CLIENTS_READY[id] = False
-                self.clientsAlive[id] = newConnection
                 self.playerCount += 1
                 self.create_table_list()
             else:
@@ -149,7 +146,8 @@ class ServerNetwork:
             chat_msg = "/start"
             self.broadcastMsg(chat_msg)
             self.gui.update_chat(chat_msg)
-            self.count_down_start()
+            self.server_game = ServerGame(self)
+            self.server_game.count_down_start()
 
     def create_table_list(self):
         client_list = []
@@ -163,20 +161,3 @@ class ServerNetwork:
             ready_list.append(self.CLIENTS_READY[my_id])
 
         self.gui.update_table(client_list, name_list, ip_list, ready_list)
-
-    def count_down_start(self):
-        taskMgr.doMethodLater(1.0, self.count_down, 'Count Down')
-        self.server_game = ServerGame(self)
-        # self.handlers[SERVER_INPUT] = self.client_game.serverInputHanlder
-        # self.handlers[GAME_INITIALIZE] = self.client_game.gameInitialize
-        # [obj.destroy() for obj in Layout.obj_list]
-
-    def count_down(self, task):
-        if self.count_down_time == -1:
-            taskMgr.remove('Count Down')
-            self.server_game.game_start()
-        else:
-            self.broadcastMsg("/count_down " + str(self.count_down_time))
-            self.server_game.displayText.setText(str(self.count_down_time))
-            self.count_down_time -= 1
-        return task.again
