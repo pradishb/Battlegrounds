@@ -6,6 +6,7 @@ from game import ClientGameEngine
 from player import Player
 from raycollider import RayCollider
 from gameui import GameUI
+from msg_id import *
 import math
 
 
@@ -36,30 +37,30 @@ class ClientGame:
         self.serverWait = True
 
     # player inputs
-    def processInput(self):
+    def process_input(self):
         self.gameEngine.speed.setX(0)
         self.gameEngine.speed.setY(0)
-        inputList = [False] * 9
+        input_list = [False] * 9
         if inputState.isSet('forward'):
-            inputList[0] = True
+            input_list[0] = True
         if inputState.isSet('left'):
-            inputList[1] = True
+            input_list[1] = True
         if inputState.isSet('reverse'):
-            inputList[2] = True
+            input_list[2] = True
         if inputState.isSet('right'):
-            inputList[3] = True
+            input_list[3] = True
         if inputState.isSet('shoot'):
             if self.gameEngine.players[self.id].weapon.get_reload():
                 pos = RayCollider.getBulletHitPos()
-                inputList[4] = True
-                inputList[5] = pos.getX()
-                inputList[6] = pos.getY()
-                inputList[7] = pos.getZ()
-                inputList[8] = RayCollider.playerHitId
+                input_list[4] = True
+                input_list[5] = pos.getX()
+                input_list[6] = pos.getY()
+                input_list[7] = pos.getZ()
+                input_list[8] = RayCollider.playerHitId
 
-        self.sendUserInput(inputList)
+        self.send_user_input(input_list)
 
-    def sendUserInput(self, inputArr = [], *args):
+    def send_user_input(self, inputArr=[], *args):
         pkg = PyDatagram()
         pkg.addUint16(CLIENT_INPUT)
         pkg.addUint64(self.myClock)
@@ -76,14 +77,14 @@ class ClientGame:
         pkg.addFloat32(self.gameEngine.players[self.id].playerNP.getH() % 360)
         pkg.addFloat32(self.gameEngine.players[self.id].playerSpine.getP() % 360)
         # Now lets send the whole thing...
-        self.send(pkg)
+        self.network.send(pkg)
 
     def serverInputHanlder(self, msgID, data):
-        serverClock = data.getUint64()
-        if self.myClock == serverClock:
-            while(data.getRemainingSize() != 0):
-                playerId = data.getUint32()
-                player = self.gameEngine.players[playerId]
+        server_clock = data.getUint64()
+        if self.myClock == server_clock:
+            while (data.getRemainingSize() != 0):
+                player_id = data.getUint32()
+                player = self.gameEngine.players[player_id]
                 player.playerNP.setX(data.getFloat32())
                 player.playerNP.setY(data.getFloat32())
                 player.playerNP.setZ(data.getFloat32())
@@ -98,12 +99,12 @@ class ClientGame:
                     z = data.getFloat32()
                     player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
                     player.animation.current = "shoot"
-                if playerId != self.id:
+                if player_id != self.id:
                     player.playerNP.setH(h)
                     player.playerSpine.setP(p)
 
                 player.health = data.getUint8()
-                if playerId == self.id:
+                if player_id == self.id:
                     self.healthUI.setText("Health : " + str(player.health))
                     if player.health == 0:
                         self.gameover()
@@ -111,7 +112,7 @@ class ClientGame:
             self.myClock += 1
             self.serverWait = False
 
-    def moveCamera(self):
+    def move_camera(self):
         md = base.win.getPointer(0)
         x = md.getX()
         y = md.getY()
@@ -119,9 +120,9 @@ class ClientGame:
         if base.win.movePointer(0, 300, 300):
             self.heading = self.heading - (x - 300) * 0.2
             self.pitch = self.pitch - (y - 300) * 0.2
-            if (self.pitch < -45.0):
+            if self.pitch < -45.0:
                 self.pitch = -45.0
-            elif (self.pitch > 45.0):
+            elif self.pitch > 45.0:
                 self.pitch = 45.0
 
         self.gameEngine.players[self.id].playerNP.lookAt(RayCollider.getObjectHit())
@@ -135,9 +136,9 @@ class ClientGame:
 
     # Update
     def update(self, task):
-        self.moveCamera()
+        self.move_camera()
         if not self.serverWait:
-            self.processInput()
+            self.process_input()
             self.gameEngine.players[self.id].weapon.update_reload_time()
             self.serverWait = True
         else:
@@ -150,22 +151,22 @@ class ClientGame:
         return task.cont
 
     def count_down(self, args):
-        self.displayUI.setText(args[1])
+        self.displayUI.setText(args[1]) if args[1] != "0" else self.displayUI.setText("Begin")
 
-    def gameInitialize(self, msgID, data):
+    def game_initialize(self, msgID, data):
         self.displayUI.destroy()
-        playerCount = data.getUint32()
-        for i in range(0, playerCount):
-            playerId = data.getUint32()
+        player_count = data.getUint32()
+        for i in range(0, player_count):
+            player_id = data.getUint32()
             x = data.getFloat32()
             y = data.getFloat32()
-            self.gameEngine.players.append(Player(x, y, 20, playerId))
-            self.gameEngine.world.attachCharacter(self.gameEngine.players[playerId].playerNP.node())
+            self.gameEngine.players.append(Player(x, y, 20, player_id))
+            self.gameEngine.world.attachCharacter(self.gameEngine.players[player_id].playerNP.node())
         self.gameEngine.showPointer()
         self.id = data.getUint32()
         self.healthUI = GameUI.createWhiteBgUI("")
         self.serverWait = False
-        taskMgr.add(self.update, 'update')
+        # taskMgr.add(self.update, 'update')
 
     def gameover(self):
         taskMgr.remove('update')
@@ -177,4 +178,3 @@ class ClientGame:
     def game_end(self, value):
         if int(value) == self.id:
             GameUI.createDisplayUI("You Win!")
-

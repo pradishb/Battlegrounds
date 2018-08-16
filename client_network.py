@@ -3,26 +3,16 @@ from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from pandac.PandaModules import *
 from client_game import ClientGame
 from direct_gui import Layout
-
-MSG_NONE = 0
-CMSG_INFO = 1
-SMSG_INFO = 2
-CMSG_CHAT = 3
-SMSG_CHAT = 4
-CMSG_DISCONNECT_REQ = 5
-SMSG_DISCONNECT_ACK = 6
-CLIENT_INPUT = 7
-SERVER_INPUT = 8
-GAME_INITIALIZE = 9
-
-CLIENTS_ID = []
-CLIENTS_IP = {}
-CLIENTS_USER_NAMES = {}
-CLIENTS_READY = {}
+from msg_id import *
 
 
 class ClientNetwork:
     def __init__(self, client):
+        self.CLIENTS_ID = []
+        self.CLIENTS_IP = {}
+        self.CLIENTS_USER_NAMES = {}
+        self.CLIENTS_READY = {}
+        
         self.client = client
         self.client_game = None
         self.Connection = None
@@ -98,16 +88,16 @@ class ClientNetwork:
         self.send(pkg)
 
     def handle_server_info(self, msgID, data):
-        CLIENTS_ID.clear()
+        self.CLIENTS_ID.clear()
         while data.getRemainingSize() != 0:
             id = data.getUint8()
             username = data.getString()
             ip = data.getString()
             ready = data.getBool()
-            CLIENTS_ID.append(id)
-            CLIENTS_USER_NAMES[id] = username
-            CLIENTS_IP[id] = ip
-            CLIENTS_READY[id] = ready
+            self.CLIENTS_ID.append(id)
+            self.CLIENTS_USER_NAMES[id] = username
+            self.CLIENTS_IP[id] = ip
+            self.CLIENTS_READY[id] = ready
         self.create_table_list()
 
     def send_msg(self, msg):
@@ -132,11 +122,11 @@ class ClientNetwork:
         name_list = []
         ip_list = []
         ready_list = []
-        for id in CLIENTS_ID:
+        for id in self.CLIENTS_ID:
             client_list.append(id)
-            name_list.append(CLIENTS_USER_NAMES[id])
-            ip_list.append(CLIENTS_IP[id])
-            ready_list.append(CLIENTS_READY[id])
+            name_list.append(self.CLIENTS_USER_NAMES[id])
+            ip_list.append(self.CLIENTS_IP[id])
+            ready_list.append(self.CLIENTS_READY[id])
         self.client.clientGui.update_table(client_list, name_list, ip_list, ready_list)
 
     def countdown(self, args):
@@ -161,5 +151,5 @@ class ClientNetwork:
         self.client_game = ClientGame(self)
         self.command_handlers['count_down'] = self.client_game.count_down
         self.handlers[SERVER_INPUT] = self.client_game.serverInputHanlder
-        self.handlers[GAME_INITIALIZE] = self.client_game.gameInitialize
+        self.handlers[GAME_INITIALIZE] = self.client_game.game_initialize
         [obj.destroy() for obj in Layout.obj_list]

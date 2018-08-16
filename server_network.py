@@ -7,19 +7,19 @@ from msg_id import *
 
 PORT = 9099
 
-CLIENTS_ID = []
-RELATION_OBJ_ID = {}
-CLIENTS_IP = {}
-CLIENTS_USER_NAMES = {}
-CLIENTS_READY = {}
-CLIENT_INPUT_RECEIVED = []
-
 
 class ServerNetwork:
     def __init__(self, gui):
+        self.CLIENTS_ID = []
+        self.RELATION_OBJ_ID = {}
+        self.CLIENTS_IP = {}
+        self.CLIENTS_USER_NAMES = {}
+        self.CLIENTS_READY = {}
+        self.CLIENT_INPUT_RECEIVED = []
+
         self.gui = gui
         self.server_game = None
-        self.count_down_time = 10
+        self.count_down_time = 3
         self.playerCount = 0
         self.clientsAlive = {}
         self.min_player = 1
@@ -55,12 +55,12 @@ class ServerNetwork:
                 # tell the Reader that there's a new connection to read from
                 self.cReader.addConnection(newConnection)
                 id = self.playerCount
-                CLIENTS_ID.append(id)
-                RELATION_OBJ_ID[id] = newConnection
-                RELATION_OBJ_ID[newConnection] = id
-                CLIENTS_IP[id] = netAddress.getIpString()
-                CLIENTS_USER_NAMES[id] = "Unknown"
-                CLIENTS_READY[id] = False
+                self.CLIENTS_ID.append(id)
+                self.RELATION_OBJ_ID[id] = newConnection
+                self.RELATION_OBJ_ID[newConnection] = id
+                self.CLIENTS_IP[id] = netAddress.getIpString()
+                self.CLIENTS_USER_NAMES[id] = "Unknown"
+                self.CLIENTS_READY[id] = False
                 self.clientsAlive[id] = newConnection
                 self.playerCount += 1
                 self.create_table_list()
@@ -103,8 +103,8 @@ class ServerNetwork:
         return
 
     def broadcast_pkg(self, pkg):
-        for c in CLIENTS_ID:
-            self.cWriter.send(pkg, RELATION_OBJ_ID[c])
+        for c in self.CLIENTS_ID:
+            self.cWriter.send(pkg, self.RELATION_OBJ_ID[c])
 
     def broadcastMsg(self, msg):
         pkg = PyDatagram()
@@ -114,7 +114,7 @@ class ServerNetwork:
 
     def msg_chat(self, msgID, data, client):
         msg = data.getString()
-        chat_msg = "%s: %s" % (CLIENTS_USER_NAMES[RELATION_OBJ_ID[client]], msg)
+        chat_msg = "%s: %s" % (self.CLIENTS_USER_NAMES[self.RELATION_OBJ_ID[client]], msg)
         self.broadcastMsg(chat_msg)
         self.gui.update_chat(chat_msg)
         if msg[:1] == '/':
@@ -126,45 +126,45 @@ class ServerNetwork:
     def send_server_info(self):
         pkg = PyDatagram()
         pkg.addUint16(SMSG_INFO)
-        for id in CLIENTS_ID:
+        for id in self.CLIENTS_ID:
             pkg.addUint8(id)
-            pkg.addString(CLIENTS_USER_NAMES[id])
-            pkg.addString(CLIENTS_IP[id])
-            pkg.addBool(CLIENTS_READY[id])
+            pkg.addString(self.CLIENTS_USER_NAMES[id])
+            pkg.addString(self.CLIENTS_IP[id])
+            pkg.addBool(self.CLIENTS_READY[id])
         self.broadcast_pkg(pkg)
 
     def handle_client_info(self, msgID, data, client):
-        CLIENTS_USER_NAMES[RELATION_OBJ_ID[client]] = data.getString()
+        self.CLIENTS_USER_NAMES[self.RELATION_OBJ_ID[client]] = data.getString()
         self.create_table_list()
         self.send_server_info()
-        chat_msg = "Server : " + CLIENTS_USER_NAMES[RELATION_OBJ_ID[client]] + " has joined the lobby."
+        chat_msg = "Server : " + self.CLIENTS_USER_NAMES[self.RELATION_OBJ_ID[client]] + " has joined the lobby."
         self.broadcastMsg(chat_msg)
         self.gui.update_chat(chat_msg)
 
     def handle_client_ready_signal(self, args, client):
-        CLIENTS_READY[RELATION_OBJ_ID[client]] = True
+        self.CLIENTS_READY[self.RELATION_OBJ_ID[client]] = True
         self.create_table_list()
         self.send_server_info()
-        if self.playerCount >= self.min_player and all(v for k, v in CLIENTS_READY.items()):
+        if self.playerCount >= self.min_player and all(v for k, v in self.CLIENTS_READY.items()):
             chat_msg = "/start"
             self.broadcastMsg(chat_msg)
             self.gui.update_chat(chat_msg)
-            self.game_start()
+            self.count_down_start()
 
     def create_table_list(self):
         client_list = []
         name_list = []
         ip_list = []
         ready_list = []
-        for my_id in CLIENTS_ID:
+        for my_id in self.CLIENTS_ID:
             client_list.append(my_id)
-            name_list.append(CLIENTS_USER_NAMES[my_id])
-            ip_list.append(CLIENTS_IP[my_id])
-            ready_list.append(CLIENTS_READY[my_id])
+            name_list.append(self.CLIENTS_USER_NAMES[my_id])
+            ip_list.append(self.CLIENTS_IP[my_id])
+            ready_list.append(self.CLIENTS_READY[my_id])
 
         self.gui.update_table(client_list, name_list, ip_list, ready_list)
 
-    def game_start(self):
+    def count_down_start(self):
         taskMgr.doMethodLater(1.0, self.count_down, 'Count Down')
         self.server_game = ServerGame(self)
         # self.handlers[SERVER_INPUT] = self.client_game.serverInputHanlder
@@ -172,7 +172,11 @@ class ServerNetwork:
         # [obj.destroy() for obj in Layout.obj_list]
 
     def count_down(self, task):
-        self.broadcastMsg("/count_down " + str(self.count_down_time))
-        self.server_game.displayText.setText(str(self.count_down_time))
-        self.count_down_time -= 1
+        if self.count_down_time == -1:
+            taskMgr.remove('Count Down')
+            self.server_game.game_start()
+        else:
+            self.broadcastMsg("/count_down " + str(self.count_down_time))
+            self.server_game.displayText.setText(str(self.count_down_time))
+            self.count_down_time -= 1
         return task.again

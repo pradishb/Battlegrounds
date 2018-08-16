@@ -1,6 +1,5 @@
 import random
 
-from pandac.PandaModules import *
 from direct.distributed.PyDatagram import PyDatagram
 
 from game import GameEngine
@@ -15,7 +14,6 @@ class ServerGame:
         self.gameEngine = GameEngine()
         self.network = network
 
-        # If you press Escape @ the server window, the server will quit.
         self.lastConnection = None
         self.serverClock = 0
         self.lobbyWaitTime = 6
@@ -31,11 +29,32 @@ class ServerGame:
 
         self.displayText = GameUI.createDisplayUI("Loading...")
 
+    # to send game's initial stats
+    def game_start(self):
+        self.displayText.setText("Begin")
+        pkg = PyDatagram()
+        pkg.addUint16(GAME_INITIALIZE)
+        pkg.addUint32(self.playerCount)
+        for client_id in self.network.CLIENTS_ID:
+            x = random.randint(1, 5)
+            y = random.randint(1, 5)
+            self.gameEngine.players.append(Player(x, y, 20, client_id))
+            self.gameEngine.world.attachCharacter(self.gameEngine.players[client_id].playerNP.node())
+            pkg.addUint32(client_id)
+            pkg.addFloat32(x)
+            pkg.addFloat32(y)
+        for client_id in self.network.CLIENTS_ID:
+            temp = pkg.__copy__()
+            temp.addUint32(client_id)
+            self.network.cWriter.send(temp, self.network.RELATION_OBJ_ID[client_id])
+        # taskMgr.add(self.update, 'update')
+        self.displayText.destroy()
+
     def client_input_handler(self, msgID, data, client):
         found = False
-        clientClock = data.getUint64()
+        client_clock = data.getUint64()
         # print('my time is', self.serverClock, 'client clock is', clientClock)
-        if clientClock == self.serverClock:
+        if client_clock == self.serverClock:
             for c in CLIENT_INPUT_RECEIVED:
                 if c == client:
                     found = True
@@ -118,40 +137,8 @@ class ServerGame:
 
         return task.cont
 
-    # to send game's initial stats
-    def gameStart(self):
-        self.displayText.setText("Loading...")
-        if CLIENTS.__len__() > 1:
-            ranValPkg = PyDatagram()
-            ranValPkg.addUint16(GAME_INITIALIZE)
-            ranValPkg.addUint32(self.playerCount)
-            for client in CLIENTS:
-                x = random.randint(1, 5)
-                y = random.randint(1, 5)
-                self.gameEngine.players.append(Player(x, y, 20, CLIENTS_ID[client]))
-                self.gameEngine.world.attachCharacter(self.gameEngine.players[CLIENTS_ID[client]].playerNP.node())
-                ranValPkg.addUint32(CLIENTS_ID[client])
-                ranValPkg.addFloat32(x)
-                ranValPkg.addFloat32(y)
-            for client in CLIENTS:
-                temp = ranValPkg.__copy__()
-                temp.addUint32(CLIENTS_ID[client])
-                self.cWriter.send(temp, client)
-            taskMgr.add(self.update, 'update')
-        else:
-            self.broadcastMsg("/info no_clients")
-            GameUI.createWhiteBgUI("Not enough clients connected.")
-        self.displayText.destroy()
-
     # Update
     def update(self, task):
         dt = globalClock.getDt()
         self.gameEngine.world.doPhysics(dt)
         return task.cont
-
-    def broadcastMsg(self, msg):
-        pkg = PyDatagram()
-        pkg.addUint16(SMSG_CHAT)
-        pkg.addString(msg)
-        for c in CLIENTS:
-            self.cWriter.send(pkg, c)
