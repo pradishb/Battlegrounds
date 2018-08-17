@@ -287,7 +287,7 @@ class Server(DirectObject):
                             self.gameEngine.players[playerHitId].health = 0
                             if playerHitId in self.clientsAlive:
                                 self.clientsAlive.pop(playerHitId)
-                    player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
+                    player.weapon.fire_with_pos(self.gameEngine.world, x, y, z)
                 h = data.getFloat32()
                 p = data.getFloat32()
 

@@ -104,7 +104,7 @@ class ClientGame:
                         x = data.getFloat32()
                         y = data.getFloat32()
                         z = data.getFloat32()
-                        player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
+                        player.weapon.fire_with_pos(self.gameEngine.world, x, y, z)
                         player.animation.current = "shoot"
                     if player_id != self.id:
                         player.playerNP.setH(h)

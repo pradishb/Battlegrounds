@@ -1,7 +1,7 @@
 from direct.actor.Actor import Actor
 from panda3d.bullet import BulletCharacterControllerNode, ZUp, BulletCylinderShape
 from panda3d.core import NodePath
-from weapon import Weapon
+from weapon import Ak47
 from animation import Animation
 from raycollider import RayCollider
 
@@ -38,8 +38,8 @@ class Player:
         self.spineExpose = self.playerModel.exposeJoint(None, 'modelRoot', 'mixamorig:Spine')
 
         # player weapon
-        self.weapon = Weapon()
-        self.weapon.object_model.reparentTo(self.hand)
+        self.weapon = Ak47(self.hand)
+
 
         # player animation
         self.xSpeed = 0

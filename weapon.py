@@ -1,24 +1,21 @@
 from direct.actor.Actor import Actor
-from panda3d.core import NodePath
 from bullet import Bullet
 
 
 class Weapon:
-    object_model = NodePath()
 
-    def __init__(self):
-        damage = 10
-        range = 20
-        self.reloadTime = 20
+    def __init__(self, model, hand, reload_time):
+        self.reloadTime = reload_time
         self.reloadTimeCount = 0
 
-        Weapon.object_model = Actor("models/m1911.egg")
-        Weapon.object_model.setScale(0.35)
-        Weapon.object_model.setPos(0, 0.5, 0)
-        Weapon.object_model.setHpr(90, -90, 0)
-        self.gunHole = self.object_model.exposeJoint(None, 'modelRoot', 'gunhole')
+        self.object_model = model
+        self.object_model.reparentTo(hand)
+        self.gunHole = self.object_model.exposeJoint(None, 'modelRoot', 'gun_hole')
+        self.gunHandle = self.object_model.exposeJoint(None, 'modelRoot', 'gun_handle')
+        self.object_model.setHpr(184, 0, 90)
+        self.object_model.setPos(self.gunHandle.getPos())
 
-    def fireWithPos(self, world, x, y, z):
+    def fire_with_pos(self, world, x, y, z):
         b = Bullet(world, self.gunHole)
         b.initializeWithPos(x, y, z)
         b.shoot()
@@ -32,3 +29,11 @@ class Weapon:
     def update_reload_time(self):
         self.reloadTimeCount -= 1
 
+
+class Ak47(Weapon):
+
+    def __init__(self, hand):
+        object_model = Actor("models/ak47.egg")
+        object_model.setScale(1)
+
+        Weapon.__init__(self, object_model, hand, 10)

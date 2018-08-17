@@ -16,7 +16,7 @@ class ServerGame:
 
         self.lastConnection = None
         self.serverClock = 0
-        self.count_down_time = 3
+        self.count_down_time = 0
 
         self.client_received_list = []
         self.listPkg = PyDatagram()
@@ -102,7 +102,7 @@ class ServerGame:
                             if player_hit_id in self.clientsAlive:
                                 self.clientsAlive.pop(player_hit_id)
                                 self.clientsDead.append(player_hit_id)
-                    player.weapon.fireWithPos(self.gameEngine.world, x, y, z)
+                    player.weapon.fire_with_pos(self.gameEngine.world, x, y, z)
                 h = data.getFloat32()
                 p = data.getFloat32()
 
