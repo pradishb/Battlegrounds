@@ -25,21 +25,22 @@ class Player:
         self.playerModel.makeSubpart("legs", ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg"])
         self.playerModel.makeSubpart("hips", ["mixamorig:Hips"], ["mixamorig:LeftUpLeg", "mixamorig:RightUpLeg", "mixamorig:Spine"])
         self.playerModel.makeSubpart("upperBody", ["mixamorig:Spine"])
+        self.playerModel.pose("idle", 0, partName="hips")
 
         self.playerModel.setH(90)
         self.playerModel.setScale(.06)
         self.playerModel.setZ(-.45)
         self.playerModel.flattenLight()
-        # self.playerModel.setLightOff()
+        # self.playerModel.setLightOff()self.playerSpine
         self.playerModel.reparentTo(self.playerNP)
 
         self.playerSpine = self.playerModel.controlJoint(None, 'modelRoot', 'mixamorig:Spine')
         self.hand = self.playerModel.exposeJoint(None, 'modelRoot', 'mixamorig:RightHand')
         self.spineExpose = self.playerModel.exposeJoint(None, 'modelRoot', 'mixamorig:Spine')
+        self.playerSpine.setH(-7)
 
         # player weapon
         self.weapon = Ak47(self.hand)
-
 
         # player animation
         self.xSpeed = 0

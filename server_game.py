@@ -50,6 +50,7 @@ class ServerGame:
 
     # to send game's initial stats
     def game_start(self):
+        base.oobe()
         self.display_text.setText("Begin")
         pkg = PyDatagram()
         pkg.addUint16(GAME_INITIALIZE)

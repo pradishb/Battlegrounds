@@ -24,11 +24,9 @@ class Animation:
             if self.player.xSpeed == 0 and self.player.ySpeed == 0 and self.current != "pistol idle":
                 self.current = "pistol idle"
                 self.player.playerModel.loop("idle", partName="legs")
-                self.player.playerModel.pose("pistol", 0, partName="hips")
                 self.player.playerModel.pose("pistol", 23, partName="upperBody")
             elif (self.player.xSpeed != 0 or self.player.ySpeed != 0) and self.current != "pistol walk":
                 self.current = "pistol walk"
                 self.player.playerModel.loop("walk", partName="legs")
-                self.player.playerModel.loop("pistol", partName="hips")
                 self.player.playerModel.pose("pistol", 23, partName="upperBody")
         return task.cont

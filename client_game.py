@@ -137,7 +137,7 @@ class ClientGame:
             elif self.pitch > 45.0:
                 self.pitch = 45.0
 
-        self.gameEngine.players[self.id].playerNP.lookAt(RayCollider.getObjectHit())
+        self.gameEngine.players[self.id].playerNP.lookAt(RayCollider.getBulletHitPos())
         base.cam.setHpr(self.heading, self.pitch, 0)
         base.cam.setX(self.gameEngine.players[self.id].playerNP.getX() + 2 * math.sin(
             math.pi / 180.0 * self.heading))

@@ -24,12 +24,12 @@ class LineSeg:
 
 class RayCollider():
     # setup eyepos
-    # eyepos = LineSegs()
-    # eyepos.setColor(0, 1, 0, 1)
-    # eyepos.drawTo(0, 0, 0)
-    # eyepos.setThickness(30)
-    # node = eyepos.create()
-    # eyeNP = base.render.attachNewNode(node)
+    eyepos = LineSegs()
+    eyepos.setColor(0, 1, 0, 1)
+    eyepos.drawTo(0, 0, 0)
+    eyepos.setThickness(30)
+    node = eyepos.create()
+    eyeNP = base.render.attachNewNode(node)
 
     playerHitId = None
 
@@ -58,7 +58,7 @@ class RayCollider():
             RayCollider.queue.sortEntries()
 
             point = RayCollider.queue.getEntry(0).getSurfacePoint(render)
-            # RayCollider.eyeNP.setPos(point)
+            RayCollider.eyeNP.setPos(point)
             RayCollider.playerHitId = None
             if RayCollider.queue.getEntry(0).getIntoNodePath().getParent().getName() == "__Actor_modelRoot":
                 body_part = RayCollider.queue.getEntry(0).getIntoNodePath().getParent().getParent().getParent().getName()

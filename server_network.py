@@ -3,6 +3,7 @@ from pandac.PandaModules import *
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 
 from server_game import ServerGame
+from direct_gui import Layout
 from msg_id import *
 
 PORT = 9099
@@ -148,6 +149,7 @@ class ServerNetwork:
             self.gui.update_chat(chat_msg)
             self.server_game = ServerGame(self)
             self.server_game.count_down_start()
+            [obj.destroy() for obj in Layout.obj_list]
 
     def create_table_list(self):
         client_list = []
